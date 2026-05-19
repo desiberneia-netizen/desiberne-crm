@@ -241,10 +241,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0f;color:#e8e8f
           <button class="add-btn" onclick="openLeadModal()"><i class="ti ti-plus"></i> Novo Lead</button>
         </div>
         <div class="kanban-board">
-          <div class="kanban-col"><div class="col-header"><span class="temp-badge badge-cold">❄️ Frio</span><div class="col-count" id="cnt-frio">0</div></div><div id="cards-frio"><div class="loading">Carregando...</div></div></div>
-          <div class="kanban-col"><div class="col-header"><span class="temp-badge badge-warm">🌡️ Morno</span><div class="col-count" id="cnt-morno">0</div></div><div id="cards-morno"><div class="loading">Carregando...</div></div></div>
-          <div class="kanban-col"><div class="col-header"><span class="temp-badge badge-hot">🔥 Quente</span><div class="col-count" id="cnt-quente">0</div></div><div id="cards-quente"><div class="loading">Carregando...</div></div></div>
-          <div class="kanban-col"><div class="col-header"><span class="temp-badge badge-done">✅ Fechado</span><div class="col-count" id="cnt-fechado">0</div></div><div id="cards-fechado"><div class="loading">Carregando...</div></div></div>
+          <div class="kanban-col" ondragover="allowDrop(event)" ondrop="dropCard(event,'Frio')"><div class="col-header"><span class="temp-badge badge-cold">❄️ Frio</span><div class="col-count" id="cnt-frio">0</div></div><div id="cards-frio"><div class="loading">Carregando...</div></div></div>
+          <div class="kanban-col" ondragover="allowDrop(event)" ondrop="dropCard(event,'Morno')"><div class="col-header"><span class="temp-badge badge-warm">🌡️ Morno</span><div class="col-count" id="cnt-morno">0</div></div><div id="cards-morno"><div class="loading">Carregando...</div></div></div>
+          <div class="kanban-col" ondragover="allowDrop(event)" ondrop="dropCard(event,'Quente')"><div class="col-header"><span class="temp-badge badge-hot">🔥 Quente</span><div class="col-count" id="cnt-quente">0</div></div><div id="cards-quente"><div class="loading">Carregando...</div></div></div>
+          <div class="kanban-col" ondragover="allowDrop(event)" ondrop="dropCard(event,'Fechado')"><div class="col-header"><span class="temp-badge badge-done">✅ Fechado</span><div class="col-count" id="cnt-fechado">0</div></div><div id="cards-fechado"><div class="loading">Carregando...</div></div></div>
         </div>
       </div>
 
@@ -456,7 +456,7 @@ function cardHTML(l) {
   const dotColor = {Frio:'var(--cold)',Morno:'var(--warning)',Quente:'var(--hot)',Fechado:'var(--success)'}[l.temperatura]||'var(--muted)';
   const ownerInitial = l.responsavel==='Tiago'?'TG':'JV';
   const ownerColor = l.responsavel==='Tiago'?'var(--purple)':'var(--neon)';
-  return `<div class="lead-card" onclick="editLead('${l.id}')">
+  return `<div class="lead-card" draggable="true" ondragstart="dragStart(event,'${l.id}')" onclick="editLead('${l.id}')">
     <div class="lead-status-dot" style="background:${dotColor}"></div>
     <div class="lead-company">${l.razao_social||'—'}</div>
     <div class="lead-contact">${l.gestor||''} ${l.celular?'· '+l.celular:''}</div>
@@ -466,6 +466,18 @@ function cardHTML(l) {
       <div class="lead-value">${l.valor?'R$ '+l.valor+'/mês':''}</div>
     </div>
   </div>`;
+}
+
+let draggedId = null;
+function dragStart(e, id) { draggedId = id; e.dataTransfer.effectAllowed='move'; }
+function allowDrop(e) { e.preventDefault(); }
+async function dropCard(e, temperatura) {
+  e.preventDefault();
+  if (!draggedId) return;
+  const { error } = await sb.from('leads').update({ temperatura }).eq('id', draggedId);
+  if (error) { showToast('Erro ao mover lead', 'error'); return; }
+  draggedId = null;
+  loadLeads();
 }
 
 function renderClientes(leads) {
