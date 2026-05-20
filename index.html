@@ -175,6 +175,50 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0f;color:#e8e8f
 .contrato-val-label{font-size:10px;color:var(--muted);margin-bottom:4px}
 .contrato-val-value{font-size:15px;font-weight:700}
 
+
+/* ATIVIDADES */
+.ativ-kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.ativ-col{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;min-height:200px;transition:border-color .15s}
+.ativ-col.drag-over{border-color:var(--purple);background:rgba(110,68,255,0.04)}
+.ativ-col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ativ-col-title{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
+.ativ-count{font-size:11px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:1px 8px;color:var(--muted)}
+.ativ-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;cursor:grab;transition:all .15s;position:relative}
+.ativ-card:hover{border-color:var(--purple);transform:translateY(-1px)}
+.ativ-card.dragging{opacity:.4;cursor:grabbing}
+.ativ-title{font-size:12px;font-weight:600;margin-bottom:4px}
+.ativ-desc{font-size:11px;color:var(--muted);margin-bottom:8px}
+.ativ-footer{display:flex;align-items:center;justify-content:space-between;font-size:10px}
+.ativ-prazo{padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.prazo-ok{background:rgba(34,197,94,0.12);color:var(--success)}
+.prazo-warn{background:rgba(245,158,11,0.12);color:var(--warning)}
+.prazo-late{background:rgba(239,68,68,0.12);color:var(--danger)}
+/* POPUP */
+.popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center}
+.popup-overlay.open{display:flex}
+.popup-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;width:420px;text-align:center}
+.popup-icon{font-size:40px;margin-bottom:12px}
+.popup-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.popup-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.popup-actions{display:flex;gap:10px;justify-content:center}
+/* NOTIF BADGE */
+.notif-badge{position:fixed;top:60px;right:20px;background:var(--surface);border:1px solid var(--purple);border-radius:12px;padding:12px 16px;z-index:150;max-width:320px;animation:slideIn .3s ease;box-shadow:0 4px 20px rgba(110,68,255,0.2)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.notif-title{font-size:12px;font-weight:600;color:var(--purple-light);margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.notif-body{font-size:11px;color:var(--muted)}
+.notif-close{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px}
+/* CLIENTE DETALHE */
+.cliente-detail{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.cliente-detail-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cliente-detail-nome{font-size:16px;font-weight:700}
+.cliente-detail-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.cliente-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.cliente-info-item{background:var(--bg);border-radius:7px;padding:10px}
+.cliente-info-label{font-size:10px;color:var(--muted);margin-bottom:3px}
+.cliente-info-value{font-size:12px;font-weight:600}
+.back-btn{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:6px 12px;color:var(--muted);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.back-btn:hover{color:var(--text);border-color:var(--purple)}
+
 </style>
 </head>
 <body>
@@ -386,6 +430,49 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0f;color:#e8e8f
         </div>
       </div>
 
+
+      <!-- CLIENTE DETALHE -->
+      <div id="view-cliente-detalhe" class="view">
+        <div class="page-header">
+          <button class="back-btn" onclick="showView('clientes')"><i class="ti ti-arrow-left"></i> Voltar</button>
+          <button class="add-btn" onclick="openAtivModal()"><i class="ti ti-plus"></i> Nova Atividade</button>
+        </div>
+        <div class="cliente-detail">
+          <div class="cliente-detail-header">
+            <div>
+              <div class="cliente-detail-nome" id="det-nome">—</div>
+              <div class="cliente-detail-sub" id="det-sub">—</div>
+            </div>
+            <span class="tag-temp" id="det-temp">—</span>
+          </div>
+          <div class="cliente-info-grid">
+            <div class="cliente-info-item"><div class="cliente-info-label">Gestor</div><div class="cliente-info-value" id="det-gestor">—</div></div>
+            <div class="cliente-info-item"><div class="cliente-info-label">Celular</div><div class="cliente-info-value" id="det-celular">—</div></div>
+            <div class="cliente-info-item"><div class="cliente-info-label">E-mail</div><div class="cliente-info-value" id="det-email">—</div></div>
+            <div class="cliente-info-item"><div class="cliente-info-label">Status</div><div class="cliente-info-value" id="det-status">—</div></div>
+            <div class="cliente-info-item"><div class="cliente-info-label">Valor</div><div class="cliente-info-value" id="det-valor">—</div></div>
+            <div class="cliente-info-item"><div class="cliente-info-label">Responsável</div><div class="cliente-info-value" id="det-resp">—</div></div>
+          </div>
+          <div id="det-obs" style="font-size:12px;color:var(--muted);font-style:italic"></div>
+        </div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">Atividades & Tarefas</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Arraste os cards entre as etapas</div>
+        <div class="ativ-kanban">
+          <div class="ativ-col" ondragover="allowAtivDrop(event)" ondrop="dropAtiv(event,'pendente')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+            <div class="ativ-col-header"><div class="ativ-col-title"><span style="color:var(--blue-light)">●</span> Pendente</div><div class="ativ-count" id="ativ-cnt-pendente">0</div></div>
+            <div id="ativ-pendente"><div class="loading">Carregando...</div></div>
+          </div>
+          <div class="ativ-col" ondragover="allowAtivDrop(event)" ondrop="dropAtiv(event,'andamento')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+            <div class="ativ-col-header"><div class="ativ-col-title"><span style="color:var(--warning)">●</span> Em Andamento</div><div class="ativ-count" id="ativ-cnt-andamento">0</div></div>
+            <div id="ativ-andamento"><div class="loading">Carregando...</div></div>
+          </div>
+          <div class="ativ-col" ondragover="allowAtivDrop(event)" ondrop="dropAtiv(event,'entregue')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+            <div class="ativ-col-header"><div class="ativ-col-title"><span style="color:var(--success)">●</span> Entregue</div><div class="ativ-count" id="ativ-cnt-entregue">0</div></div>
+            <div id="ativ-entregue"><div class="loading">Carregando...</div></div>
+          </div>
+        </div>
+      </div>
+
       <!-- MASTER PANEL -->
       <div id="view-master" class="view">
         <div class="page-header">
@@ -508,6 +595,65 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0f;color:#e8e8f
     </div>
     <div class="form-group" style="margin-top:14px"><label class="form-label">Observações</label><input class="form-input" id="fat-obs" placeholder="Procedimentos, detalhes do mês..."></div>
     <div class="modal-footer"><button class="btn-ghost" onclick="closeModal('faturamentoModal')">Cancelar</button><button class="btn-primary" onclick="saveFaturamento()">Salvar</button></div>
+  </div>
+</div>
+
+
+<!-- ATIVIDADE MODAL -->
+<div class="modal-overlay" id="ativModal" onclick="closeModalOutside(event,'ativModal')">
+  <div class="modal" style="width:480px">
+    <div class="modal-header"><div class="modal-title">Nova Atividade</div><button class="modal-close" onclick="closeModal('ativModal')"><i class="ti ti-x"></i></button></div>
+    <input type="hidden" id="ativ-edit-id">
+    <div class="form-group"><label class="form-label">Título da atividade *</label><input class="form-input" id="ativ-titulo" placeholder="Ex: Enviar proposta de tráfego pago"></div>
+    <div class="form-group"><label class="form-label">Descrição</label><textarea class="form-input" id="ativ-desc" rows="2" placeholder="Detalhes da atividade..." style="resize:vertical"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-select" id="ativ-status">
+          <option value="pendente">🔵 Pendente</option>
+          <option value="andamento">🟡 Em Andamento</option>
+          <option value="entregue">✅ Entregue</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Prioridade</label>
+        <select class="form-select" id="ativ-prioridade">
+          <option value="normal">Normal</option>
+          <option value="alta">🔴 Alta</option>
+          <option value="baixa">🟢 Baixa</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Prazo (data)</label><input class="form-input" id="ativ-prazo-data" type="date"></div>
+      <div class="form-group"><label class="form-label">Prazo (hora)</label><input class="form-input" id="ativ-prazo-hora" type="time"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Responsável</label>
+      <select class="form-select" id="ativ-resp">
+        <option>Joao Victor</option>
+        <option>Tiago</option>
+      </select>
+    </div>
+    <div class="form-group" style="display:flex;align-items:center;gap:10px">
+      <input type="checkbox" id="ativ-lembrete" style="width:16px;height:16px;cursor:pointer">
+      <label for="ativ-lembrete" style="font-size:12px;cursor:pointer;color:var(--text)">Ativar lembrete pop-up no prazo</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-danger" id="ativ-delete-btn" style="display:none;margin-right:auto" onclick="deleteAtiv()"><i class="ti ti-trash"></i></button>
+      <button class="btn-ghost" onclick="closeModal('ativModal')">Cancelar</button>
+      <button class="btn-primary" onclick="saveAtiv()">Salvar Atividade</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP LEMBRETE -->
+<div class="popup-overlay" id="popupOverlay">
+  <div class="popup-box">
+    <div class="popup-icon">🔔</div>
+    <div class="popup-title" id="popup-title">Lembrete!</div>
+    <div class="popup-sub" id="popup-sub">Você tem uma atividade pendente.</div>
+    <div class="popup-actions">
+      <button class="btn-ghost" onclick="closePopup()">Dispensar</button>
+      <button class="btn-primary" onclick="closePopup()">Ver Atividade</button>
+    </div>
   </div>
 </div>
 
@@ -966,6 +1112,7 @@ async function saveReceita(){
   if(!desc||!valor){showToast('Preencha os campos','error');return;}
   const{error}=await sb.from('financeiro_receitas').insert({descricao:desc,cliente:document.getElementById('rec-cliente').value,categoria:document.getElementById('rec-cat').value,recorrencia:document.getElementById('rec-recor').value,valor:Number(valor),data:document.getElementById('rec-data').value||new Date().toISOString().split('T')[0]});
   if(error){showToast('Erro','error');return;}showToast('Receita salva!','success');closeModal('receitaModal');loadFinanceiro();
+setTimeout(checkFunilAlertas, 3000);
 }
 
 async function saveDespesa(){
@@ -973,6 +1120,7 @@ async function saveDespesa(){
   if(!desc||!valor||!data){showToast('Preencha os campos','error');return;}
   const{error}=await sb.from('financeiro_despesas').insert({descricao:desc,categoria:document.getElementById('desp-cat').value,tipo:document.getElementById('desp-tipo').value,valor:Number(valor),data,obs:document.getElementById('desp-obs').value});
   if(error){showToast('Erro','error');return;}showToast('Despesa salva!','success');closeModal('despesaModal');loadFinanceiro();
+setTimeout(checkFunilAlertas, 3000);
 }
 
 async function saveContrato(){
@@ -980,6 +1128,7 @@ async function saveContrato(){
   if(!nome){showToast('Nome obrigatório','error');return;}
   const{error}=await sb.from('contratos_parceiros').insert({nome,segmento:document.getElementById('con-seg').value,status:document.getElementById('con-status').value,fixo_inicial:Number(document.getElementById('con-fixo1').value||0),fixo_meses_inicial:Number(document.getElementById('con-fixo-meses').value||6),fixo_reajuste:Number(document.getElementById('con-fixo2').value||0)||null,modelo_variavel:document.getElementById('con-var-modelo').value,pct_variavel:Number(document.getElementById('con-var-pct').value||0),meta_mensal:Number(document.getElementById('con-meta').value||0)||null,pct_variavel2:Number(document.getElementById('con-var-pct2').value||0)||null,inicio:document.getElementById('con-inicio').value||null,obs:document.getElementById('con-obs').value});
   if(error){showToast('Erro: '+error.message,'error');return;}showToast('Contrato salvo!','success');closeModal('contratoModal');loadFinanceiro();
+setTimeout(checkFunilAlertas, 3000);
 }
 
 async function saveFaturamento(){
@@ -990,16 +1139,268 @@ async function saveFaturamento(){
   const con=contratos.find(c=>c.id===conId);
   const{error}=await sb.from('faturamentos_mensais').insert({contrato_id:conId,cliente_nome:con?.nome||'',mes:Number(document.getElementById('fat-mes').value),ano:Number(document.getElementById('fat-ano').value),faturamento_bruto:fat,fixo:Number(box.dataset.fixo||0),variavel:Number(box.dataset.variavel||0),percentual:Number(box.dataset.pct||0),total:Number(box.dataset.total||0),mes_contrato:Number(document.getElementById('fat-mes-contrato').value||1),obs:document.getElementById('fat-obs').value});
   if(error){showToast('Erro: '+error.message,'error');return;}showToast('Faturamento salvo!','success');closeModal('faturamentoModal');loadFinanceiro();
+setTimeout(checkFunilAlertas, 3000);
 }
 
-async function deleteFinItem(table,id){if(!confirm('Excluir?'))return;await sb.from(table).delete().eq('id',id);showToast('Excluído','success');loadFinanceiro();}
+async function deleteFinItem(table,id){if(!confirm('Excluir?'))return;await sb.from(table).delete().eq('id',id);showToast('Excluído','success');loadFinanceiro();
+setTimeout(checkFunilAlertas, 3000);}
 
 document.getElementById('rec-data').value=new Date().toISOString().split('T')[0];
 document.getElementById('desp-data').value=new Date().toISOString().split('T')[0];
 document.getElementById('fat-mes').value=new Date().getMonth()+1;
 document.getElementById('con-inicio').value=new Date().toISOString().split('T')[0];
+
+// ATIVIDADES
+let atividades = [], currentLeadId = null, draggedAtivId = null;
+
+async function openClienteDetalhe(id) {
+  const l = allLeads.find(x => x.id === id);
+  if (!l) return;
+  currentLeadId = id;
+  document.getElementById('det-nome').textContent = l.razao_social || '—';
+  document.getElementById('det-sub').textContent = (l.segmento || '') + (l.cidade ? ' · ' + l.cidade : '');
+  document.getElementById('det-gestor').textContent = l.gestor || '—';
+  document.getElementById('det-celular').textContent = l.celular || '—';
+  document.getElementById('det-email').textContent = l.email || '—';
+  document.getElementById('det-status').textContent = l.status || '—';
+  document.getElementById('det-valor').textContent = l.valor ? 'R$ ' + l.valor + '/mês' : '—';
+  document.getElementById('det-resp').textContent = l.responsavel || '—';
+  document.getElementById('det-obs').textContent = l.observacoes || '';
+  const tempEl = document.getElementById('det-temp');
+  tempEl.textContent = l.temperatura || '';
+  tempEl.className = 'tag-temp ' + ({Frio:'badge-cold',Morno:'badge-warm',Quente:'badge-hot',Fechado:'badge-done'}[l.temperatura] || '');
+  showView('cliente-detalhe');
+  await loadAtividades();
+}
+
+async function loadAtividades() {
+  if (!currentLeadId) return;
+  const { data } = await sb.from('atividades').select('*').eq('lead_id', currentLeadId).order('created_at', { ascending: true });
+  atividades = data || [];
+  renderAtividades();
+  checkLembretes();
+}
+
+function renderAtividades() {
+  const cols = { pendente: [], andamento: [], entregue: [] };
+  atividades.forEach(a => { if (cols[a.status]) cols[a.status].push(a); });
+  Object.entries(cols).forEach(([status, items]) => {
+    document.getElementById('ativ-cnt-' + status).textContent = items.length;
+    const el = document.getElementById('ativ-' + status);
+    el.innerHTML = items.length ? items.map(ativCardHTML).join('') : '<div style="text-align:center;padding:20px;color:var(--muted);font-size:11px">Nenhuma atividade</div>';
+  });
+}
+
+function ativCardHTML(a) {
+  const hoje = new Date();
+  const prazo = a.prazo_data ? new Date(a.prazo_data + 'T' + (a.prazo_hora || '23:59')) : null;
+  let prazoClass = 'prazo-ok', prazoText = '';
+  if (prazo) {
+    const diff = Math.ceil((prazo - hoje) / (1000 * 60 * 60 * 24));
+    prazoText = prazo.toLocaleDateString('pt-BR') + (a.prazo_hora ? ' ' + a.prazo_hora : '');
+    if (diff < 0) prazoClass = 'prazo-late';
+    else if (diff <= 2) prazoClass = 'prazo-warn';
+    else prazoClass = 'prazo-ok';
+  }
+  const prioColor = a.prioridade === 'alta' ? 'var(--danger)' : a.prioridade === 'baixa' ? 'var(--success)' : 'var(--muted)';
+  return `<div class="ativ-card" draggable="true" ondragstart="dragAtivStart(event,'${a.id}')" onclick="editAtiv('${a.id}')">
+    <div style="position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:${prioColor}"></div>
+    <div class="ativ-title">${a.titulo}</div>
+    ${a.descricao ? `<div class="ativ-desc">${a.descricao}</div>` : ''}
+    <div class="ativ-footer">
+      <span style="color:var(--muted);font-size:10px">${a.responsavel || ''}</span>
+      ${prazoText ? `<span class="ativ-prazo ${prazoClass}"><i class="ti ti-clock"></i> ${prazoText}</span>` : ''}
+    </div>
+    ${a.lembrete ? '<div style="font-size:10px;color:var(--purple-light);margin-top:5px"><i class="ti ti-bell"></i> Lembrete ativo</div>' : ''}
+  </div>`;
+}
+
+function dragAtivStart(e, id) {
+  draggedAtivId = id;
+  setTimeout(() => { const el = document.querySelector(`[ondragstart*="${id}"]`); if (el) el.classList.add('dragging'); }, 0);
+}
+function allowAtivDrop(e) { e.preventDefault(); }
+async function dropAtiv(e, status) {
+  e.preventDefault();
+  document.querySelectorAll('.ativ-col').forEach(c => c.classList.remove('drag-over'));
+  if (!draggedAtivId) return;
+  document.querySelector(`[ondragstart*="${draggedAtivId}"]`)?.classList.remove('dragging');
+  await sb.from('atividades').update({ status }).eq('id', draggedAtivId);
+  draggedAtivId = null;
+  loadAtividades();
+}
+
+function openAtivModal() {
+  document.getElementById('ativ-edit-id').value = '';
+  document.getElementById('ativ-titulo').value = '';
+  document.getElementById('ativ-desc').value = '';
+  document.getElementById('ativ-status').value = 'pendente';
+  document.getElementById('ativ-prioridade').value = 'normal';
+  document.getElementById('ativ-prazo-data').value = '';
+  document.getElementById('ativ-prazo-hora').value = '';
+  document.getElementById('ativ-resp').value = 'Joao Victor';
+  document.getElementById('ativ-lembrete').checked = false;
+  document.getElementById('ativ-delete-btn').style.display = 'none';
+  openModal('ativModal');
+}
+
+function editAtiv(id) {
+  const a = atividades.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('ativ-edit-id').value = a.id;
+  document.getElementById('ativ-titulo').value = a.titulo || '';
+  document.getElementById('ativ-desc').value = a.descricao || '';
+  document.getElementById('ativ-status').value = a.status || 'pendente';
+  document.getElementById('ativ-prioridade').value = a.prioridade || 'normal';
+  document.getElementById('ativ-prazo-data').value = a.prazo_data || '';
+  document.getElementById('ativ-prazo-hora').value = a.prazo_hora || '';
+  document.getElementById('ativ-resp').value = a.responsavel || 'Joao Victor';
+  document.getElementById('ativ-lembrete').checked = !!a.lembrete;
+  document.getElementById('ativ-delete-btn').style.display = 'block';
+  openModal('ativModal');
+}
+
+async function saveAtiv() {
+  const titulo = document.getElementById('ativ-titulo').value.trim();
+  if (!titulo) { showToast('Título obrigatório', 'error'); return; }
+  const data = {
+    lead_id: currentLeadId,
+    titulo,
+    descricao: document.getElementById('ativ-desc').value,
+    status: document.getElementById('ativ-status').value,
+    prioridade: document.getElementById('ativ-prioridade').value,
+    prazo_data: document.getElementById('ativ-prazo-data').value || null,
+    prazo_hora: document.getElementById('ativ-prazo-hora').value || null,
+    responsavel: document.getElementById('ativ-resp').value,
+    lembrete: document.getElementById('ativ-lembrete').checked
+  };
+  const editId = document.getElementById('ativ-edit-id').value;
+  const { error } = editId ? await sb.from('atividades').update(data).eq('id', editId) : await sb.from('atividades').insert(data);
+  if (error) { showToast('Erro: ' + error.message, 'error'); return; }
+  showToast(editId ? 'Atividade atualizada!' : 'Atividade criada!', 'success');
+  closeModal('ativModal');
+  loadAtividades();
+}
+
+async function deleteAtiv() {
+  const id = document.getElementById('ativ-edit-id').value;
+  if (!id || !confirm('Excluir esta atividade?')) return;
+  await sb.from('atividades').delete().eq('id', id);
+  showToast('Atividade excluída', 'success');
+  closeModal('ativModal');
+  loadAtividades();
+}
+
+// LEMBRETES / POP-UP
+let lembreteInterval = null;
+function startLembretes() {
+  if (lembreteInterval) clearInterval(lembreteInterval);
+  lembreteInterval = setInterval(checkAllLembretes, 60000); // verifica a cada 1 min
+  checkAllLembretes();
+}
+
+async function checkAllLembretes() {
+  // Busca todas atividades com lembrete ativo e prazo nos próximos 15 min ou vencido
+  const { data } = await sb.from('atividades').select('*').eq('lembrete', true).neq('status', 'entregue');
+  if (!data) return;
+  const agora = new Date();
+  data.forEach(a => {
+    if (!a.prazo_data) return;
+    const prazo = new Date(a.prazo_data + 'T' + (a.prazo_hora || '09:00'));
+    const diffMin = (prazo - agora) / 60000;
+    const key = 'notif_' + a.id;
+    if ((diffMin <= 15 && diffMin > -60) && !sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, '1');
+      showNotificacao(a);
+    }
+  });
+  // Verifica agendamentos
+  checkAgendaLembretes();
+}
+
+function checkLembretes() {
+  if (!atividades.length) return;
+  const agora = new Date();
+  atividades.filter(a => a.lembrete && a.status !== 'entregue' && a.prazo_data).forEach(a => {
+    const prazo = new Date(a.prazo_data + 'T' + (a.prazo_hora || '09:00'));
+    const diffMin = (prazo - agora) / 60000;
+    const key = 'notif_' + a.id;
+    if (diffMin <= 15 && diffMin > -60 && !sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, '1');
+      showNotificacao(a);
+    }
+  });
+}
+
+function checkAgendaLembretes() {
+  const agora = new Date();
+  agendamentos.filter(a => a.data && a.hora).forEach(a => {
+    const prazo = new Date(a.data + 'T' + a.hora);
+    const diffMin = (prazo - agora) / 60000;
+    const key = 'ag_notif_' + a.id;
+    if (diffMin <= 15 && diffMin > -60 && !sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, '1');
+      showPopup('📅 Agendamento em breve!', a.titulo + (a.lead ? ' · ' + a.lead : ''));
+    }
+  });
+}
+
+function showNotificacao(a) {
+  // Toast notification flutuante
+  const n = document.createElement('div');
+  n.className = 'notif-badge';
+  n.innerHTML = `
+    <button class="notif-close" onclick="this.parentElement.remove()"><i class="ti ti-x"></i></button>
+    <div class="notif-title"><i class="ti ti-bell"></i> 🔔 Lembrete de atividade</div>
+    <div class="notif-body"><strong>${a.titulo}</strong><br>Prazo: ${new Date(a.prazo_data+'T'+(a.prazo_hora||'09:00')).toLocaleString('pt-BR')}</div>
+  `;
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 8000);
+  // Também mostra popup se for urgente (menos de 5 min)
+  const agora = new Date();
+  const prazo = new Date(a.prazo_data+'T'+(a.prazo_hora||'09:00'));
+  if ((prazo - agora) / 60000 <= 5) {
+    showPopup('⚠️ Atividade vencendo agora!', a.titulo + '\nPrazo: ' + prazo.toLocaleString('pt-BR'));
+  }
+}
+
+function showPopup(titulo, sub) {
+  document.getElementById('popup-title').textContent = titulo;
+  document.getElementById('popup-sub').textContent = sub;
+  document.getElementById('popupOverlay').classList.add('open');
+}
+
+function closePopup() {
+  document.getElementById('popupOverlay').classList.remove('open');
+}
+
+// FUNIL - alertas de leads sem contato
+function checkFunilAlertas() {
+  const agora = new Date();
+  allLeads.filter(l => l.status === 'Retornar' || l.status === 'Negociando').forEach(l => {
+    const criado = new Date(l.created_at);
+    const diffDias = (agora - criado) / (1000 * 60 * 60 * 24);
+    const key = 'funil_' + l.id + '_' + new Date().toDateString();
+    if (diffDias > 3 && !sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, '1');
+      const n = document.createElement('div');
+      n.className = 'notif-badge';
+      n.style.borderColor = 'var(--warning)';
+      n.innerHTML = `
+        <button class="notif-close" onclick="this.parentElement.remove()"><i class="ti ti-x"></i></button>
+        <div class="notif-title" style="color:var(--warning)"><i class="ti ti-alert-triangle"></i> Lead sem contato</div>
+        <div class="notif-body"><strong>${l.razao_social}</strong><br>Status: ${l.status} · ${Math.floor(diffDias)} dias sem atualização</div>
+      `;
+      document.body.appendChild(n);
+      setTimeout(() => n.remove(), 8000);
+    }
+  });
+}
+
 checkSession();
+startLembretes();
 loadFinanceiro();
+setTimeout(checkFunilAlertas, 3000);
 </script>
 </body>
 </html>
