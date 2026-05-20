@@ -219,6 +219,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0f;color:#e8e8f
 .back-btn{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:6px 12px;color:var(--muted);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px}
 .back-btn:hover{color:var(--text);border-color:var(--purple)}
 
+
+/* VENDAS */
+.vertical-badge{font-size:10px;padding:2px 9px;border-radius:20px;font-weight:600}
+.vb-vitrini{background:rgba(96,165,250,0.15);color:var(--blue-light)}
+.vb-menu{background:rgba(245,158,11,0.15);color:var(--warning)}
+.vb-crm{background:rgba(110,68,255,0.15);color:var(--purple-light)}
+.vb-clinica{background:rgba(34,197,94,0.15);color:var(--success)}
+.vb-outro{background:rgba(136,136,170,0.15);color:var(--muted)}
+.pgto-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;background:rgba(110,68,255,0.1);color:var(--purple-light)}
+.venda-row{display:grid;padding:11px 14px;border-bottom:1px solid var(--border);font-size:12px;align-items:center;transition:background .1s}
+.venda-row:hover{background:rgba(255,255,255,0.02)}
+.venda-row:last-child{border-bottom:none}
+.caixa-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.caixa-label{font-size:11px;color:var(--muted);margin-bottom:6px}
+.caixa-value{font-size:20px;font-weight:700}
+.caixa-sub{font-size:11px;color:var(--muted);margin-top:4px}
+
 </style>
 </head>
 <body>
@@ -260,6 +277,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0f;color:#e8e8f
       <button class="nav-btn" onclick="showView('clientes',this)"><i class="ti ti-users"></i> Clientes</button>
       <button class="nav-btn" onclick="showView('financeiro',this)"><i class="ti ti-coin"></i> Financeiro</button>
       <button class="nav-btn" onclick="showView('contratos',this)"><i class="ti ti-file-dollar"></i> Contratos</button>
+      <button class="nav-btn" onclick="showView('vendas',this)"><i class="ti ti-shopping-cart"></i> Vendas</button>
       <button class="nav-btn" id="master-btn" style="display:none" onclick="showView('master',this)"><i class="ti ti-shield"></i> Master</button>
     </div>
     <div class="topbar-right">
@@ -287,6 +305,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0f;color:#e8e8f
       <div class="sidebar-item" onclick="showView('receitas',null,this)"><i class="ti ti-trending-up"></i> Receitas</div>
       <div class="sidebar-item" onclick="showView('despesas',null,this)"><i class="ti ti-trending-down"></i> Despesas</div>
       <div class="sidebar-item" onclick="showView('contratos',null,this)"><i class="ti ti-file-dollar"></i> Contratos</div>
+      <div class="sidebar-item" onclick="showView('vendas',null,this)"><i class="ti ti-shopping-cart"></i> Registro de Vendas</div>
       <div class="sidebar-section" id="master-section" style="display:none">Admin</div>
       <div class="sidebar-item" id="master-sidebar" style="display:none" onclick="showView('master',null,this)"><i class="ti ti-shield"></i> Painel Master</div>
     </div>
@@ -473,6 +492,43 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0f;color:#e8e8f
         </div>
       </div>
 
+
+      <!-- VENDAS -->
+      <div id="view-vendas" class="view">
+        <div class="page-header">
+          <div><div class="page-title">Registro de Vendas</div><div class="page-sub">Caixa em tempo real da Desiberne IA</div></div>
+          <button class="add-btn" onclick="openVendaModal()"><i class="ti ti-plus"></i> Nova Venda</button>
+        </div>
+
+        <!-- KPIs CAIXA -->
+        <div class="kpi-grid" id="vendas-kpis">
+          <div class="caixa-card"><div class="caixa-label">💰 Total Hoje</div><div class="caixa-value" id="v-hoje" style="color:var(--success)">R$ 0</div><div class="caixa-sub" id="v-hoje-qtd">0 vendas</div></div>
+          <div class="caixa-card"><div class="caixa-label">📅 Total do Mês</div><div class="caixa-value" id="v-mes" style="color:var(--neon)">R$ 0</div><div class="caixa-sub" id="v-mes-qtd">0 vendas</div></div>
+          <div class="caixa-card"><div class="caixa-label">🏆 Melhor Vertical</div><div class="caixa-value" id="v-top" style="color:var(--purple-light);font-size:16px">—</div><div class="caixa-sub" id="v-top-val">—</div></div>
+          <div class="caixa-card"><div class="caixa-label">💳 Forma + usada</div><div class="caixa-value" id="v-pgto" style="color:var(--warning);font-size:16px">—</div><div class="caixa-sub" id="v-pgto-qtd">—</div></div>
+        </div>
+
+        <!-- RESUMO POR VERTICAL -->
+        <div class="charts-row" style="margin-bottom:16px">
+          <div class="chart-card">
+            <div class="chart-title">Faturamento por vertical</div>
+            <div id="v-por-vertical"><div class="loading">Carregando...</div></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Por forma de pagamento</div>
+            <div id="v-por-pgto"><div class="loading">Carregando...</div></div>
+          </div>
+        </div>
+
+        <!-- LISTA DE VENDAS -->
+        <div class="table-wrap">
+          <div class="table-head" style="grid-template-columns:1fr 1.5fr 2fr 1fr 1fr 1fr 40px">
+            <span>DATA</span><span>VERTICAL</span><span>CLIENTE / DESCRIÇÃO</span><span>QTD</span><span>VALOR</span><span>PAGAMENTO</span><span></span>
+          </div>
+          <div id="vendas-list"><div class="loading">Carregando...</div></div>
+        </div>
+      </div>
+
       <!-- MASTER PANEL -->
       <div id="view-master" class="view">
         <div class="page-header">
@@ -653,6 +709,92 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0a0a0f;color:#e8e8f
     <div class="popup-actions">
       <button class="btn-ghost" onclick="closePopup()">Dispensar</button>
       <button class="btn-primary" onclick="closePopup()">Ver Atividade</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- VENDA MODAL -->
+<div class="modal-overlay" id="vendaModal" onclick="closeModalOutside(event,'vendaModal')">
+  <div class="modal" style="width:520px">
+    <div class="modal-header">
+      <div class="modal-title" id="venda-modal-title">Nova Venda</div>
+      <button class="modal-close" onclick="closeModal('vendaModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <input type="hidden" id="venda-edit-id">
+
+    <div class="section-divider">Identificação</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Vertical / Produto *</label>
+        <select class="form-select" id="v-vertical">
+          <option value="Vitrini Fotos">📸 Vitrini Fotos</option>
+          <option value="MenuIA">🍔 MenuIA</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data da venda *</label>
+        <input class="form-input" id="v-data" type="date">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Nome do cliente *</label>
+      <input class="form-input" id="v-cliente" placeholder="Ex: Maria Silva">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Descrição do produto/serviço</label>
+      <input class="form-input" id="v-descricao" placeholder="Ex: Pack 30 fotos AI, Mensalidade CRM Basic...">
+    </div>
+
+    <div class="section-divider">Valores</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Quantidade</label>
+        <input class="form-input" id="v-qtd" type="number" value="1" min="1" oninput="calcVendaTotal()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor unitário (R$) *</label>
+        <input class="form-input" id="v-valor-unit" type="number" placeholder="0,00" oninput="calcVendaTotal()">
+      </div>
+    </div>
+
+    <div style="background:var(--bg);border-radius:8px;padding:12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <span style="font-size:13px;color:var(--muted)">Total da venda</span>
+      <span id="v-total-preview" style="font-size:18px;font-weight:700;color:var(--neon)">R$ 0,00</span>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Forma de pagamento *</label>
+        <select class="form-select" id="v-pgto">
+          <option value="Pix">💚 Pix</option>
+          <option value="Cartão de Crédito">💳 Cartão de Crédito</option>
+          <option value="Cartão de Débito">💳 Cartão de Débito</option>
+          <option value="Dinheiro">💵 Dinheiro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="v-status">
+          <option value="recebido">✅ Recebido</option>
+          <option value="pendente">⏳ Pendente</option>
+          <option value="cancelado">❌ Cancelado</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Observações</label>
+      <input class="form-input" id="v-obs" placeholder="Notas da venda...">
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-danger" id="venda-delete-btn" style="display:none;margin-right:auto" onclick="deleteVenda()"><i class="ti ti-trash"></i></button>
+      <button class="btn-ghost" onclick="closeModal('vendaModal')">Cancelar</button>
+      <button class="btn-primary" onclick="saveVenda()">Registrar Venda</button>
     </div>
   </div>
 </div>
