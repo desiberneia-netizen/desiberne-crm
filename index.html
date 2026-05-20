@@ -1574,9 +1574,153 @@ function checkFunilAlertas() {
   });
 }
 
+// VENDAS
+let vendas = [];
+const fmt2 = v => 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+async function loadVendas() {
+  const { data } = await sb.from('vendas').select('*').order('data', { ascending: false });
+  vendas = data || [];
+  renderVendas();
+}
+
+function renderVendas() {
+  const hoje = new Date().toISOString().split('T')[0];
+  const mesAtual = new Date().getMonth(), anoAtual = new Date().getFullYear();
+  const vHoje = vendas.filter(v => v.data === hoje && v.status === 'recebido');
+  const vMes = vendas.filter(v => { const d = new Date(v.data+'T00:00:00'); return d.getMonth()===mesAtual&&d.getFullYear()===anoAtual&&v.status==='recebido'; });
+  const totalHoje = vHoje.reduce((s,v)=>s+Number(v.valor_total||0),0);
+  const totalMes = vMes.reduce((s,v)=>s+Number(v.valor_total||0),0);
+  const el = id => document.getElementById(id);
+  if(el('v-hoje')) el('v-hoje').textContent = fmt2(totalHoje);
+  if(el('v-hoje-qtd')) el('v-hoje-qtd').textContent = vHoje.length+' venda'+(vHoje.length!==1?'s':'');
+  if(el('v-mes')) el('v-mes').textContent = fmt2(totalMes);
+  if(el('v-mes-qtd')) el('v-mes-qtd').textContent = vMes.length+' venda'+(vMes.length!==1?'s':'');
+  const porVertical = {};
+  vendas.filter(v=>v.status==='recebido').forEach(v=>{ porVertical[v.vertical]=(porVertical[v.vertical]||0)+Number(v.valor_total||0); });
+  const topV = Object.entries(porVertical).sort((a,b)=>b[1]-a[1])[0];
+  if(el('v-top')) el('v-top').textContent = topV?topV[0]:'—';
+  if(el('v-top-val')) el('v-top-val').textContent = topV?fmt2(topV[1]):'—';
+  const porPgto = {};
+  vendas.forEach(v=>{ porPgto[v.pagamento]=(porPgto[v.pagamento]||0)+1; });
+  const topP = Object.entries(porPgto).sort((a,b)=>b[1]-a[1])[0];
+  if(el('v-pgto')) el('v-pgto').textContent = topP?topP[0]:'—';
+  if(el('v-pgto-qtd')) el('v-pgto-qtd').textContent = topP?topP[1]+' transações':'—';
+  const maxV = Math.max(...Object.values(porVertical),1);
+  const vColors = {'Vitrini Fotos':'var(--blue-light)','MenuIA':'var(--warning)','Outro':'var(--muted)'};
+  if(el('v-por-vertical')) el('v-por-vertical').innerHTML = Object.keys(porVertical).length ?
+    Object.entries(porVertical).sort((a,b)=>b[1]-a[1]).map(([k,val])=>`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="font-size:11px;color:var(--muted);width:110px;flex-shrink:0">${k}</div>
+        <div style="flex:1;height:18px;background:var(--border);border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(val/maxV*100)}%;background:${vColors[k]||'var(--neon)'};border-radius:4px;display:flex;align-items:center;padding-left:6px">
+            <span style="font-size:10px;font-weight:600;color:#fff">${fmt2(val)}</span>
+          </div>
+        </div>
+      </div>`).join('') : '<div class="loading">Sem dados</div>';
+  const maxP = Math.max(...Object.values(porPgto),1);
+  const pColors = {'Pix':'var(--success)','Cartão de Crédito':'var(--purple-light)','Cartão de Débito':'var(--blue-light)','Dinheiro':'var(--warning)'};
+  if(el('v-por-pgto')) el('v-por-pgto').innerHTML = Object.keys(porPgto).length ?
+    Object.entries(porPgto).sort((a,b)=>b[1]-a[1]).map(([k,qtd])=>`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="font-size:11px;color:var(--muted);width:110px;flex-shrink:0">${k}</div>
+        <div style="flex:1;height:18px;background:var(--border);border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(qtd/maxP*100)}%;background:${pColors[k]||'var(--neon)'};border-radius:4px;display:flex;align-items:center;padding-left:6px">
+            <span style="font-size:10px;font-weight:600;color:#fff">${qtd}x</span>
+          </div>
+        </div>
+      </div>`).join('') : '<div class="loading">Sem dados</div>';
+  const vClass = {'Vitrini Fotos':'vb-vitrini','MenuIA':'vb-menu','Outro':'vb-outro'};
+  if(el('vendas-list')) el('vendas-list').innerHTML = vendas.length ?
+    vendas.map(v=>`
+      <div class="venda-row" style="grid-template-columns:1fr 1.5fr 2fr 1fr 1fr 1fr 40px;cursor:pointer" onclick="editVenda('${v.id}')">
+        <div style="color:var(--muted)">${v.data?new Date(v.data+'T00:00:00').toLocaleDateString('pt-BR'):'—'}</div>
+        <div><span class="vertical-badge ${vClass[v.vertical]||'vb-outro'}">${v.vertical||'—'}</span></div>
+        <div><div style="font-weight:500">${v.cliente||'—'}</div><div style="font-size:11px;color:var(--muted)">${v.descricao||''}</div></div>
+        <div style="color:var(--muted)">${v.quantidade||1}</div>
+        <div style="font-weight:600;color:var(--success)">${fmt2(v.valor_total)}</div>
+        <div><span class="pgto-badge">${v.pagamento||'—'}</span></div>
+        <div><button class="delete-btn" onclick="event.stopPropagation();deleteVendaById('${v.id}')"><i class="ti ti-trash"></i></button></div>
+      </div>`).join('') : '<div class="loading">Nenhuma venda registrada ainda</div>';
+}
+
+function openVendaModal() {
+  document.getElementById('venda-modal-title').textContent = 'Nova Venda';
+  document.getElementById('venda-edit-id').value = '';
+  document.getElementById('venda-delete-btn').style.display = 'none';
+  document.getElementById('v-vertical').value = 'Vitrini Fotos';
+  document.getElementById('v-data').value = new Date().toISOString().split('T')[0];
+  document.getElementById('v-cliente').value = '';
+  document.getElementById('v-descricao').value = '';
+  document.getElementById('v-qtd').value = 1;
+  document.getElementById('v-valor-unit').value = '';
+  document.getElementById('v-total-preview').textContent = 'R$ 0,00';
+  document.getElementById('v-pgto').value = 'Pix';
+  document.getElementById('v-status').value = 'recebido';
+  document.getElementById('v-obs').value = '';
+  openModal('vendaModal');
+}
+
+function editVenda(id) {
+  const venda = vendas.find(x=>x.id===id); if(!venda)return;
+  document.getElementById('venda-modal-title').textContent = 'Editar Venda';
+  document.getElementById('venda-edit-id').value = venda.id;
+  document.getElementById('venda-delete-btn').style.display = 'block';
+  document.getElementById('v-vertical').value = venda.vertical||'Vitrini Fotos';
+  document.getElementById('v-data').value = venda.data||'';
+  document.getElementById('v-cliente').value = venda.cliente||'';
+  document.getElementById('v-descricao').value = venda.descricao||'';
+  document.getElementById('v-qtd').value = venda.quantidade||1;
+  document.getElementById('v-valor-unit').value = venda.valor_unitario||'';
+  document.getElementById('v-total-preview').textContent = fmt2(venda.valor_total);
+  document.getElementById('v-pgto').value = venda.pagamento||'Pix';
+  document.getElementById('v-status').value = venda.status||'recebido';
+  document.getElementById('v-obs').value = venda.obs||'';
+  openModal('vendaModal');
+}
+
+function calcVendaTotal() {
+  const qtd = Number(document.getElementById('v-qtd').value||1);
+  const unit = Number(document.getElementById('v-valor-unit').value||0);
+  document.getElementById('v-total-preview').textContent = fmt2(qtd*unit);
+}
+
+async function saveVenda() {
+  const cliente = document.getElementById('v-cliente').value.trim();
+  const valorUnit = Number(document.getElementById('v-valor-unit').value||0);
+  if(!cliente||!valorUnit){showToast('Preencha cliente e valor','error');return;}
+  const qtd = Number(document.getElementById('v-qtd').value||1);
+  const data = {
+    vertical: document.getElementById('v-vertical').value,
+    data: document.getElementById('v-data').value,
+    cliente, descricao: document.getElementById('v-descricao').value,
+    quantidade: qtd, valor_unitario: valorUnit, valor_total: qtd*valorUnit,
+    pagamento: document.getElementById('v-pgto').value,
+    status: document.getElementById('v-status').value,
+    obs: document.getElementById('v-obs').value
+  };
+  const editId = document.getElementById('venda-edit-id').value;
+  const{error}=editId?await sb.from('vendas').update(data).eq('id',editId):await sb.from('vendas').insert(data);
+  if(error){showToast('Erro: '+error.message,'error');return;}
+  showToast(editId?'Venda atualizada!':'✅ Venda registrada!','success');
+  closeModal('vendaModal');loadVendas();
+}
+
+async function deleteVenda() {
+  const id=document.getElementById('venda-edit-id').value;
+  if(!id||!confirm('Excluir esta venda?'))return;
+  await deleteVendaById(id);closeModal('vendaModal');
+}
+
+async function deleteVendaById(id) {
+  await sb.from('vendas').delete().eq('id',id);
+  showToast('Venda removida','success');loadVendas();
+}
+
 checkSession();
 startLembretes();
 loadFinanceiro();
+loadVendas();
 setTimeout(checkFunilAlertas, 3000);
 </script>
 </body>
