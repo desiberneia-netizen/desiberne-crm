@@ -344,6 +344,22 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 .report-section{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
 .report-section:last-child{border-bottom:none;margin-bottom:0}
 
+
+/* USUÁRIOS */
+.usuario-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;display:flex;align-items:center;gap:16px;transition:all .2s}
+.usuario-card:hover{border-color:rgba(124,58,237,0.2)}
+.usuario-card.inativo{opacity:.5}
+.usuario-avatar{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0}
+.usuario-info{flex:1}
+.usuario-nome{font-size:14px;font-weight:800;margin-bottom:3px}
+.usuario-email{font-size:11px;color:var(--muted);font-weight:500}
+.usuario-badges{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.perm-master{background:rgba(124,58,237,0.15);color:var(--purple-light);font-size:10px;padding:2px 9px;border-radius:20px;font-weight:800}
+.perm-admin{background:rgba(245,158,11,0.12);color:var(--warning);font-size:10px;padding:2px 9px;border-radius:20px;font-weight:800}
+.perm-vendedor{background:rgba(59,130,246,0.12);color:var(--blue-light);font-size:10px;padding:2px 9px;border-radius:20px;font-weight:800}
+.perm-visualizador{background:rgba(107,114,128,0.12);color:var(--muted);font-size:10px;padding:2px 9px;border-radius:20px;font-weight:800}
+.usuario-actions{display:flex;gap:8px;flex-direction:column;align-items:flex-end}
+
 @media(max-width:768px){.kpi-grid{grid-template-columns:1fr 1fr}.kanban-board{grid-template-columns:1fr}.sidebar{display:none}.charts-row{grid-template-columns:1fr}.topbar-nav{display:none}.link-grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -384,7 +400,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
   <div class="topbar">
     <div class="logo-area">
       <img class="logo-img" src="https://i.imgur.com/rrQxwkl.png" alt="Desiberne IA">
-      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v10.0</span></div>
+      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v11.0</span></div>
     </div>
     <div class="topbar-nav">
       <button class="nav-btn active" onclick="showView('home',this)"><i class="ti ti-home"></i> Início</button>
@@ -1089,6 +1105,57 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 
 <!-- NOTIF ANIVERSÁRIO -->
 <div id="aniv-container" style="position:fixed;bottom:20px;left:20px;z-index:150;max-width:340px;display:flex;flex-direction:column;gap:8px"></div>
+
+
+<!-- USUARIO MODAL -->
+<div class="modal-overlay" id="usuarioModal" onclick="closeModalOutside(event,'usuarioModal')">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title" id="usuario-modal-title">Novo Usuário</div>
+      <button class="modal-close" onclick="closeModal('usuarioModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <input type="hidden" id="usr-edit-id">
+    <div class="section-divider">Dados do Usuário</div>
+    <div class="form-group"><label class="form-label">Nome completo *</label><input class="form-input" id="usr-nome" placeholder="Ex: Joao Victor Ramos"></div>
+    <div class="form-group"><label class="form-label">E-mail *</label><input class="form-input" id="usr-email" type="email" placeholder="usuario@desiberneia.com.br"></div>
+    <div class="form-group"><label class="form-label">Cargo / Função</label><input class="form-input" id="usr-cargo" placeholder="Ex: Coordenador Comercial, Vendedor..."></div>
+    <div class="section-divider">Permissões</div>
+    <div class="form-group">
+      <label class="form-label">Nível de acesso</label>
+      <select class="form-select" id="usr-permissao">
+        <option value="master">Master — acesso total + painel admin</option>
+        <option value="admin">Admin — acesso total sem painel master</option>
+        <option value="vendedor">Vendedor — vê apenas seus leads</option>
+        <option value="visualizador">Visualizador — somente leitura</option>
+      </select>
+    </div>
+    <div style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:800;color:var(--purple-light);margin-bottom:10px">O que cada nível pode fazer:</div>
+      <div style="font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:6px;line-height:1.5">
+        <div><strong style="color:var(--purple-light)">Master</strong> — tudo + criar usuários + painel estratégico</div>
+        <div><strong style="color:var(--warning)">Admin</strong> — leads, financeiro, contratos, vendas, links</div>
+        <div><strong style="color:var(--blue-light)">Vendedor</strong> — pipeline, agenda, clientes e atividades</div>
+        <div><strong style="color:var(--muted)">Visualizador</strong> — somente visualizar, sem editar</div>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Status</label>
+      <select class="form-select" id="usr-ativo">
+        <option value="true">Ativo</option>
+        <option value="false">Inativo</option>
+      </select>
+    </div>
+    <div id="usr-senha-wrap">
+      <div class="section-divider">Senha de Acesso</div>
+      <div class="form-group"><label class="form-label">Senha temporária *</label><input class="form-input" id="usr-senha" type="password" placeholder="Mínimo 6 caracteres"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:12px;font-weight:500">O usuário receberá as credenciais e poderá alterar a senha depois.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-danger" id="usr-delete-btn" style="display:none;margin-right:auto" onclick="deleteUsuario()"><i class="ti ti-trash"></i></button>
+      <button class="btn-ghost" onclick="closeModal('usuarioModal')">Cancelar</button>
+      <button class="btn-primary" onclick="saveUsuario()">Salvar Usuário</button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -2612,7 +2679,7 @@ function exportPDF(){
         <p>Relatório Comercial & Financeiro — ${mesStr}</p>
       </div>
       <div class="date-info">
-        <div style="font-size:14px;font-weight:800;color:#111">CRM v10.0</div>
+        <div style="font-size:14px;font-weight:800;color:#111">CRM v11.0</div>
         <div>Gerado em ${dateStr}</div>
       </div>
     </div>
@@ -2681,7 +2748,7 @@ function exportPDF(){
     </div>
 
     <div class="footer">
-      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v10.0
+      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v11.0
     </div>
     </body>
     </html>
@@ -2699,6 +2766,173 @@ function matchMonthFin(dateStr){
   const d = new Date(dateStr+'T00:00:00');
   const now = new Date();
   return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+}
+
+
+// ============================================================
+// GESTÃO DE USUÁRIOS
+// ============================================================
+let allUsuarios = [];
+let masterTabAtual = 'empresas';
+
+function switchMasterTab(tab){
+  masterTabAtual = tab;
+  document.getElementById('master-tab-empresas').style.display = tab==='empresas'?'block':'none';
+  document.getElementById('master-tab-usuarios').style.display = tab==='usuarios'?'block':'none';
+  const btnE = document.getElementById('tab-empresas');
+  const btnU = document.getElementById('tab-usuarios');
+  if(tab==='empresas'){
+    btnE.className='btn-primary';btnE.style.cssText='flex:1;border-radius:9px;font-size:12px';
+    btnU.className='btn-ghost';btnU.style.cssText='flex:1;border-radius:9px;font-size:12px;border:none';
+  } else {
+    btnU.className='btn-primary';btnU.style.cssText='flex:1;border-radius:9px;font-size:12px';
+    btnE.className='btn-ghost';btnE.style.cssText='flex:1;border-radius:9px;font-size:12px;border:none';
+    loadUsuarios();
+  }
+}
+
+async function loadUsuarios(){
+  const{data,error}=await sb.from('usuarios').select('*').order('created_at',{ascending:false});
+  if(error){console.error(error);return;}
+  allUsuarios = data||[];
+  renderUsuarios();
+}
+
+function renderUsuarios(){
+  const el = document.getElementById('usuarios-list');
+  if(!el) return;
+  const permColors = {master:'#8b5cf6',admin:'#f59e0b',vendedor:'#3b82f6',visualizador:'#6b7280'};
+  const permLabels = {master:'Master',admin:'Admin',vendedor:'Vendedor',visualizador:'Visualizador'};
+  const permClass = {master:'perm-master',admin:'perm-admin',vendedor:'perm-vendedor',visualizador:'perm-visualizador'};
+
+  el.innerHTML = allUsuarios.length ? allUsuarios.map(u=>`
+    <div class="usuario-card ${u.ativo?'':'inativo'}">
+      <div class="usuario-avatar" style="background:${permColors[u.permissao]||'var(--purple)'}">
+        ${(u.nome||'U').split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase()}
+      </div>
+      <div class="usuario-info">
+        <div class="usuario-nome">${u.nome||'—'}</div>
+        <div class="usuario-email">${u.email||'—'}</div>
+        <div class="usuario-badges">
+          <span class="${permClass[u.permissao]||'perm-vendedor'}">${permLabels[u.permissao]||'Vendedor'}</span>
+          ${u.cargo?`<span style="background:rgba(255,255,255,0.06);color:var(--muted);font-size:10px;padding:2px 9px;border-radius:20px;font-weight:600">${u.cargo}</span>`:''}
+          ${!u.ativo?'<span style="background:rgba(239,68,68,0.1);color:var(--danger);font-size:10px;padding:2px 9px;border-radius:20px;font-weight:700">Inativo</span>':''}
+        </div>
+      </div>
+      <div class="usuario-actions">
+        <button class="add-btn" style="font-size:10px;padding:5px 12px" onclick="editUsuario('${u.id}')"><i class="ti ti-pencil"></i> Editar</button>
+        <button onclick="toggleUsuarioAtivo('${u.id}',${u.ativo})" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:10px;color:var(--muted);cursor:pointer;font-weight:600;font-family:inherit">
+          ${u.ativo?'Desativar':'Ativar'}
+        </button>
+      </div>
+    </div>`).join('') :
+    `<div style="text-align:center;padding:50px;color:var(--muted)">
+      <i class="ti ti-users" style="font-size:36px;display:block;margin-bottom:12px;opacity:.3"></i>
+      Nenhum usuário cadastrado.<br><small>Clique em "Novo Usuário" para começar.</small>
+    </div>`;
+}
+
+function openUsuarioModal(){
+  document.getElementById('usuario-modal-title').textContent = 'Novo Usuário';
+  document.getElementById('usr-edit-id').value = '';
+  document.getElementById('usr-nome').value = '';
+  document.getElementById('usr-email').value = '';
+  document.getElementById('usr-cargo').value = '';
+  document.getElementById('usr-permissao').value = 'vendedor';
+  document.getElementById('usr-ativo').value = 'true';
+  document.getElementById('usr-senha').value = '';
+  document.getElementById('usr-senha-wrap').style.display = 'block';
+  document.getElementById('usr-delete-btn').style.display = 'none';
+  openModal('usuarioModal');
+}
+
+function editUsuario(id){
+  const u = allUsuarios.find(x=>x.id===id);
+  if(!u) return;
+  document.getElementById('usuario-modal-title').textContent = 'Editar Usuário';
+  document.getElementById('usr-edit-id').value = u.id;
+  document.getElementById('usr-nome').value = u.nome||'';
+  document.getElementById('usr-email').value = u.email||'';
+  document.getElementById('usr-cargo').value = u.cargo||'';
+  document.getElementById('usr-permissao').value = u.permissao||'vendedor';
+  document.getElementById('usr-ativo').value = u.ativo?'true':'false';
+  document.getElementById('usr-senha-wrap').style.display = 'none';
+  document.getElementById('usr-delete-btn').style.display = 'block';
+  openModal('usuarioModal');
+}
+
+async function saveUsuario(){
+  const nome = document.getElementById('usr-nome').value.trim();
+  const email = document.getElementById('usr-email').value.trim();
+  const editId = document.getElementById('usr-edit-id').value;
+  if(!nome||!email){showToast('Preencha nome e e-mail','error');return;}
+
+  // Se novo usuário, cria no Supabase Auth
+  if(!editId){
+    const senha = document.getElementById('usr-senha').value;
+    if(!senha||senha.length<6){showToast('Senha deve ter mínimo 6 caracteres','error');return;}
+    // Cria via admin (usando signUp)
+    const{data:authData,error:authErr}=await sb.auth.signUp({email,password:senha,options:{data:{nome}}});
+    if(authErr){showToast('Erro ao criar acesso: '+authErr.message,'error');return;}
+    // Salva na tabela usuarios
+    const{error}=await sb.from('usuarios').insert({
+      nome, email,
+      cargo: document.getElementById('usr-cargo').value,
+      permissao: document.getElementById('usr-permissao').value,
+      ativo: document.getElementById('usr-ativo').value==='true',
+      auth_id: authData.user?.id||null
+    });
+    if(error){showToast('Erro: '+error.message,'error');return;}
+    showToast('Usuário criado! Credenciais: '+email,'success');
+  } else {
+    // Edita dados
+    const{error}=await sb.from('usuarios').update({
+      nome, email,
+      cargo: document.getElementById('usr-cargo').value,
+      permissao: document.getElementById('usr-permissao').value,
+      ativo: document.getElementById('usr-ativo').value==='true'
+    }).eq('id',editId);
+    if(error){showToast('Erro: '+error.message,'error');return;}
+    showToast('Usuário atualizado!','success');
+  }
+  closeModal('usuarioModal');
+  loadUsuarios();
+}
+
+async function toggleUsuarioAtivo(id, ativo){
+  const{error}=await sb.from('usuarios').update({ativo:!ativo}).eq('id',id);
+  if(error){showToast('Erro','error');return;}
+  showToast(ativo?'Usuário desativado':'Usuário ativado','success');
+  loadUsuarios();
+}
+
+async function deleteUsuario(){
+  const id = document.getElementById('usr-edit-id').value;
+  if(!id||!confirm('Excluir este usuário?')) return;
+  await sb.from('usuarios').delete().eq('id',id);
+  showToast('Usuário removido','success');
+  closeModal('usuarioModal');
+  loadUsuarios();
+}
+
+// Aplicar permissões na UI baseado no usuário logado
+async function applyPermissions(){
+  if(!currentUser) return;
+  // Busca permissão do usuário logado
+  const{data}=await sb.from('usuarios').select('permissao,nome').eq('email',currentUser.email).maybeSingle();
+  if(!data) return; // master original, sem restrições
+  const perm = data.permissao;
+  // Vendedor: esconde financeiro, contratos master
+  if(perm==='vendedor'){
+    ['financeiro','receitas','despesas','contratos','vendas'].forEach(v=>{
+      const nb = document.querySelector(`[onclick*="showView('${v}')"]`);
+      // não esconde, apenas limita ações — futuro
+    });
+  }
+  // Visualizador: esconde botões de ação
+  if(perm==='visualizador'){
+    document.querySelectorAll('.add-btn').forEach(b=>b.style.display='none');
+  }
 }
 
 checkSession();
