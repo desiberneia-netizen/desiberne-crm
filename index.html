@@ -353,7 +353,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
   <div class="topbar">
     <div class="logo-area">
       <img class="logo-img" src="https://i.imgur.com/rrQxwkl.png" alt="Desiberne IA">
-      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v7.0</span></div>
+      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v8.0</span></div>
     </div>
     <div class="topbar-nav">
       <button class="nav-btn active" onclick="showView('home',this)"><i class="ti ti-home"></i> Início</button>
@@ -976,6 +976,58 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
   </div>
 </div>
 
+
+<!-- FECHAMENTO DE VENDA -->
+<div class="modal-overlay" id="fechamentoModal" onclick="closeModalOutside(event,'fechamentoModal')">
+  <div class="modal modal-sm">
+    <div class="modal-header"><div class="modal-title">Registrar Venda Fechada</div><button class="modal-close" onclick="closeModal('fechamentoModal')"><i class="ti ti-x"></i></button></div>
+    <div style="background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:12px;color:var(--success);font-weight:700;display:flex;align-items:center;gap:8px"><i class="ti ti-check-circle" style="font-size:16px"></i> Lead movido para Fechado! Registre os detalhes da venda.</div>
+    <input type="hidden" id="fech-lead-id">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Cliente</label><input class="form-input" id="fech-cliente" readonly style="opacity:.7"></div>
+      <div class="form-group"><label class="form-label">Vertical</label><input class="form-input" id="fech-vertical" readonly style="opacity:.7"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Valor (R$) *</label><input class="form-input" id="fech-valor" type="number" placeholder="0,00"></div>
+      <div class="form-group"><label class="form-label">Quantidade</label><input class="form-input" id="fech-qtd" type="number" value="1" min="1"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Forma de Pagamento *</label>
+        <select class="form-select" id="fech-pgto">
+          <option value="Pix">Pix</option>
+          <option value="Cartão de Crédito">Cartão de Crédito</option>
+          <option value="Cartão de Débito">Cartão de Débito</option>
+          <option value="Dinheiro">Dinheiro</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Status do Pagamento</label>
+        <select class="form-select" id="fech-status">
+          <option value="recebido">Recebido</option>
+          <option value="pendente">Pendente</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Modelo de Remuneração</label>
+      <select class="form-select" id="fech-modelo" onchange="toggleRecorrencia()">
+        <option value="oneshot">One-shot</option>
+        <option value="recorrente">Recorrente</option>
+        <option value="fixo">Fixo Mensal</option>
+        <option value="variavel">Variável</option>
+      </select>
+    </div>
+    <div class="form-group" id="fech-recorrencia-wrap" style="display:none">
+      <label class="form-label">Período de recorrência (meses)</label>
+      <input class="form-input" id="fech-recorrencia" type="number" placeholder="Ex: 12" min="1">
+    </div>
+    <div class="form-group"><label class="form-label">Descrição</label><input class="form-input" id="fech-desc" placeholder="Detalhes da venda..."></div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="skipFechamento()">Pular</button>
+      <button class="btn-primary" onclick="saveFechamento()"><i class="ti ti-check"></i> Registrar Venda</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1285,7 +1337,7 @@ async function saveLead() {
   if(!razao){showToast('Razão Social obrigatória','error');return;}
   const btn=document.getElementById('save-lead-btn');
   btn.disabled=true;btn.textContent='Salvando...';
-  const data={razao_social:razao,cnpj:document.getElementById('f-cnpj').value,gestor:document.getElementById('f-gestor').value,celular:document.getElementById('f-celular').value,email:document.getElementById('f-email').value,cep:document.getElementById('f-cep').value,cidade:document.getElementById('f-cidade').value,logradouro:document.getElementById('f-logradouro').value,bairro:document.getElementById('f-bairro').value,segmento:document.getElementById('f-segmento').value,temperatura:document.getElementById('f-temperatura').value,status:document.getElementById('f-status').value,valor:document.getElementById('f-valor').value,responsavel:document.getElementById('f-responsavel').value,observacoes:document.getElementById('f-obs').value};
+  const data={razao_social:razao,cnpj:document.getElementById('f-cnpj').value,gestor:document.getElementById('f-gestor').value,celular:document.getElementById('f-celular').value,email:document.getElementById('f-email').value,cep:document.getElementById('f-cep').value,cidade:document.getElementById('f-cidade').value,logradouro:document.getElementById('f-logradouro').value,bairro:document.getElementById('f-bairro').value,segmento:document.getElementById('f-segmento').value,temperatura:document.getElementById('f-temperatura').value,status:document.getElementById('f-status').value,valor:document.getElementById('f-valor').value,responsavel:document.getElementById('f-responsavel').value,observacoes:document.getElementById('f-obs').value,vertical:document.getElementById('f-vertical')?.value||'',modelo:document.getElementById('f-modelo')?.value||'',quantidade:document.getElementById('f-quantidade')?.value||1,proximo_passo:document.getElementById('f-proximo-passo')?.value||''};
   const editId=document.getElementById('edit-id').value;
   const {error}=editId?await sb.from('leads').update(data).eq('id',editId):await sb.from('leads').insert(data);
   btn.disabled=false;btn.textContent='Salvar Lead';
