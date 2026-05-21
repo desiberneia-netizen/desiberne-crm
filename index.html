@@ -725,10 +725,52 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
       <!-- MASTER PANEL -->
       <div id="view-master" class="view">
         <div class="page-header">
-          <div><div class="page-title">Painel Master</div><div class="page-sub">Gerenciamento de empresas clientes</div></div>
-          <button class="add-btn" onclick="openEmpresaModal()"><i class="ti ti-plus"></i> Nova Empresa</button>
+          <div><div class="page-title">Painel Master</div><div class="page-sub">Visão estratégica da Desiberne IA</div></div>
+          <div class="month-selector">
+            <button class="month-btn" onclick="changeMasterMonth(-1)"><i class="ti ti-chevron-left"></i></button>
+            <div class="month-display" id="master-month-display">—</div>
+            <button class="month-btn" onclick="changeMasterMonth(1)"><i class="ti ti-chevron-right"></i></button>
+          </div>
         </div>
-        <div id="empresas-list"><div class="loading">Carregando...</div></div>
+        <!-- TABS -->
+        <div style="display:flex;gap:4px;margin-bottom:20px;background:var(--card);padding:4px;border-radius:12px;border:1px solid var(--border)">
+          <button id="tab-empresas" class="btn-primary" style="flex:1;border-radius:9px;font-size:12px" onclick="switchMasterTab('empresas')">Empresas Clientes</button>
+          <button id="tab-usuarios" class="btn-ghost" style="flex:1;border-radius:9px;font-size:12px;border:none" onclick="switchMasterTab('usuarios')">Gestão de Usuários</button>
+          <button id="tab-estrategico" class="btn-ghost" style="flex:1;border-radius:9px;font-size:12px;border:none" onclick="switchMasterTab('estrategico')">Resumo Estratégico</button>
+        </div>
+
+        <!-- EMPRESAS -->
+        <div id="master-tab-empresas">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:15px;font-weight:800">Empresas Clientes</div>
+            <button class="add-btn" onclick="openModal('empresaModal')"><i class="ti ti-plus"></i> Nova Empresa</button>
+          </div>
+          <div id="empresas-list"><div class="loading">Carregando...</div></div>
+        </div>
+
+        <!-- USUÁRIOS -->
+        <div id="master-tab-usuarios" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div><div style="font-size:15px;font-weight:800">Gestão de Usuários</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Crie e gerencie acessos ao CRM</div></div>
+            <button class="add-btn" onclick="openUsuarioModal()"><i class="ti ti-user-plus"></i> Novo Usuário</button>
+          </div>
+          <div id="usuarios-list"><div class="loading">Carregando...</div></div>
+        </div>
+
+        <!-- ESTRATÉGICO -->
+        <div id="master-tab-estrategico" style="display:none">
+          <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px">
+            <div class="kpi-card"><div class="kpi-label"><i class="ti ti-trending-up" style="color:var(--success)"></i> Receita do Mês</div><div class="kpi-value" id="m-receita" style="color:var(--success)">—</div><div class="kpi-sub" id="m-receita-vs"></div><div class="kpi-bar"><div class="kpi-bar-fill" id="m-bar-rec" style="width:0%;background:var(--success)"></div></div></div>
+            <div class="kpi-card"><div class="kpi-label"><i class="ti ti-trending-down" style="color:var(--danger)"></i> Despesas do Mês</div><div class="kpi-value" id="m-despesa" style="color:var(--danger)">—</div><div class="kpi-sub" id="m-despesa-vs"></div><div class="kpi-bar"><div class="kpi-bar-fill" id="m-bar-desp" style="width:0%;background:var(--danger)"></div></div></div>
+            <div class="kpi-card"><div class="kpi-label"><i class="ti ti-scale" style="color:var(--neon)"></i> Resultado Líquido</div><div class="kpi-value" id="m-liquido">—</div><div class="kpi-sub" id="m-liquido-label"></div><div class="kpi-bar"><div class="kpi-bar-fill" id="m-bar-liq" style="width:0%;background:var(--neon)"></div></div></div>
+          </div>
+          <div class="charts-row" style="margin-bottom:16px">
+            <div class="chart-card"><div class="chart-title">Meta mensal <button class="add-btn" style="font-size:10px;padding:4px 10px" onclick="openMetaModal()"><i class="ti ti-pencil"></i> Definir</button></div><div id="master-meta-progress"><div class="loading">Carregando...</div></div></div>
+            <div class="chart-card"><div class="chart-title">Previsibilidade — MRR</div><div id="master-mrr"><div class="loading">Carregando...</div></div></div>
+          </div>
+          <div class="chart-card" style="margin-bottom:16px"><div class="chart-title">Histórico — últimos 6 meses</div><div id="master-historico-chart"><div class="loading">Carregando...</div></div></div>
+          <div class="chart-card"><div class="chart-title"><i class="ti ti-brain" style="color:var(--purple-light);margin-right:6px"></i>Análise Estratégica</div><div id="master-analise" style="font-size:13px;color:var(--muted);line-height:1.8;margin-top:4px">Carregando...</div></div>
+        </div>
       </div>
 
     </div>
@@ -2777,18 +2819,21 @@ let masterTabAtual = 'empresas';
 
 function switchMasterTab(tab){
   masterTabAtual = tab;
-  document.getElementById('master-tab-empresas').style.display = tab==='empresas'?'block':'none';
-  document.getElementById('master-tab-usuarios').style.display = tab==='usuarios'?'block':'none';
-  const btnE = document.getElementById('tab-empresas');
-  const btnU = document.getElementById('tab-usuarios');
-  if(tab==='empresas'){
-    btnE.className='btn-primary';btnE.style.cssText='flex:1;border-radius:9px;font-size:12px';
-    btnU.className='btn-ghost';btnU.style.cssText='flex:1;border-radius:9px;font-size:12px;border:none';
-  } else {
-    btnU.className='btn-primary';btnU.style.cssText='flex:1;border-radius:9px;font-size:12px';
-    btnE.className='btn-ghost';btnE.style.cssText='flex:1;border-radius:9px;font-size:12px;border:none';
-    loadUsuarios();
-  }
+  ['empresas','usuarios','estrategico'].forEach(t=>{
+    const el = document.getElementById('master-tab-'+t);
+    if(el) el.style.display = t===tab?'block':'none';
+    const btn = document.getElementById('tab-'+t);
+    if(btn){
+      if(t===tab){btn.className='btn-primary';btn.style.cssText='flex:1;border-radius:9px;font-size:12px';}
+      else{btn.className='btn-ghost';btn.style.cssText='flex:1;border-radius:9px;font-size:12px;border:none';}
+    }
+  });
+  if(tab==='usuarios') loadUsuarios();
+  if(tab==='estrategico') renderMasterEstrategico();
+}
+
+async function renderMasterEstrategico(){
+  renderMaster();
 }
 
 async function loadUsuarios(){
