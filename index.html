@@ -360,6 +360,21 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 .perm-visualizador{background:rgba(107,114,128,0.12);color:var(--muted);font-size:10px;padding:2px 9px;border-radius:20px;font-weight:800}
 .usuario-actions{display:flex;gap:8px;flex-direction:column;align-items:flex-end}
 
+
+/* ANEXOS */
+.anexo-area{border:2px dashed var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;margin-top:8px}
+.anexo-area:hover{border-color:var(--purple);background:rgba(124,58,237,0.04)}
+.anexo-area.drag-over{border-color:var(--purple);background:rgba(124,58,237,0.08)}
+.anexo-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.anexo-item{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:11px}
+.anexo-item-name{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.anexo-item-size{color:var(--muted);font-weight:500;flex-shrink:0}
+.anexo-delete{background:none;border:none;color:var(--muted);cursor:pointer;padding:2px 4px;border-radius:4px}
+.anexo-delete:hover{color:var(--danger)}
+.anexo-icon{font-size:16px;flex-shrink:0}
+.slide-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;transition:all .2s}
+.slide-card:hover{border-color:rgba(124,58,237,0.2)}
+
 @media(max-width:768px){.kpi-grid{grid-template-columns:1fr 1fr}.kanban-board{grid-template-columns:1fr}.sidebar{display:none}.charts-row{grid-template-columns:1fr}.topbar-nav{display:none}.link-grid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -400,7 +415,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
   <div class="topbar">
     <div class="logo-area">
       <img class="logo-img" src="https://i.imgur.com/rrQxwkl.png" alt="Desiberne IA">
-      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v12.0</span></div>
+      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v13.0</span></div>
     </div>
     <div class="topbar-nav">
       <button class="nav-btn active" onclick="showView('home',this)"><i class="ti ti-home"></i> Início</button>
@@ -761,10 +776,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
           </div>
         </div>
         <!-- TABS -->
-        <div style="display:flex;gap:4px;margin-bottom:20px;background:var(--card);padding:4px;border-radius:12px;border:1px solid var(--border)">
-          <button id="tab-empresas" class="btn-primary" style="flex:1;border-radius:9px;font-size:12px" onclick="switchMasterTab('empresas')">Empresas Clientes</button>
-          <button id="tab-usuarios" class="btn-ghost" style="flex:1;border-radius:9px;font-size:12px;border:none" onclick="switchMasterTab('usuarios')">Gestão de Usuários</button>
-          <button id="tab-estrategico" class="btn-ghost" style="flex:1;border-radius:9px;font-size:12px;border:none" onclick="switchMasterTab('estrategico')">Resumo Estratégico</button>
+        <div style="display:flex;gap:4px;margin-bottom:20px;background:var(--card);padding:4px;border-radius:12px;border:1px solid var(--border);flex-wrap:wrap">
+          <button id="tab-empresas" class="btn-primary" style="flex:1;border-radius:9px;font-size:11px;min-width:100px" onclick="switchMasterTab('empresas')">Empresas</button>
+          <button id="tab-usuarios" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('usuarios')">Usuários</button>
+          <button id="tab-estrategico" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('estrategico')">Estratégico</button>
+          <button id="tab-carrossel" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('carrossel')">Carrossel Home</button>
         </div>
 
         <!-- EMPRESAS -->
@@ -798,6 +814,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
           </div>
           <div class="chart-card" style="margin-bottom:16px"><div class="chart-title">Histórico — últimos 6 meses</div><div id="master-historico-chart"><div class="loading">Carregando...</div></div></div>
           <div class="chart-card"><div class="chart-title"><i class="ti ti-brain" style="color:var(--purple-light);margin-right:6px"></i>Análise Estratégica</div><div id="master-analise" style="font-size:13px;color:var(--muted);line-height:1.8;margin-top:4px">Carregando...</div></div>
+
+        <!-- CARROSSEL -->
+        <div id="master-tab-carrossel" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div><div style="font-size:15px;font-weight:800">Slides do Carrossel</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Gerencie os conteúdos que aparecem na tela Início</div></div>
+            <button class="add-btn" onclick="openSlideModal()"><i class="ti ti-plus"></i> Novo Slide</button>
+          </div>
+          <div id="slides-list"><div class="loading">Carregando...</div></div>
+        </div>
         </div>
       </div>
 
@@ -879,6 +904,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
     <div class="form-row"><div class="form-group"><label class="form-label">Categoria</label><select class="form-select" id="desp-cat"><option>Ferramentas / SaaS</option><option>Tráfego pago</option><option>Reembolso</option><option>Salários</option><option>Marketing</option><option>Operacional</option><option>Nota fiscal</option><option>Outro</option></select></div><div class="form-group"><label class="form-label">Tipo</label><select class="form-select" id="desp-tipo"><option>Custo fixo</option><option>Custo variável</option><option>Reembolso</option><option>Investimento</option></select></div></div>
     <div class="form-row"><div class="form-group"><label class="form-label">Valor (R$) *</label><input class="form-input" id="desp-valor" type="number" placeholder="0,00"></div><div class="form-group"><label class="form-label">Data *</label><input class="form-input" id="desp-data" type="date"></div></div>
     <div class="form-group"><label class="form-label">Observações</label><input class="form-input" id="desp-obs" placeholder="Número da nota, detalhes..."></div>
+    <div class="section-divider">Comprovante / Nota Fiscal</div>
+    <div class="anexo-area" onclick="document.getElementById('desp-file-input').click()">
+      <i class="ti ti-file-upload" style="font-size:18px;color:var(--muted);display:block;margin-bottom:5px"></i>
+      <div style="font-size:11px;color:var(--muted);font-weight:600">Anexar comprovante ou nota fiscal</div>
+    </div>
+    <input type="file" id="desp-file-input" multiple style="display:none" onchange="handleAnexoUpload('desp',event)">
+    <div class="anexo-list" id="desp-anexos-list"></div>
     <div class="modal-footer"><button class="btn-ghost" onclick="closeModal('despesaModal')">Cancelar</button><button class="btn-primary" onclick="saveDespesa()">Salvar</button></div>
   </div>
 </div>
@@ -1283,11 +1315,67 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
       <input type="checkbox" id="ti-lembrete" style="width:16px;height:16px;cursor:pointer;accent-color:var(--neon)">
       <label for="ti-lembrete" style="font-size:12px;cursor:pointer;font-weight:600">Ativar lembrete pop-up no prazo</label>
     </div>
+    <div class="section-divider">Anexos</div>
+    <div class="anexo-area" onclick="document.getElementById('ti-file-input').click()" id="ti-drop-area">
+      <i class="ti ti-upload" style="font-size:20px;color:var(--muted);display:block;margin-bottom:6px"></i>
+      <div style="font-size:12px;color:var(--muted);font-weight:600">Clique ou arraste arquivos aqui</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px">Imagens, PDFs, documentos (máx. 50MB)</div>
+    </div>
+    <input type="file" id="ti-file-input" multiple style="display:none" onchange="handleAnexoUpload('ti',event)">
+    <div class="anexo-list" id="ti-anexos-list"></div>
     <div class="modal-footer">
       <button class="btn-danger" id="ti-delete-btn" style="display:none;margin-right:auto" onclick="deleteTarefaInterna()"><i class="ti ti-trash"></i></button>
       <button class="btn-ghost" onclick="closeModal('tarefaInternaModal')">Cancelar</button>
       <button class="btn-primary" onclick="saveTarefaInterna()">Salvar Tarefa</button>
     </div>
+  </div>
+</div>
+
+
+<!-- SLIDE MODAL -->
+<div class="modal-overlay" id="slideModal" onclick="closeModalOutside(event,'slideModal')">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title" id="slide-modal-title">Novo Slide</div>
+      <button class="modal-close" onclick="closeModal('slideModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <input type="hidden" id="sl-edit-id">
+    <div class="form-group"><label class="form-label">Título *</label><input class="form-input" id="sl-titulo" placeholder="Ex: Bem-vindo ao Desiberne CRM"></div>
+    <div class="form-group"><label class="form-label">Subtítulo / Descrição</label><input class="form-input" id="sl-sub" placeholder="Ex: Seu sistema de gestão completo"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Ícone (Tabler Icons)</label><input class="form-input" id="sl-icone" placeholder="Ex: ti-rocket"></div>
+      <div class="form-group"><label class="form-label">Cor do destaque</label>
+        <select class="form-select" id="sl-cor">
+          <option value="var(--neon)">Roxo (padrão)</option>
+          <option value="var(--success)">Verde</option>
+          <option value="var(--warning)">Laranja</option>
+          <option value="var(--hot)">Vermelho</option>
+          <option value="var(--blue-light)">Azul</option>
+          <option value="var(--purple-light)">Lilás</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Ordem de exibição</label><input class="form-input" id="sl-ordem" type="number" value="1" min="1"></div>
+    <div class="form-group"><label class="form-label">Ativo?</label>
+      <select class="form-select" id="sl-ativo">
+        <option value="true">Sim — exibir no carrossel</option>
+        <option value="false">Não — ocultar</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-danger" id="sl-delete-btn" style="display:none;margin-right:auto" onclick="deleteSlide()"><i class="ti ti-trash"></i></button>
+      <button class="btn-ghost" onclick="closeModal('slideModal')">Cancelar</button>
+      <button class="btn-primary" onclick="saveSlide()">Salvar Slide</button>
+    </div>
+  </div>
+</div>
+
+<!-- ANEXO VIEWER MODAL -->
+<div class="modal-overlay" id="anexoViewerModal" onclick="closeModalOutside(event,'anexoViewerModal')">
+  <div class="modal modal-sm">
+    <div class="modal-header"><div class="modal-title">Anexos</div><button class="modal-close" onclick="closeModal('anexoViewerModal')"><i class="ti ti-x"></i></button></div>
+    <div id="anexo-viewer-list"></div>
+    <div class="modal-footer"><button class="btn-ghost" onclick="closeModal('anexoViewerModal')">Fechar</button></div>
   </div>
 </div>
 
@@ -2817,7 +2905,7 @@ function exportPDF(){
         <p>Relatório Comercial & Financeiro — ${mesStr}</p>
       </div>
       <div class="date-info">
-        <div style="font-size:14px;font-weight:800;color:#111">CRM v12.0</div>
+        <div style="font-size:14px;font-weight:800;color:#111">CRM v13.0</div>
         <div>Gerado em ${dateStr}</div>
       </div>
     </div>
@@ -2886,7 +2974,7 @@ function exportPDF(){
     </div>
 
     <div class="footer">
-      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v12.0
+      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v13.0
     </div>
     </body>
     </html>
@@ -2915,17 +3003,18 @@ let masterTabAtual = 'empresas';
 
 function switchMasterTab(tab){
   masterTabAtual = tab;
-  ['empresas','usuarios','estrategico'].forEach(t=>{
+  ['empresas','usuarios','estrategico','carrossel'].forEach(t=>{
     const el = document.getElementById('master-tab-'+t);
     if(el) el.style.display = t===tab?'block':'none';
     const btn = document.getElementById('tab-'+t);
     if(btn){
-      if(t===tab){btn.className='btn-primary';btn.style.cssText='flex:1;border-radius:9px;font-size:12px';}
-      else{btn.className='btn-ghost';btn.style.cssText='flex:1;border-radius:9px;font-size:12px;border:none';}
+      if(t===tab){btn.className='btn-primary';btn.style.cssText='flex:1;border-radius:9px;font-size:11px;min-width:100px';}
+      else{btn.className='btn-ghost';btn.style.cssText='flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px';}
     }
   });
   if(tab==='usuarios') loadUsuarios();
   if(tab==='estrategico') renderMasterEstrategico();
+  if(tab==='carrossel') loadSlidesAdmin();
 }
 
 async function renderMasterEstrategico(){
@@ -3155,6 +3244,7 @@ function openTarefaInternaModal(){
   document.getElementById('ti-prazo-hora').value='';
   document.getElementById('ti-lembrete').checked=false;
   document.getElementById('ti-delete-btn').style.display='none';
+  clearAnexos('ti');
   openModal('tarefaInternaModal');
 }
 
@@ -3227,10 +3317,237 @@ function checkTiLembretes(){
   });
 }
 
+
+// ============================================================
+// ANEXOS — SUPABASE STORAGE
+// ============================================================
+const BUCKET = 'Anexos';
+let pendingAnexos = {ti:[],desp:[],rec:[],venda:[]};
+
+function getFileIcon(name){
+  const ext = name.split('.').pop().toLowerCase();
+  if(['jpg','jpeg','png','gif','webp'].includes(ext)) return 'ti-photo';
+  if(['pdf'].includes(ext)) return 'ti-file-type-pdf';
+  if(['doc','docx'].includes(ext)) return 'ti-file-type-doc';
+  if(['xls','xlsx'].includes(ext)) return 'ti-file-type-xls';
+  if(['mp4','mov','avi'].includes(ext)) return 'ti-video';
+  return 'ti-file';
+}
+
+function formatSize(bytes){
+  if(bytes<1024) return bytes+'B';
+  if(bytes<1024*1024) return (bytes/1024).toFixed(1)+'KB';
+  return (bytes/1024/1024).toFixed(1)+'MB';
+}
+
+async function handleAnexoUpload(context, event){
+  const files = Array.from(event.target.files);
+  if(!files.length) return;
+  const listEl = document.getElementById(context+'-anexos-list');
+  for(const file of files){
+    const path = `${context}/${Date.now()}_${file.name}`;
+    showToast('Enviando '+file.name+'...','success');
+    const{data,error}=await sb.storage.from(BUCKET).upload(path,file,{upsert:true});
+    if(error){showToast('Erro ao enviar: '+error.message,'error');continue;}
+    const url = sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+    if(!pendingAnexos[context]) pendingAnexos[context]=[];
+    pendingAnexos[context].push({name:file.name,url,path,size:file.size});
+    renderAnexoList(context);
+    showToast(file.name+' enviado!','success');
+  }
+  event.target.value='';
+}
+
+function renderAnexoList(context){
+  const listEl = document.getElementById(context+'-anexos-list');
+  if(!listEl) return;
+  const items = pendingAnexos[context]||[];
+  listEl.innerHTML = items.map((a,i)=>`
+    <div class="anexo-item">
+      <i class="ti ${getFileIcon(a.name)} anexo-icon" style="color:var(--purple-light)"></i>
+      <span class="anexo-item-name"><a href="${a.url}" target="_blank" style="color:var(--text);text-decoration:none">${a.name}</a></span>
+      <span class="anexo-item-size">${formatSize(a.size)}</span>
+      <button class="anexo-delete" onclick="removeAnexo('${context}',${i})"><i class="ti ti-x"></i></button>
+    </div>`).join('');
+}
+
+async function removeAnexo(context, idx){
+  const item = pendingAnexos[context][idx];
+  await sb.storage.from(BUCKET).remove([item.path]);
+  pendingAnexos[context].splice(idx,1);
+  renderAnexoList(context);
+}
+
+function clearAnexos(context){
+  pendingAnexos[context]=[];
+  renderAnexoList(context);
+  const input = document.getElementById(context+'-file-input');
+  if(input) input.value='';
+}
+
+function getAnexosJson(context){
+  return JSON.stringify(pendingAnexos[context]||[]);
+}
+
+// ============================================================
+// CARROSSEL DINÂMICO
+// ============================================================
+let allSlides = [];
+
+async function loadSlides(){
+  const{data}=await sb.from('slides_carrossel').select('*').eq('ativo',true).order('ordem',{ascending:true}).catch(()=>({data:null}));
+  if(data&&data.length>0){
+    allSlides = data;
+    // Rebuild carousel
+    const slides = document.getElementById('carousel-slides');
+    const dots = document.getElementById('carousel-dots');
+    if(!slides||!dots) return;
+    slides.innerHTML = allSlides.map((s,i)=>`
+      <div class="carousel-slide ${i===0?'active':''}" id="cs-${i}">
+        <div style="width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.08)">
+          <i class="ti ${s.icone||'ti-star'}" style="font-size:26px;color:${s.cor||'var(--neon)'}"></i>
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:900;margin-bottom:6px;letter-spacing:-.02em">${s.titulo}</div>
+          <div style="font-size:13px;color:var(--muted);font-weight:500;line-height:1.5">${s.subtitulo||''}</div>
+        </div>
+      </div>`).join('');
+    dots.innerHTML = allSlides.map((_,i)=>`<div class="carousel-dot ${i===0?'active':''}" onclick="goCarousel(${i})"></div>`).join('');
+  }
+}
+
+async function loadSlidesAdmin(){
+  const{data}=await sb.from('slides_carrossel').select('*').order('ordem',{ascending:true}).catch(()=>({data:[]}));
+  const el=document.getElementById('slides-list');
+  if(!el) return;
+  const slides=data||[];
+  el.innerHTML=slides.length?slides.map(s=>`
+    <div class="slide-card">
+      <div style="display:flex;align-items:center;gap:12px;flex:1">
+        <div style="width:40px;height:40px;border-radius:10px;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i class="ti ${s.icone||'ti-star'}" style="font-size:18px;color:${s.cor||'var(--neon)'}"></i>
+        </div>
+        <div>
+          <div style="font-weight:800;font-size:13px">${s.titulo}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${s.subtitulo||''}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="badge ${s.ativo?'badge-green':'badge-red'}">${s.ativo?'Ativo':'Inativo'}</span>
+        <span style="font-size:11px;color:var(--muted);font-weight:600">Ordem ${s.ordem}</span>
+        <button class="add-btn" style="font-size:10px;padding:5px 10px" onclick="editSlide('${s.id}',${JSON.stringify(s).replace(/'/g,\"\\\\'\")})"><i class="ti ti-pencil"></i></button>
+        <button class="delete-btn" onclick="deleteSlide('${s.id}')"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`).join(''):'<div style="text-align:center;padding:40px;color:var(--muted)">Nenhum slide cadastrado.<br><small>Clique em "Novo Slide" para adicionar.</small></div>';
+}
+
+function openSlideModal(){
+  document.getElementById('slide-modal-title').textContent='Novo Slide';
+  document.getElementById('sl-edit-id').value='';
+  document.getElementById('sl-titulo').value='';
+  document.getElementById('sl-sub').value='';
+  document.getElementById('sl-icone').value='ti-star';
+  document.getElementById('sl-cor').value='var(--neon)';
+  document.getElementById('sl-ordem').value='1';
+  document.getElementById('sl-ativo').value='true';
+  document.getElementById('sl-delete-btn').style.display='none';
+  openModal('slideModal');
+}
+
+function editSlide(id,s){
+  document.getElementById('slide-modal-title').textContent='Editar Slide';
+  document.getElementById('sl-edit-id').value=id;
+  document.getElementById('sl-titulo').value=s.titulo||'';
+  document.getElementById('sl-sub').value=s.subtitulo||'';
+  document.getElementById('sl-icone').value=s.icone||'ti-star';
+  document.getElementById('sl-cor').value=s.cor||'var(--neon)';
+  document.getElementById('sl-ordem').value=s.ordem||1;
+  document.getElementById('sl-ativo').value=s.ativo?'true':'false';
+  document.getElementById('sl-delete-btn').style.display='block';
+  openModal('slideModal');
+}
+
+async function saveSlide(){
+  const titulo=document.getElementById('sl-titulo').value.trim();
+  if(!titulo){showToast('Título obrigatório','error');return;}
+  const editId=document.getElementById('sl-edit-id').value;
+  const data={titulo,subtitulo:document.getElementById('sl-sub').value,icone:document.getElementById('sl-icone').value,cor:document.getElementById('sl-cor').value,ordem:Number(document.getElementById('sl-ordem').value||1),ativo:document.getElementById('sl-ativo').value==='true'};
+  const{error}=editId?await sb.from('slides_carrossel').update(data).eq('id',editId):await sb.from('slides_carrossel').insert(data);
+  if(error){showToast('Erro: '+error.message,'error');return;}
+  showToast(editId?'Slide atualizado!':'Slide criado!','success');
+  closeModal('slideModal');
+  loadSlidesAdmin();loadSlides();
+}
+
+async function deleteSlide(id){
+  const did=id||document.getElementById('sl-edit-id').value;
+  if(!did||!confirm('Excluir este slide?'))return;
+  await sb.from('slides_carrossel').delete().eq('id',did);
+  showToast('Slide removido','success');
+  closeModal('slideModal');
+  loadSlidesAdmin();loadSlides();
+}
+
+// ============================================================
+// FINANCEIRO SINCRONIZADO
+// ============================================================
+// Override renderFinanceiro to include vendas
+const _origRenderFin = typeof renderFinanceiro === 'function' ? renderFinanceiro : null;
+function renderFinanceiroSync(){
+  // Soma vendas recebidas do mês como receita
+  const mesAtual=new Date().getMonth(),anoAtual=new Date().getFullYear();
+  const vendasMes=vendas.filter(v=>{
+    if(v.status!=='recebido'||!v.data)return false;
+    const d=new Date(v.data+'T00:00:00');
+    return d.getMonth()===curMonth&&d.getFullYear()===curYear;
+  });
+  const totalVendasMes=vendasMes.reduce((s,v)=>s+Number(v.valor_total||0),0);
+
+  const mRec=receitas.filter(r=>r.recorrencia==='Mensal'||matchMonthFin(r.data));
+  const mDesp=despesas.filter(d=>matchMonthFin(d.data));
+  const totalRec=mRec.reduce((s,r)=>s+Number(r.valor||0),0)+totalVendasMes;
+  const totalDesp=mDesp.reduce((s,d)=>s+Number(d.valor||0),0);
+  const liq=totalRec-totalDesp;
+
+  const el=id=>document.getElementById(id);
+  if(el('fin-receita')){el('fin-receita').textContent=fmt(totalRec);}
+  if(el('fin-despesa')){el('fin-despesa').textContent=fmt(totalDesp);}
+  if(el('fin-liquido')){el('fin-liquido').textContent=fmt(liq);el('fin-liquido').style.color=liq>=0?'var(--success)':'var(--danger)';}
+
+  const ativos=contratos.filter(c=>c.status==='ativo').length;
+  const prevMensal=contratos.filter(c=>c.status==='ativo').reduce((s,c)=>s+Number(c.fixo_inicial||0),0);
+  if(el('fin-contratos'))el('fin-contratos').textContent=ativos;
+  if(el('fin-contratos-sub'))el('fin-contratos-sub').textContent=fmt(prevMensal)+'/mês';
+
+  const mx=Math.max(totalRec,totalDesp,1);
+  const bar=(id,w)=>{const e=el(id);if(e)e.style.width=w;};
+  bar('fin-bar-rec',Math.round(totalRec/mx*100)+'%');
+  bar('fin-bar-desp',Math.round(totalDesp/mx*100)+'%');
+  bar('fin-bar-liq',Math.min(100,Math.abs(Math.round(liq/mx*100)))+'%');
+  bar('fin-bar-con',Math.min(100,ativos*20)+'%');
+
+  // Update dashboard KPI
+  const kEl=el('kpi-previsao');if(kEl){kEl.textContent=fmt(prevMensal);kEl.style.color='var(--success)';}
+
+  // Lists
+  const rEl=el('fin-dash-rec');
+  if(rEl){
+    const allRec=[...mRec,...vendasMes.map(v=>({descricao:v.cliente+' — '+v.vertical,cliente:v.cliente,valor:v.valor_total,recorrencia:'Venda'}))];
+    rEl.innerHTML=allRec.slice(0,4).map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px"><div><div style="font-weight:500">${r.descricao||r.cliente}</div><div style="font-size:11px;color:var(--muted)">${r.recorrencia||''}</div></div><div style="font-weight:600;color:var(--success)">${fmt(r.valor)}</div></div>`).join('')||'<div class="loading">Sem receitas</div>';
+  }
+  const dEl=el('fin-dash-desp');
+  if(dEl)dEl.innerHTML=mDesp.slice(0,4).map(d=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px"><div style="font-weight:500">${d.descricao}</div><div style="font-weight:600;color:var(--danger)">${fmt(d.valor)}</div></div>`).join('')||'<div class="loading">Sem despesas</div>';
+}
+
+// ============================================================
+// SWITCH MASTER TAB — update for carrossel
+// ============================================================
+
 checkSession();
 startLembretes();
 loadFinanceiro();
 loadVendas();
+setTimeout(renderFinanceiroSync,1000);
 setTimeout(checkFunilAlertas, 3000);
 </script>
 </body>
