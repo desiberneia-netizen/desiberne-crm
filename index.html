@@ -2698,6 +2698,8 @@ async function renderMaster(){
         <button class="delete-btn" onclick="deleteFinItem('empresas','${e.id}')"><i class="ti ti-trash"></i></button>
       </div>
     </div>`).join('') : '<div style="text-align:center;padding:40px;color:var(--muted);font-weight:600">Nenhuma empresa cadastrada</div>';
+  // Restaurar aba ativa
+  switchMasterTab(masterTabAtual||'empresas');
 }
 
 
