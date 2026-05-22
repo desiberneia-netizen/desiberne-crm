@@ -400,7 +400,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
   <div class="topbar">
     <div class="logo-area">
       <img class="logo-img" src="https://i.imgur.com/rrQxwkl.png" alt="Desiberne IA">
-      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v11.0</span></div>
+      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v12.0</span></div>
     </div>
     <div class="topbar-nav">
       <button class="nav-btn active" onclick="showView('home',this)"><i class="ti ti-home"></i> Início</button>
@@ -469,7 +469,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
           <div class="home-stat"><div class="home-stat-val" id="hs-vendas" style="color:var(--success)">—</div><div class="home-stat-label">Vendas Realizadas</div></div>
           <div class="home-stat"><div class="home-stat-val" id="hs-total" style="color:var(--neon)">—</div><div class="home-stat-label">Total de Leads</div></div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px">
           <div class="chart-card">
             <div class="home-section-title"><i class="ti ti-calendar" style="color:var(--purple-light)"></i> Próximos agendamentos</div>
             <div id="home-agenda-list"><div class="loading">Carregando...</div></div>
@@ -477,6 +477,34 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
           <div class="chart-card">
             <div class="home-section-title"><i class="ti ti-flame" style="color:var(--hot)"></i> Leads quentes</div>
             <div id="home-quentes-list"><div class="loading">Carregando...</div></div>
+          </div>
+        </div>
+
+        <!-- TAREFAS INTERNAS -->
+        <div class="chart-card">
+          <div class="chart-title">
+            <div style="display:flex;align-items:center;gap:8px">
+              <i class="ti ti-building" style="color:var(--neon)"></i>
+              Tarefas Internas — Desiberne IA
+            </div>
+            <button class="add-btn" style="font-size:11px;padding:6px 14px" onclick="openTarefaInternaModal()">
+              <i class="ti ti-plus"></i> Nova Tarefa
+            </button>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:16px;font-weight:500">Atividades internas da empresa — arraste entre as etapas</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+            <div class="ativ-col" ondragover="allowTiDrop(event)" ondrop="dropTi(event,'pendente')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+              <div class="ativ-col-header"><div class="ativ-col-title"><span class="s-dot" style="background:var(--cold)"></span> Pendente</div><div class="ativ-count" id="ti-cnt-pendente">0</div></div>
+              <div id="ti-pendente"><div class="loading">Carregando...</div></div>
+            </div>
+            <div class="ativ-col" ondragover="allowTiDrop(event)" ondrop="dropTi(event,'andamento')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+              <div class="ativ-col-header"><div class="ativ-col-title"><span class="s-dot" style="background:var(--warning)"></span> Em Andamento</div><div class="ativ-count" id="ti-cnt-andamento">0</div></div>
+              <div id="ti-andamento"><div class="loading">Carregando...</div></div>
+            </div>
+            <div class="ativ-col" ondragover="allowTiDrop(event)" ondrop="dropTi(event,'entregue')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+              <div class="ativ-col-header"><div class="ativ-col-title"><span class="s-dot" style="background:var(--success)"></span> Entregue</div><div class="ativ-count" id="ti-cnt-entregue">0</div></div>
+              <div id="ti-entregue"><div class="loading">Carregando...</div></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1195,6 +1223,70 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
       <button class="btn-danger" id="usr-delete-btn" style="display:none;margin-right:auto" onclick="deleteUsuario()"><i class="ti ti-trash"></i></button>
       <button class="btn-ghost" onclick="closeModal('usuarioModal')">Cancelar</button>
       <button class="btn-primary" onclick="saveUsuario()">Salvar Usuário</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- TAREFA INTERNA MODAL -->
+<div class="modal-overlay" id="tarefaInternaModal" onclick="closeModalOutside(event,'tarefaInternaModal')">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title" id="ti-modal-title">Nova Tarefa Interna</div>
+      <button class="modal-close" onclick="closeModal('tarefaInternaModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <input type="hidden" id="ti-edit-id">
+    <div class="form-group"><label class="form-label">Título *</label><input class="form-input" id="ti-titulo" placeholder="Ex: Criar proposta comercial para novo cliente"></div>
+    <div class="form-group"><label class="form-label">Descrição</label><textarea class="form-input" id="ti-desc" rows="2" placeholder="Detalhes da tarefa..." style="resize:vertical"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Categoria</label>
+        <select class="form-select" id="ti-categoria">
+          <option>Geral</option>
+          <option>Marketing</option>
+          <option>Comercial</option>
+          <option>Financeiro</option>
+          <option>Produto</option>
+          <option>Operacional</option>
+          <option>Estratégia</option>
+          <option>Tecnologia</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Prioridade</label>
+        <select class="form-select" id="ti-prioridade">
+          <option value="normal">Normal</option>
+          <option value="alta">Alta</option>
+          <option value="baixa">Baixa</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-select" id="ti-status">
+          <option value="pendente">Pendente</option>
+          <option value="andamento">Em Andamento</option>
+          <option value="entregue">Entregue</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Responsável</label>
+        <select class="form-select" id="ti-responsavel">
+          <option>Joao Victor</option>
+          <option>Tiago</option>
+          <option>Equipe</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Prazo (data)</label><input class="form-input" id="ti-prazo-data" type="date"></div>
+      <div class="form-group"><label class="form-label">Prazo (hora)</label><input class="form-input" id="ti-prazo-hora" type="time"></div>
+    </div>
+    <div class="form-group" style="display:flex;align-items:center;gap:10px">
+      <input type="checkbox" id="ti-lembrete" style="width:16px;height:16px;cursor:pointer;accent-color:var(--neon)">
+      <label for="ti-lembrete" style="font-size:12px;cursor:pointer;font-weight:600">Ativar lembrete pop-up no prazo</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-danger" id="ti-delete-btn" style="display:none;margin-right:auto" onclick="deleteTarefaInterna()"><i class="ti ti-trash"></i></button>
+      <button class="btn-ghost" onclick="closeModal('tarefaInternaModal')">Cancelar</button>
+      <button class="btn-primary" onclick="saveTarefaInterna()">Salvar Tarefa</button>
     </div>
   </div>
 </div>
@@ -2174,6 +2266,10 @@ function renderHome(){
   if(el('hs-quentes')) el('hs-quentes').textContent = q;
   if(el('hs-vendas')) el('hs-vendas').textContent = v;
   if(el('hs-total')) el('hs-total').textContent = allLeads.length;
+  // Update tarefas badge
+  const tiPend = tarefasInternas.filter(t=>t.status!=='entregue').length;
+  const badgeTi = document.getElementById('badge-tarefas');
+  if(badgeTi) badgeTi.textContent = tiPend;
   const ag = [...agendamentos].sort((a,b)=>new Date(a.data+' '+a.hora)-new Date(b.data+' '+b.hora)).slice(0,4);
   if(el('home-agenda-list')) el('home-agenda-list').innerHTML = ag.length ? ag.map(a=>`
     <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
@@ -2721,7 +2817,7 @@ function exportPDF(){
         <p>Relatório Comercial & Financeiro — ${mesStr}</p>
       </div>
       <div class="date-info">
-        <div style="font-size:14px;font-weight:800;color:#111">CRM v11.0</div>
+        <div style="font-size:14px;font-weight:800;color:#111">CRM v12.0</div>
         <div>Gerado em ${dateStr}</div>
       </div>
     </div>
@@ -2790,7 +2886,7 @@ function exportPDF(){
     </div>
 
     <div class="footer">
-      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v11.0
+      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v12.0
     </div>
     </body>
     </html>
@@ -2978,6 +3074,157 @@ async function applyPermissions(){
   if(perm==='visualizador'){
     document.querySelectorAll('.add-btn').forEach(b=>b.style.display='none');
   }
+}
+
+
+// ============================================================
+// TAREFAS INTERNAS
+// ============================================================
+let tarefasInternas = [], draggedTiId = null;
+
+async function loadTarefasInternas(){
+  const{data,error}=await sb.from('tarefas_internas').select('*').order('created_at',{ascending:true});
+  if(error){console.error('Erro tarefas internas:',error);return;}
+  tarefasInternas = data||[];
+  renderTarefasInternas();
+}
+
+function renderTarefasInternas(){
+  const cols = {pendente:[],andamento:[],entregue:[]};
+  tarefasInternas.forEach(t=>{if(cols[t.status])cols[t.status].push(t);});
+  Object.entries(cols).forEach(([status,items])=>{
+    const cnt = document.getElementById('ti-cnt-'+status);
+    if(cnt) cnt.textContent = items.length;
+    const el = document.getElementById('ti-'+status);
+    if(!el) return;
+    el.innerHTML = items.length ? items.map(tiCardHTML).join('') :
+      '<div style="text-align:center;padding:16px;color:var(--muted);font-size:11px;font-weight:500">Nenhuma tarefa</div>';
+  });
+  // Checa lembretes
+  checkTiLembretes();
+}
+
+function tiCardHTML(t){
+  const hoje = new Date();
+  const prazo = t.prazo_data ? new Date(t.prazo_data+'T'+(t.prazo_hora||'23:59')) : null;
+  let prazoClass='prazo-ok', prazoText='';
+  if(prazo){
+    const diff = Math.ceil((prazo-hoje)/(1000*60*60*24));
+    prazoText = prazo.toLocaleDateString('pt-BR')+(t.prazo_hora?' '+t.prazo_hora:'');
+    prazoClass = diff<0?'prazo-late':diff<=2?'prazo-warn':'prazo-ok';
+  }
+  const prioColor = t.prioridade==='alta'?'var(--danger)':t.prioridade==='baixa'?'var(--success)':'var(--muted)';
+  const catColors = {Marketing:'var(--hot)',Comercial:'var(--warning)',Financeiro:'var(--success)',Produto:'var(--neon)',Operacional:'var(--blue-light)',Estratégia:'var(--purple-light)',Tecnologia:'var(--cold)',Geral:'var(--muted)'};
+  return `<div class="ativ-card" draggable="true" ondragstart="dragTiStart(event,'${t.id}')" onclick="editTarefaInterna('${t.id}')">
+    <div style="position:absolute;top:8px;right:8px;width:7px;height:7px;border-radius:50%;background:${prioColor}"></div>
+    ${t.categoria&&t.categoria!=='Geral'?`<div style="font-size:9px;font-weight:800;color:${catColors[t.categoria]||'var(--muted)'};text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">${t.categoria}</div>`:''}
+    <div class="ativ-title">${t.titulo}</div>
+    ${t.descricao?`<div class="ativ-desc">${t.descricao}</div>`:''}
+    <div class="ativ-footer">
+      <span style="color:var(--muted);font-size:10px;font-weight:600">${t.responsavel||''}</span>
+      ${prazoText?`<span class="ativ-prazo ${prazoClass}"><i class="ti ti-clock" style="font-size:9px"></i> ${prazoText}</span>`:''}
+    </div>
+    ${t.lembrete?'<div style="font-size:10px;color:var(--purple-light);margin-top:5px;font-weight:600"><i class="ti ti-bell" style="font-size:10px"></i> Lembrete ativo</div>':''}
+  </div>`;
+}
+
+function dragTiStart(e,id){
+  draggedTiId=id;
+  setTimeout(()=>{const el=document.querySelector(`#ti-pendente [ondragstart*="${id}"],#ti-andamento [ondragstart*="${id}"],#ti-entregue [ondragstart*="${id}"]`);if(el)el.classList.add('dragging');},0);
+}
+function allowTiDrop(e){e.preventDefault();}
+async function dropTi(e,status){
+  e.preventDefault();
+  document.querySelectorAll('.ativ-col').forEach(c=>c.classList.remove('drag-over'));
+  if(!draggedTiId)return;
+  await sb.from('tarefas_internas').update({status}).eq('id',draggedTiId);
+  draggedTiId=null;
+  loadTarefasInternas();
+}
+
+function openTarefaInternaModal(){
+  document.getElementById('ti-modal-title').textContent='Nova Tarefa Interna';
+  document.getElementById('ti-edit-id').value='';
+  document.getElementById('ti-titulo').value='';
+  document.getElementById('ti-desc').value='';
+  document.getElementById('ti-categoria').value='Geral';
+  document.getElementById('ti-prioridade').value='normal';
+  document.getElementById('ti-status').value='pendente';
+  document.getElementById('ti-responsavel').value='Joao Victor';
+  document.getElementById('ti-prazo-data').value='';
+  document.getElementById('ti-prazo-hora').value='';
+  document.getElementById('ti-lembrete').checked=false;
+  document.getElementById('ti-delete-btn').style.display='none';
+  openModal('tarefaInternaModal');
+}
+
+function editTarefaInterna(id){
+  const t=tarefasInternas.find(x=>x.id===id);if(!t)return;
+  document.getElementById('ti-modal-title').textContent='Editar Tarefa';
+  document.getElementById('ti-edit-id').value=t.id;
+  document.getElementById('ti-titulo').value=t.titulo||'';
+  document.getElementById('ti-desc').value=t.descricao||'';
+  document.getElementById('ti-categoria').value=t.categoria||'Geral';
+  document.getElementById('ti-prioridade').value=t.prioridade||'normal';
+  document.getElementById('ti-status').value=t.status||'pendente';
+  document.getElementById('ti-responsavel').value=t.responsavel||'Joao Victor';
+  document.getElementById('ti-prazo-data').value=t.prazo_data||'';
+  document.getElementById('ti-prazo-hora').value=t.prazo_hora||'';
+  document.getElementById('ti-lembrete').checked=!!t.lembrete;
+  document.getElementById('ti-delete-btn').style.display='block';
+  openModal('tarefaInternaModal');
+}
+
+async function saveTarefaInterna(){
+  const titulo=document.getElementById('ti-titulo').value.trim();
+  if(!titulo){showToast('Título obrigatório','error');return;}
+  const editId=document.getElementById('ti-edit-id').value;
+  const data={
+    titulo,
+    descricao:document.getElementById('ti-desc').value,
+    categoria:document.getElementById('ti-categoria').value,
+    prioridade:document.getElementById('ti-prioridade').value,
+    status:document.getElementById('ti-status').value,
+    responsavel:document.getElementById('ti-responsavel').value,
+    prazo_data:document.getElementById('ti-prazo-data').value||null,
+    prazo_hora:document.getElementById('ti-prazo-hora').value||null,
+    lembrete:document.getElementById('ti-lembrete').checked
+  };
+  const{error}=editId?await sb.from('tarefas_internas').update(data).eq('id',editId):await sb.from('tarefas_internas').insert(data);
+  if(error){showToast('Erro: '+error.message,'error');return;}
+  showToast(editId?'Tarefa atualizada!':'Tarefa criada!','success');
+  closeModal('tarefaInternaModal');
+  loadTarefasInternas();
+}
+
+async function deleteTarefaInterna(){
+  const id=document.getElementById('ti-edit-id').value;
+  if(!id||!confirm('Excluir esta tarefa?'))return;
+  await sb.from('tarefas_internas').delete().eq('id',id);
+  showToast('Tarefa excluída','success');
+  closeModal('tarefaInternaModal');
+  loadTarefasInternas();
+}
+
+function checkTiLembretes(){
+  const agora=new Date();
+  tarefasInternas.filter(t=>t.lembrete&&t.status!=='entregue'&&t.prazo_data).forEach(t=>{
+    const prazo=new Date(t.prazo_data+'T'+(t.prazo_hora||'09:00'));
+    const diffMin=(prazo-agora)/60000;
+    const key='ti_notif_'+t.id;
+    if(diffMin<=15&&diffMin>-60&&!sessionStorage.getItem(key)){
+      sessionStorage.setItem(key,'1');
+      const n=document.createElement('div');
+      n.className='notif-badge';
+      n.style.borderColor='rgba(16,185,129,0.3)';
+      n.innerHTML=`
+        <button class="notif-close" onclick="this.parentElement.remove()"><i class="ti ti-x"></i></button>
+        <div class="notif-title" style="color:var(--success)"><i class="ti ti-building"></i> Tarefa Interna</div>
+        <div class="notif-body"><strong>${t.titulo}</strong><br>Prazo: ${prazo.toLocaleString('pt-BR')}</div>`;
+      document.body.appendChild(n);
+      setTimeout(()=>n.remove(),8000);
+    }
+  });
 }
 
 checkSession();
