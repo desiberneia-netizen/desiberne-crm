@@ -1340,10 +1340,27 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
       <button class="modal-close" onclick="closeModal('slideModal')"><i class="ti ti-x"></i></button>
     </div>
     <input type="hidden" id="sl-edit-id">
-    <div class="form-group"><label class="form-label">Título *</label><input class="form-input" id="sl-titulo" placeholder="Ex: Bem-vindo ao Desiberne CRM"></div>
-    <div class="form-group"><label class="form-label">Subtítulo / Descrição</label><input class="form-input" id="sl-sub" placeholder="Ex: Seu sistema de gestão completo"></div>
+    <div class="form-group"><label class="form-label">Título *</label><input class="form-input" id="sl-titulo" placeholder="Ex: Novidade: MenuIA para restaurantes"></div>
+    <div class="form-group"><label class="form-label">Subtítulo / Descrição</label><input class="form-input" id="sl-sub" placeholder="Ex: Cardápio digital com fotos geradas por IA"></div>
+    <div class="section-divider">Imagem do Slide</div>
+    <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px">
+      <div style="flex:1">
+        <label class="form-label">URL da imagem</label>
+        <input class="form-input" id="sl-imagem-url" placeholder="https://... ou cole o link do Google Drive" oninput="previewSlideImagem()">
+      </div>
+      <div style="flex-shrink:0;padding-top:18px">
+        <span style="font-size:11px;color:var(--muted);font-weight:600">ou</span>
+      </div>
+      <div style="flex-shrink:0;padding-top:14px">
+        <button type="button" onclick="document.getElementById('sl-file-input').click()" class="btn-ghost" style="font-size:11px;padding:8px 12px"><i class="ti ti-upload"></i> Upload</button>
+        <input type="file" id="sl-file-input" accept="image/*" style="display:none" onchange="uploadSlideImagem(event)">
+      </div>
+    </div>
+    <div id="sl-imagem-preview" style="display:none;margin-bottom:12px;border-radius:10px;overflow:hidden;border:1px solid var(--border);max-height:140px">
+      <img id="sl-imagem-preview-img" src="" style="width:100%;height:140px;object-fit:cover">
+    </div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Ícone (Tabler Icons)</label><input class="form-input" id="sl-icone" placeholder="Ex: ti-rocket"></div>
+      <div class="form-group"><label class="form-label">Ícone (se não tiver imagem)</label><input class="form-input" id="sl-icone" placeholder="Ex: ti-rocket"></div>
       <div class="form-group"><label class="form-label">Cor do destaque</label>
         <select class="form-select" id="sl-cor">
           <option value="var(--neon)">Roxo (padrão)</option>
@@ -3404,9 +3421,10 @@ async function loadSlides(){
     if(!slides||!dots) return;
     slides.innerHTML = allSlides.map((s,i)=>`
       <div class="carousel-slide ${i===0?'active':''}" id="cs-${i}">
-        <div style="width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.08)">
-          <i class="ti ${s.icone||'ti-star'}" style="font-size:26px;color:${s.cor||'var(--neon)'}"></i>
-        </div>
+        ${s.imagem_url
+          ? `<img src="${s.imagem_url}" style="width:80px;height:80px;border-radius:14px;object-fit:cover;flex-shrink:0;border:2px solid rgba(255,255,255,0.1)">`
+          : `<div style="width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.08)"><i class="ti ${s.icone||'ti-star'}" style="font-size:26px;color:${s.cor||'var(--neon)'}"></i></div>`
+        }
         <div>
           <div style="font-size:20px;font-weight:900;margin-bottom:6px;letter-spacing:-.02em">${s.titulo}</div>
           <div style="font-size:13px;color:var(--muted);font-weight:500;line-height:1.5">${s.subtitulo||''}</div>
@@ -3451,8 +3469,32 @@ function openSlideModal(){
   document.getElementById('sl-cor').value='var(--neon)';
   document.getElementById('sl-ordem').value='1';
   document.getElementById('sl-ativo').value='true';
+  document.getElementById('sl-imagem-url').value='';
+  document.getElementById('sl-imagem-preview').style.display='none';
   document.getElementById('sl-delete-btn').style.display='none';
   openModal('slideModal');
+}
+
+function previewSlideImagem(){
+  const url = document.getElementById('sl-imagem-url').value.trim();
+  const prev = document.getElementById('sl-imagem-preview');
+  const img = document.getElementById('sl-imagem-preview-img');
+  if(url){prev.style.display='block';img.src=url;}
+  else{prev.style.display='none';}
+}
+
+async function uploadSlideImagem(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  showToast('Enviando imagem...','success');
+  const path = `slides/${Date.now()}_${file.name}`;
+  const{data,error}=await sb.storage.from('Anexos').upload(path,file,{upsert:true});
+  if(error){showToast('Erro: '+error.message,'error');return;}
+  const url = sb.storage.from('Anexos').getPublicUrl(path).data.publicUrl;
+  document.getElementById('sl-imagem-url').value=url;
+  previewSlideImagem();
+  showToast('Imagem enviada!','success');
+  event.target.value='';
 }
 
 function editSlideById(id){
@@ -3468,6 +3510,11 @@ function editSlide(id,s){
   document.getElementById('sl-cor').value=s.cor||'var(--neon)';
   document.getElementById('sl-ordem').value=s.ordem||1;
   document.getElementById('sl-ativo').value=s.ativo?'true':'false';
+  document.getElementById('sl-imagem-url').value=s.imagem_url||'';
+  const prev=document.getElementById('sl-imagem-preview');
+  const img=document.getElementById('sl-imagem-preview-img');
+  if(s.imagem_url){prev.style.display='block';img.src=s.imagem_url;}
+  else{prev.style.display='none';}
   document.getElementById('sl-delete-btn').style.display='block';
   openModal('slideModal');
 }
@@ -3476,7 +3523,7 @@ async function saveSlide(){
   const titulo=document.getElementById('sl-titulo').value.trim();
   if(!titulo){showToast('Título obrigatório','error');return;}
   const editId=document.getElementById('sl-edit-id').value;
-  const data={titulo,subtitulo:document.getElementById('sl-sub').value,icone:document.getElementById('sl-icone').value,cor:document.getElementById('sl-cor').value,ordem:Number(document.getElementById('sl-ordem').value||1),ativo:document.getElementById('sl-ativo').value==='true'};
+  const data={titulo,subtitulo:document.getElementById('sl-sub').value,icone:document.getElementById('sl-icone').value,cor:document.getElementById('sl-cor').value,ordem:Number(document.getElementById('sl-ordem').value||1),ativo:document.getElementById('sl-ativo').value==='true',imagem_url:document.getElementById('sl-imagem-url').value||null};
   const{error}=editId?await sb.from('slides_carrossel').update(data).eq('id',editId):await sb.from('slides_carrossel').insert(data);
   if(error){showToast('Erro: '+error.message,'error');return;}
   showToast(editId?'Slide atualizado!':'Slide criado!','success');
