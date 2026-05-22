@@ -3412,7 +3412,8 @@ function getAnexosJson(context){
 let allSlides = [];
 
 async function loadSlides(){
-  const{data}=await sb.from('slides_carrossel').select('*').eq('ativo',true).order('ordem',{ascending:true}).catch(()=>({data:null}));
+  const res=await sb.from('slides_carrossel').select('*').eq('ativo',true).order('ordem',{ascending:true});
+  const data=res.error?null:res.data;
   if(data&&data.length>0){
     allSlides = data;
     // Rebuild carousel
@@ -3435,10 +3436,21 @@ async function loadSlides(){
 }
 
 async function loadSlidesAdmin(){
-  const{data}=await sb.from('slides_carrossel').select('*').order('ordem',{ascending:true}).catch(()=>({data:[]}));
   const el=document.getElementById('slides-list');
   if(!el) return;
-  const slides=data||[];
+  el.innerHTML='<div class="loading">Carregando slides...</div>';
+  let slides=[];
+  try{
+    const res=await sb.from('slides_carrossel').select('*').order('ordem',{ascending:true});
+    if(res.error){
+      el.innerHTML=`<div style="text-align:center;padding:40px;color:var(--danger)">Erro ao carregar slides: ${res.error.message}</div>`;
+      return;
+    }
+    slides=res.data||[];
+  }catch(e){
+    el.innerHTML=`<div style="text-align:center;padding:40px;color:var(--danger)">Erro inesperado: ${e.message}</div>`;
+    return;
+  }
   window._slidesCache=slides;
   el.innerHTML=slides.length?slides.map(s=>`
     <div class="slide-card">
