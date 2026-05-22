@@ -3421,6 +3421,7 @@ async function loadSlidesAdmin(){
   const el=document.getElementById('slides-list');
   if(!el) return;
   const slides=data||[];
+  window._slidesCache=slides;
   el.innerHTML=slides.length?slides.map(s=>`
     <div class="slide-card">
       <div style="display:flex;align-items:center;gap:12px;flex:1">
@@ -3435,7 +3436,7 @@ async function loadSlidesAdmin(){
       <div style="display:flex;align-items:center;gap:8px">
         <span class="badge ${s.ativo?'badge-green':'badge-red'}">${s.ativo?'Ativo':'Inativo'}</span>
         <span style="font-size:11px;color:var(--muted);font-weight:600">Ordem ${s.ordem}</span>
-        <button class="add-btn" style="font-size:10px;padding:5px 10px" onclick="editSlide('${s.id}',${JSON.stringify(s).replace(/'/g,\"\\\\'\")})"><i class="ti ti-pencil"></i></button>
+        <button class="add-btn" style="font-size:10px;padding:5px 10px" onclick="editSlideById('${s.id}')""><i class="ti ti-pencil"></i></button>
         <button class="delete-btn" onclick="deleteSlide('${s.id}')"><i class="ti ti-trash"></i></button>
       </div>
     </div>`).join(''):'<div style="text-align:center;padding:40px;color:var(--muted)">Nenhum slide cadastrado.<br><small>Clique em "Novo Slide" para adicionar.</small></div>';
@@ -3454,6 +3455,10 @@ function openSlideModal(){
   openModal('slideModal');
 }
 
+function editSlideById(id){
+  const s = (window._slidesCache||[]).find(x=>x.id===id);
+  if(s) editSlide(id,s);
+}
 function editSlide(id,s){
   document.getElementById('slide-modal-title').textContent='Editar Slide';
   document.getElementById('sl-edit-id').value=id;
