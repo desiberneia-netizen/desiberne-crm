@@ -2687,7 +2687,7 @@ async function renderMaster(){
   }
 
   // EMPRESAS
-  const{data}=await sb.from('empresas').select('*').order('created_at',{ascending:false}).catch(()=>({data:[]}));
+  const{data}=await sb.from('empresas').select('*').order('created_at',{ascending:false});
   const emps=data||[];
   if(el('empresas-list')) el('empresas-list').innerHTML = emps.length ? emps.map(e=>`
     <div class="empresa-card">
