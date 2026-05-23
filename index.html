@@ -484,17 +484,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
           <div class="home-stat"><div class="home-stat-val" id="hs-vendas" style="color:var(--success)">—</div><div class="home-stat-label">Vendas Realizadas</div></div>
           <div class="home-stat"><div class="home-stat-val" id="hs-total" style="color:var(--neon)">—</div><div class="home-stat-label">Total de Leads</div></div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px">
-          <div class="chart-card">
-            <div class="home-section-title"><i class="ti ti-calendar" style="color:var(--purple-light)"></i> Próximos agendamentos</div>
-            <div id="home-agenda-list"><div class="loading">Carregando...</div></div>
-          </div>
-          <div class="chart-card">
-            <div class="home-section-title"><i class="ti ti-flame" style="color:var(--hot)"></i> Leads quentes</div>
-            <div id="home-quentes-list"><div class="loading">Carregando...</div></div>
-          </div>
-        </div>
-
         <!-- TAREFAS INTERNAS -->
         <div class="chart-card">
           <div class="chart-title">
@@ -520,6 +509,17 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
               <div class="ativ-col-header"><div class="ativ-col-title"><span class="s-dot" style="background:var(--success)"></span> Entregue</div><div class="ativ-count" id="ti-cnt-entregue">0</div></div>
               <div id="ti-entregue"><div class="loading">Carregando...</div></div>
             </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px;margin-top:22px">
+          <div class="chart-card">
+            <div class="home-section-title"><i class="ti ti-calendar" style="color:var(--purple-light)"></i> Próximos agendamentos</div>
+            <div id="home-agenda-list"><div class="loading">Carregando...</div></div>
+          </div>
+          <div class="chart-card">
+            <div class="home-section-title"><i class="ti ti-flame" style="color:var(--hot)"></i> Leads quentes</div>
+            <div id="home-quentes-list"><div class="loading">Carregando...</div></div>
           </div>
         </div>
       </div>
