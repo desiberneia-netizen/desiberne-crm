@@ -6,6 +6,7 @@
 <title>Desiberne CRM</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 /* V7 DESIGN UPGRADE */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -26,6 +27,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 @keyframes slideRight{from{transform:translateX(-8px);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes glow-pulse{0%,100%{box-shadow:0 0 10px rgba(124,58,237,0.15)}50%{box-shadow:0 0 25px rgba(124,58,237,0.4)}}
+@keyframes spin{to{transform:rotate(360deg)}}
 @keyframes carouselIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
 
 /* LOGIN */
@@ -250,8 +252,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 .link-search:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,0.08)}
 
 /* HOME */
-.home-hero{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:24px;position:relative;overflow:hidden;min-height:160px}
-.home-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 75% 50%,rgba(124,58,237,0.06) 0%,transparent 65%)}
 .carousel-slide{display:none}.carousel-slide.active{display:flex;align-items:center;gap:24px;animation:carouselIn .4s ease}
 .carousel-dots{display:flex;gap:6px;margin-top:20px}
 .carousel-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .3s;cursor:pointer}
@@ -415,7 +415,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
   <div class="topbar">
     <div class="logo-area">
       <img class="logo-img" src="https://i.imgur.com/rrQxwkl.png" alt="Desiberne IA">
-      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v13.0</span></div>
+      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v14.0</span></div>
     </div>
     <div class="topbar-nav">
       <button class="nav-btn active" onclick="showView('home',this)"><i class="ti ti-home"></i> Início</button>
@@ -459,6 +459,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
       <div class="sidebar-section">Ferramentas</div>
       <div class="sidebar-item" onclick="showView('links',null,this)"><i class="ti ti-link"></i> Links Úteis</div>
       <div class="sidebar-item" onclick="showView('vendas',null,this)"><i class="ti ti-shopping-cart"></i> Registro de Vendas</div>
+      <div class="sidebar-item" onclick="showView('propostas',null,this)"><i class="ti ti-file-description"></i> Propostas</div>
       <div class="sidebar-section" id="master-section" style="display:none">Admin</div>
       <div class="sidebar-item" id="master-sidebar" style="display:none" onclick="showView('master',null,this)"><i class="ti ti-shield"></i> Painel Master</div>
     </div>
@@ -472,13 +473,34 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
           <div><div class="page-title">Início</div><div class="page-sub" id="home-date-sub"></div></div>
           <button class="add-btn" onclick="showView('kanban')"><i class="ti ti-plus"></i> Novo Lead</button>
         </div>
-        <div class="home-hero">
-          <div style="position:relative;z-index:1">
-            <div id="carousel-slides"></div>
-            <div class="carousel-dots" id="carousel-dots"></div>
+        <!-- KPI BANNER v14 -->
+        <div id="home-kpi-banner" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px">
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor='rgba(124,58,237,0.3)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--neon),var(--blue))"></div>
+            <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">MRR</div>
+            <div id="kpi-mrr-val" style="font-size:24px;font-weight:900;color:var(--neon-light);letter-spacing:-.02em">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Receita Recorrente Mensal</div>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor='rgba(59,130,246,0.3)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--purple))"></div>
+            <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Leads Hoje</div>
+            <div id="kpi-leads-hoje-val" style="font-size:24px;font-weight:900;color:var(--blue);letter-spacing:-.02em">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Novos leads cadastrados</div>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor='rgba(245,158,11,0.3)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--warning),var(--hot))"></div>
+            <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Tarefas Pendentes</div>
+            <div id="kpi-tarefas-val" style="font-size:24px;font-weight:900;color:var(--warning);letter-spacing:-.02em">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Aguardando execução</div>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor='rgba(16,185,129,0.3)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--success),#34d399)"></div>
+            <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Receita do Mês</div>
+            <div id="kpi-receita-mes-val" style="font-size:24px;font-weight:900;color:var(--success);letter-spacing:-.02em">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Total recebido este mês</div>
           </div>
         </div>
-        <div class="home-stats-grid">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
           <div class="home-stat"><div class="home-stat-val" id="hs-neg" style="color:var(--warning)">—</div><div class="home-stat-label">Negociando</div></div>
           <div class="home-stat"><div class="home-stat-val" id="hs-quentes" style="color:var(--hot)">—</div><div class="home-stat-label">Leads Quentes</div></div>
           <div class="home-stat"><div class="home-stat-val" id="hs-vendas" style="color:var(--success)">—</div><div class="home-stat-label">Vendas Realizadas</div></div>
@@ -524,11 +546,20 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
         </div>
       </div>
 
+      <!-- PROPOSTAS -->
+      <div id="view-propostas" class="view">
+        <div class="page-header">
+          <div><div class="page-title">Propostas Comerciais</div><div class="page-sub">Gere propostas profissionais em PDF</div></div>
+          <button class="add-btn" onclick="openPropostaModal()"><i class="ti ti-plus"></i> Nova Proposta</button>
+        </div>
+        <div id="propostas-list"><div class="loading">Nenhuma proposta gerada ainda. Clique em "Nova Proposta" para começar.</div></div>
+      </div>
+
       <!-- DASHBOARD -->
       <div id="view-dashboard" class="view">
         <div class="page-header">
           <div><div class="page-title">Dashboard</div><div class="page-sub" id="dash-sub">Visão geral do funil comercial</div></div>
-          <div style="font-size:11px;color:var(--muted);cursor:pointer" onclick="loadLeads()"><i class="ti ti-refresh"></i> Atualizar</div>
+          <button class="add-btn" style="font-size:11px;padding:6px 14px;background:transparent;border:1px solid var(--border);color:var(--muted)" onclick="refreshDashboard(this)"><i class="ti ti-refresh"></i> Atualizar</button>
         </div>
         <div class="kpi-grid">
           <div class="kpi-card"><div class="kpi-label">Total de Leads</div><div class="kpi-value" id="kpi-total">—</div><div class="kpi-bar"><div class="kpi-bar-fill" id="bar-total" style="width:0%;background:var(--neon)"></div></div></div>
@@ -548,7 +579,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
         <div class="page-header"><div><div class="page-title">Pipeline de Vendas</div><div class="page-sub">Gerencie seus leads por temperatura</div></div></div>
         <div class="kanban-toolbar">
           <input class="search-box" id="search-input" placeholder="🔍  Buscar lead..." oninput="filterLeads()">
-          <select class="filter-select" id="filter-resp" onchange="filterLeads()"><option value="">Todos vendedores</option><option>Joao Victor</option><option>Tiago</option></select>
+          <select class="filter-select" id="filter-resp" onchange="filterLeads()"><option value="">Todos vendedores</option><option>João Ramos</option><option>Tiago Barbosa</option></select>
           <select class="filter-select" id="filter-seg" onchange="filterLeads()"><option value="">Todos segmentos</option><option>Clínica / Saúde</option><option>Salão de Beleza</option><option>Food & Restaurante</option><option>B2B / Corporativo</option><option>Outro</option></select>
           <button class="add-btn" onclick="openLeadModal()"><i class="ti ti-plus"></i> Novo Lead</button>
         </div>
@@ -586,7 +617,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
         <div class="page-header"><div><div class="page-title">Equipe</div><div class="page-sub">Performance dos vendedores</div></div></div>
         <div class="kpi-grid" style="grid-template-columns:1fr 1fr">
           <div class="kpi-card">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div class="owner-av" style="background:var(--neon);width:36px;height:36px;font-size:14px">JV</div><div><div style="font-weight:600">Joao Victor</div><div style="font-size:11px;color:var(--muted)">Coordenador Comercial</div></div></div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div class="owner-av" style="background:var(--neon);width:36px;height:36px;font-size:14px">JV</div><div><div style="font-weight:600">João Ramos</div><div style="font-size:11px;color:var(--muted)">Coordenador Comercial</div></div></div>
             <div style="display:flex;flex-direction:column;gap:6px">
               <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Leads ativos</span><span id="jv-leads" style="font-weight:600">—</span></div>
               <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Vendas fechadas</span><span id="jv-vendas" style="font-weight:600;color:var(--success)">—</span></div>
@@ -594,7 +625,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
             </div>
           </div>
           <div class="kpi-card">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div class="owner-av" style="background:var(--purple);width:36px;height:36px;font-size:14px">TG</div><div><div style="font-weight:600">Tiago</div><div style="font-size:11px;color:var(--muted)">Vendedor</div></div></div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div class="owner-av" style="background:var(--purple);width:36px;height:36px;font-size:14px">TG</div><div><div style="font-weight:600">Tiago Barbosa</div><div style="font-size:11px;color:var(--muted)">Vendedor</div></div></div>
             <div style="display:flex;flex-direction:column;gap:6px">
               <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Leads ativos</span><span id="tg-leads" style="font-weight:600">—</span></div>
               <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--muted)">Vendas fechadas</span><span id="tg-vendas" style="font-weight:600;color:var(--success)">—</span></div>
@@ -780,7 +811,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
           <button id="tab-empresas" class="btn-primary" style="flex:1;border-radius:9px;font-size:11px;min-width:100px" onclick="switchMasterTab('empresas')">Empresas</button>
           <button id="tab-usuarios" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('usuarios')">Usuários</button>
           <button id="tab-estrategico" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('estrategico')">Estratégico</button>
-          <button id="tab-carrossel" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('carrossel')">Carrossel Home</button>
+          <button id="tab-integracoes" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('integracoes')">Integrações</button>
+          <button id="tab-carrossel" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('carrossel')">Carrossel</button>
         </div>
 
         <!-- EMPRESAS -->
@@ -816,6 +848,63 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
           <div class="chart-card"><div class="chart-title"><i class="ti ti-brain" style="color:var(--purple-light);margin-right:6px"></i>Análise Estratégica</div><div id="master-analise" style="font-size:13px;color:var(--muted);line-height:1.8;margin-top:4px">Carregando...</div></div>
 
         <!-- CARROSSEL -->
+        <div id="master-tab-integracoes" style="display:none">
+          <div style="max-width:700px">
+            <div style="font-size:16px;font-weight:800;margin-bottom:6px">Integração com n8n / Agentes de IA</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:24px">Use a API REST do Supabase para conectar qualquer agente de IA, n8n, Make ou sistema externo.</div>
+
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+              <div style="font-size:11px;font-weight:700;color:var(--neon-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Endpoint Base</div>
+              <div style="font-family:monospace;font-size:12px;color:#a78bfa;background:#0a0a14;padding:12px;border-radius:8px;word-break:break-all">https://nzglzeyzczgorvhyrogi.supabase.co/rest/v1/</div>
+            </div>
+
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+              <div style="font-size:11px;font-weight:700;color:var(--neon-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Headers Necessários (n8n)</div>
+              <div style="font-family:monospace;font-size:11px;color:#10b981;background:#0a0a14;padding:12px;border-radius:8px;line-height:1.8">
+                apikey: sb_publishable_PaCRAdmlvjqIYv6wLqKBsg_uowzhho7<br>
+                Authorization: Bearer sb_publishable_PaCRAdmlvjqIYv6wLqKBsg_uowzhho7<br>
+                Content-Type: application/json<br>
+                Prefer: return=minimal
+              </div>
+            </div>
+
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+              <div style="font-size:11px;font-weight:700;color:var(--warning);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">📌 Criar Lead (POST /leads)</div>
+              <div style="font-family:monospace;font-size:11px;color:#a78bfa;background:#0a0a14;padding:12px;border-radius:8px;line-height:1.8">POST /rest/v1/leads<br>
+{<br>
+&nbsp;&nbsp;"razao_social": "Nome da Empresa",<br>
+&nbsp;&nbsp;"gestor": "Nome do Contato",<br>
+&nbsp;&nbsp;"celular": "11999999999",<br>
+&nbsp;&nbsp;"temperatura": "Frio",<br>
+&nbsp;&nbsp;"status": "Retornar",<br>
+&nbsp;&nbsp;"responsavel": "João Ramos",<br>
+&nbsp;&nbsp;"segmento": "Clínica / Saúde",<br>
+&nbsp;&nbsp;"valor": 5000,<br>
+&nbsp;&nbsp;"obs": "Veio pelo agente Rafael"<br>
+}</div>
+            </div>
+
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+              <div style="font-size:11px;font-weight:700;color:var(--warning);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">📅 Criar Agendamento (POST /atividades)</div>
+              <div style="font-family:monospace;font-size:11px;color:#a78bfa;background:#0a0a14;padding:12px;border-radius:8px;line-height:1.8">POST /rest/v1/atividades<br>
+{<br>
+&nbsp;&nbsp;"titulo": "Retorno — WhatsApp",<br>
+&nbsp;&nbsp;"descricao": "Cliente pediu retorno em 2 dias",<br>
+&nbsp;&nbsp;"status": "pendente",<br>
+&nbsp;&nbsp;"prazo_data": "2026-05-30",<br>
+&nbsp;&nbsp;"prazo_hora": "10:00",<br>
+&nbsp;&nbsp;"lembrete": true,<br>
+&nbsp;&nbsp;"responsavel": "João Ramos"<br>
+}</div>
+            </div>
+
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px">
+              <div style="font-size:11px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">✓ Como configurar no n8n</div>
+              <div style="font-size:12px;color:var(--muted);line-height:1.8">1. Adicione um nó <strong style="color:var(--text)">HTTP Request</strong><br>2. Method: <strong style="color:var(--text)">POST</strong><br>3. URL: endpoint acima<br>4. Authentication: <strong style="color:var(--text)">Generic Credential Type → Header Auth</strong><br>5. Cole os headers necessários<br>6. Body: JSON com os campos acima</div>
+            </div>
+          </div>
+        </div>
+
         <div id="master-tab-carrossel" style="display:none">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
             <div><div style="font-size:15px;font-weight:800">Slides do Carrossel</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Gerencie os conteúdos que aparecem na tela Início</div></div>
@@ -845,7 +934,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
     <div class="form-row"><div class="form-group"><label class="form-label">Logradouro</label><input class="form-input" id="f-logradouro" placeholder="Rua / Av."></div><div class="form-group"><label class="form-label">Bairro</label><input class="form-input" id="f-bairro" placeholder="Bairro"></div></div>
     <div class="section-divider">Pipeline</div>
     <div class="form-row"><div class="form-group"><label class="form-label">Temperatura</label><select class="form-select" id="f-temperatura"><option>Frio</option><option>Morno</option><option>Quente</option><option>Fechado</option></select></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-status"><option>Retornar</option><option>Negociando</option><option>Ag. Contrato</option><option>Venda Realizada</option><option>Sem Interesse</option><option>Sem Resposta</option></select></div></div>
-    <div class="form-row"><div class="form-group"><label class="form-label">Valor (R$/mês)</label><input class="form-input" id="f-valor" placeholder="0,00"></div><div class="form-group"><label class="form-label">Responsável</label><select class="form-select" id="f-responsavel"><option>Joao Victor</option><option>Tiago</option></select></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Valor (R$/mês)</label><input class="form-input" id="f-valor" placeholder="0,00"></div><div class="form-group"><label class="form-label">Responsável</label><select class="form-select" id="f-responsavel"><option>João Ramos</option><option>Tiago Barbosa</option></select></div></div>
     <div class="section-divider">Observações</div>
     <textarea class="form-input" id="f-obs" rows="3" placeholder="Notas e histórico..." style="resize:vertical"></textarea>
     <div class="modal-footer">
@@ -865,6 +954,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
     <div class="form-row"><div class="form-group"><label class="form-label">Duração</label><select class="form-select" id="ag-duracao"><option>30 min</option><option>45 min</option><option>1h</option><option>1h30</option><option>2h</option></select></div><div class="form-group"><label class="form-label">Tipo</label><select class="form-select" id="ag-tipo"><option>Retorno</option><option>Reunião</option><option>Apresentação</option><option>Assinatura</option><option>Follow-up</option></select></div></div>
     <div class="form-group"><label class="form-label">Lead relacionado</label><input class="form-input" id="ag-lead" placeholder="Nome da empresa"></div>
     <div class="form-group"><label class="form-label">Observações</label><input class="form-input" id="ag-obs" placeholder="Detalhes..."></div>
+    <div class="form-group">
+      <label class="form-label">🎥 Link de Videochamada (opcional)</label>
+      <div style="display:flex;gap:8px">
+        <input class="form-input" id="ag-meet-link" placeholder="Clique em Gerar ou cole um link" style="flex:1">
+        <button type="button" class="add-btn" style="white-space:nowrap;font-size:11px;padding:8px 14px" onclick="gerarJitsiLink()"><i class="ti ti-video"></i> Gerar Jitsi</button>
+      </div>
+    </div>
     <div class="modal-footer"><button class="btn-ghost" onclick="closeModal('agendaModal')">Cancelar</button><button class="btn-primary" onclick="saveAgenda()">Salvar</button></div>
   </div>
 </div>
@@ -918,17 +1014,96 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 <!-- CONTRATO MODAL -->
 <div class="modal-overlay" id="contratoModal" onclick="closeModalOutside(event,'contratoModal')">
   <div class="modal" style="width:520px">
-    <div class="modal-header"><div class="modal-title">Novo Contrato / Parceiro</div><button class="modal-close" onclick="closeModal('contratoModal')"><i class="ti ti-x"></i></button></div>
+    <div class="modal-header"><div class="modal-title" id="contrato-modal-title">Novo Contrato / Parceiro</div><button class="modal-close" onclick="closeModal('contratoModal')"><i class="ti ti-x"></i></button></div>
+    <input type="hidden" id="con-edit-id">
     <div class="form-group"><label class="form-label">Nome do cliente / empresa *</label><input class="form-input" id="con-nome" placeholder="Ex: Clínica Dra. Mariangela Santiago"></div>
     <div class="form-row"><div class="form-group"><label class="form-label">Segmento</label><select class="form-select" id="con-seg"><option>Clínica / Saúde</option><option>Salão de Beleza</option><option>Food & Restaurante</option><option>B2B / Corporativo</option><option>Outro</option></select></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="con-status"><option value="ativo">Ativo</option><option value="pausado">Pausado</option><option value="encerrado">Encerrado</option></select></div></div>
     <div class="section-divider">Remuneração Fixa</div>
-    <div class="form-row"><div class="form-group"><label class="form-label">Fixo inicial (R$/mês) *</label><input class="form-input" id="con-fixo1" type="number" placeholder="Ex: 5000"></div><div class="form-group"><label class="form-label">Reajuste após quantos meses?</label><input class="form-input" id="con-fixo-meses" type="number" placeholder="Ex: 6 (0 = sem reajuste)"></div></div>
-    <div class="form-group"><label class="form-label">Fixo após reajuste (R$/mês)</label><input class="form-input" id="con-fixo2" type="number" placeholder="Deixe vazio se não houver reajuste"></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Fixo inicial (R$/mês) *</label><input class="form-input money-mask" id="con-fixo1" placeholder="R$ 0,00" oninput="applyMoneyMask(this)"></div><div class="form-group"><label class="form-label">Reajuste após quantos meses?</label><input class="form-input" id="con-fixo-meses" type="number" placeholder="Ex: 6 (0 = sem reajuste)"></div></div>
+    <div class="form-group"><label class="form-label">Fixo após reajuste (R$/mês)</label><input class="form-input money-mask" id="con-fixo2" placeholder="R$ 0,00 (opcional)" oninput="applyMoneyMask(this)"></div>
     <div class="section-divider">Remuneração Variável</div>
     <div class="form-row"><div class="form-group"><label class="form-label">Modelo variável</label><select class="form-select" id="con-var-modelo"><option value="nenhum">Sem variável</option><option value="pct_fat">% sobre faturamento</option><option value="pct_meta">% sobre meta atingida</option></select></div><div class="form-group"><label class="form-label">% base</label><input class="form-input" id="con-var-pct" type="number" placeholder="Ex: 5"></div></div>
-    <div class="form-row"><div class="form-group"><label class="form-label">Meta mensal (R$)</label><input class="form-input" id="con-meta" type="number" placeholder="Ex: 500000"></div><div class="form-group"><label class="form-label">% acima da meta</label><input class="form-input" id="con-var-pct2" type="number" placeholder="Ex: 8 (se diferente)"></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Meta mensal (R$)</label><input class="form-input money-mask" id="con-meta" placeholder="R$ 0,00" oninput="applyMoneyMask(this)"></div><div class="form-group"><label class="form-label">% acima da meta</label><input class="form-input" id="con-var-pct2" type="number" placeholder="Ex: 8 (se diferente)"></div></div>
     <div class="form-row"><div class="form-group"><label class="form-label">Início do contrato</label><input class="form-input" id="con-inicio" type="date"></div><div class="form-group"><label class="form-label">Observações</label><input class="form-input" id="con-obs" placeholder="Detalhes..."></div></div>
-    <div class="modal-footer"><button class="btn-ghost" onclick="closeModal('contratoModal')">Cancelar</button><button class="btn-primary" onclick="saveContrato()">Salvar Contrato</button></div>
+    <div class="modal-footer">
+      <button class="delete-btn" id="con-delete-btn" style="display:none;margin-right:auto" onclick="deleteContrato()"><i class="ti ti-trash"></i> Excluir</button>
+      <button class="btn-ghost" onclick="closeModal('contratoModal')">Cancelar</button>
+      <button class="btn-primary" onclick="saveContrato()">Salvar Contrato</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROPOSTA COMERCIAL MODAL -->
+<div class="modal-overlay" id="propostaModal" onclick="closeModalOutside(event,'propostaModal')">
+  <div class="modal" style="width:680px;max-height:90vh;overflow-y:auto">
+    <div class="modal-header"><div class="modal-title">Nova Proposta Comercial</div><button class="modal-close" onclick="closeModal('propostaModal')"><i class="ti ti-x"></i></button></div>
+    
+    <div class="section-divider">Bloco 1 — Cliente</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Empresa *</label><input class="form-input" id="prop-empresa" placeholder="Ex: Clínica Dra. Mariangela"></div>
+      <div class="form-group"><label class="form-label">Nicho *</label><select class="form-select" id="prop-nicho"><option>Clínica / Saúde</option><option>Salão de Beleza</option><option>Food & Restaurante</option><option>B2B / Corporativo</option><option>E-commerce</option><option>Educação</option><option>Imobiliária</option><option>Outro</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Responsável</label><input class="form-input" id="prop-resp" placeholder="Nome do decisor"></div>
+      <div class="form-group"><label class="form-label">Contato (WhatsApp)</label><input class="form-input" id="prop-contato" placeholder="(11) 99999-9999"></div>
+    </div>
+
+    <div class="section-divider">Bloco 2 — Diagnóstico</div>
+    <div class="form-group"><label class="form-label">Situação atual do cliente</label><textarea class="form-input" id="prop-situacao" rows="2" placeholder="Ex: Sem presença digital, dependente de indicações..." style="resize:vertical"></textarea></div>
+    <div class="form-group"><label class="form-label">Principal dor / desafio</label><textarea class="form-input" id="prop-dor" rows="2" placeholder="Ex: Pouca captação de novos clientes, ticket médio baixo..." style="resize:vertical"></textarea></div>
+    <div class="form-group"><label class="form-label">Meta em 6 meses</label><input class="form-input" id="prop-meta" placeholder="Ex: Aumentar faturamento em 30%, gerar 50 leads/mês"></div>
+
+    <div class="section-divider">Bloco 3 — Solução (Serviços)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)" onclick="this.style.borderColor=this.querySelector('input').checked?'var(--border)':' rgba(124,58,237,0.4)'">
+        <input type="checkbox" id="srv-marketing" style="accent-color:var(--neon)"> Marketing Digital
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+        <input type="checkbox" id="srv-trafego" style="accent-color:var(--neon)"> Tráfego Pago
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+        <input type="checkbox" id="srv-social" style="accent-color:var(--neon)"> Social Mídia
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+        <input type="checkbox" id="srv-gestao" style="accent-color:var(--neon)"> Gestão Comercial
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+        <input type="checkbox" id="srv-automacao" style="accent-color:var(--neon)"> Automação
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+        <input type="checkbox" id="srv-agente" style="accent-color:var(--neon)"> Agente de IA
+      </label>
+    </div>
+
+    <div class="section-divider">Bloco 4 — Planejamento</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+      <div class="form-group"><label class="form-label" style="font-size:10px">Mês 1</label><input class="form-input" id="plan-m1" placeholder="Ex: Onboarding, setup"></div>
+      <div class="form-group"><label class="form-label" style="font-size:10px">Mês 2</label><input class="form-input" id="plan-m2" placeholder="Ex: Lançamento campanhas"></div>
+      <div class="form-group"><label class="form-label" style="font-size:10px">Mês 3</label><input class="form-input" id="plan-m3" placeholder="Ex: Otimização"></div>
+      <div class="form-group"><label class="form-label" style="font-size:10px">Mês 4</label><input class="form-input" id="plan-m4" placeholder="Ex: Escala"></div>
+      <div class="form-group"><label class="form-label" style="font-size:10px">Mês 5</label><input class="form-input" id="plan-m5" placeholder="Ex: Expansão"></div>
+      <div class="form-group"><label class="form-label" style="font-size:10px">Mês 6</label><input class="form-input" id="plan-m6" placeholder="Ex: Resultados + revisão"></div>
+    </div>
+    <div class="form-group"><label class="form-label">KPIs esperados</label><input class="form-input" id="plan-kpis" placeholder="Ex: 50 leads/mês, 20% conversão, R$ 50k faturamento"></div>
+
+    <div class="section-divider">Bloco 5 — Investimento</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Valor mensal (R$)</label><input class="form-input money-mask" id="prop-valor-mensal" placeholder="R$ 0,00" oninput="applyMoneyMask(this);calcPropostTotal()"></div>
+      <div class="form-group"><label class="form-label">Vigência (meses)</label><input class="form-input" id="prop-vigencia" type="number" placeholder="Ex: 6" oninput="calcPropostTotal()"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Comissão (%)</label><input class="form-input" id="prop-comissao" type="number" placeholder="Ex: 5"></div>
+      <div class="form-group"><label class="form-label">Validade da proposta</label><input class="form-input" id="prop-validade" type="number" placeholder="Ex: 7 (dias)"></div>
+    </div>
+    <div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:10px;padding:14px;margin-bottom:16px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">VALOR TOTAL DO CONTRATO</div>
+      <div id="prop-total-display" style="font-size:22px;font-weight:900;color:var(--neon-light)">R$ 0,00</div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('propostaModal')">Cancelar</button>
+      <button class="btn-primary" onclick="gerarPropostaPDF()"><i class="ti ti-file-download"></i> Gerar PDF</button>
+    </div>
   </div>
 </div>
 
@@ -979,8 +1154,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
     </div>
     <div class="form-group"><label class="form-label">Responsável</label>
       <select class="form-select" id="ativ-resp">
-        <option>Joao Victor</option>
-        <option>Tiago</option>
+        <option>João Ramos</option>
+        <option>Tiago Barbosa</option>
       </select>
     </div>
     <div class="form-group" style="display:flex;align-items:center;gap:10px">
@@ -1218,7 +1393,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
     </div>
     <input type="hidden" id="usr-edit-id">
     <div class="section-divider">Dados do Usuário</div>
-    <div class="form-group"><label class="form-label">Nome completo *</label><input class="form-input" id="usr-nome" placeholder="Ex: Joao Victor Ramos"></div>
+    <div class="form-group"><label class="form-label">Nome completo *</label><input class="form-input" id="usr-nome" placeholder="Ex: João Ramos"></div>
     <div class="form-group"><label class="form-label">E-mail *</label><input class="form-input" id="usr-email" type="email" placeholder="usuario@desiberneia.com.br"></div>
     <div class="form-group"><label class="form-label">Cargo / Função</label><input class="form-input" id="usr-cargo" placeholder="Ex: Coordenador Comercial, Vendedor..."></div>
     <div class="section-divider">Permissões</div>
@@ -1301,8 +1476,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
       </div>
       <div class="form-group"><label class="form-label">Responsável</label>
         <select class="form-select" id="ti-responsavel">
-          <option>Joao Victor</option>
-          <option>Tiago</option>
+          <option>João Ramos</option>
+          <option>Tiago Barbosa</option>
           <option>Equipe</option>
         </select>
       </div>
@@ -1503,6 +1678,31 @@ function renderAll() {
   renderEquipe(allLeads);
   renderTarefas();
   if (isMaster) renderEmpresas();
+  updateHomeKPIs();
+}
+
+function updateHomeKPIs() {
+  // MRR — soma receitas recorrentes mensais
+  const mrr = receitas.filter(r=>r.recorrencia==='Mensal').reduce((s,r)=>s+(r.valor||0),0);
+  const el_mrr = document.getElementById('kpi-mrr-val');
+  if(el_mrr) el_mrr.textContent = mrr>0 ? 'R$ '+mrr.toLocaleString('pt-BR',{minimumFractionDigits:0}) : 'R$ 0';
+
+  // Leads hoje
+  const hoje = new Date().toISOString().split('T')[0];
+  const leadsHoje = allLeads.filter(l=>l.created_at&&l.created_at.startsWith(hoje)).length;
+  const el_lh = document.getElementById('kpi-leads-hoje-val');
+  if(el_lh) el_lh.textContent = leadsHoje;
+
+  // Tarefas pendentes
+  const tiPendentes = (tarefasInternas||[]).filter(t=>t.status==='pendente').length;
+  const el_tf = document.getElementById('kpi-tarefas-val');
+  if(el_tf) el_tf.textContent = tiPendentes;
+
+  // Receita do mês (receitas com status recebido no mês atual)
+  const mesAtual = new Date().toISOString().slice(0,7);
+  const recMes = receitas.filter(r=>r.data&&r.data.startsWith(mesAtual)&&r.recorrencia!=='Mensal').reduce((s,r)=>s+(r.valor||0),0) + mrr;
+  const el_rm = document.getElementById('kpi-receita-mes-val');
+  if(el_rm) el_rm.textContent = recMes>0 ? 'R$ '+recMes.toLocaleString('pt-BR',{minimumFractionDigits:0}) : 'R$ 0';
 }
 
 function renderKanban(leads) {
@@ -1519,8 +1719,8 @@ function renderKanban(leads) {
 
 function cardHTML(l) {
   const dotColor = {Frio:'var(--cold)',Morno:'var(--warning)',Quente:'var(--hot)',Fechado:'var(--success)'}[l.temperatura]||'var(--muted)';
-  const ownerInitial = l.responsavel==='Tiago'?'TG':'JV';
-  const ownerColor = l.responsavel==='Tiago'?'var(--purple)':'var(--neon)';
+  const ownerInitial = l.responsavel==='Tiago Barbosa'?'TG':'JV';
+  const ownerColor = l.responsavel==='Tiago Barbosa'?'var(--purple)':'var(--neon)';
   return `<div class="lead-card" draggable="true" ondragstart="dragStart(event,'${l.id}')" onclick="editLead('${l.id}')">
     <div class="lead-status-dot" style="background:${dotColor}"></div>
     <div class="lead-company">${l.razao_social||'—'}</div>
@@ -1541,8 +1741,43 @@ async function dropCard(e, temperatura) {
   if (!draggedId) return;
   const { error } = await sb.from('leads').update({ temperatura }).eq('id', draggedId);
   if (error) { showToast('Erro ao mover lead', 'error'); return; }
+  // B1 — Auto-cria venda pendente quando mover para Fechado
+  if (temperatura === 'Fechado') {
+    const lead = leads.find(l => l.id === draggedId);
+    if (lead) {
+      // Verifica se já existe venda para esse lead
+      const { data: existeVenda } = await sb.from('vendas').select('id').eq('cliente', lead.razao_social).eq('status', 'pendente').limit(1);
+      if (!existeVenda || existeVenda.length === 0) {
+        const { error: ve } = await sb.from('vendas').insert({
+          vertical: lead.vertical || 'Desiberne IA',
+          data: new Date().toISOString().split('T')[0],
+          cliente: lead.razao_social || lead.gestor || 'Lead',
+          descricao: 'Venda gerada automaticamente — Pipeline Fechado',
+          quantidade: 1,
+          valor_unitario: lead.valor || 0,
+          valor_total: lead.valor || 0,
+          pagamento: 'A definir',
+          status: 'pendente',
+          obs: 'Criado automaticamente ao fechar lead no pipeline'
+        });
+        if (!ve) {
+          await sb.from('financeiro_receitas').insert({
+            descricao: (lead.razao_social || 'Lead') + ' — Venda Fechada (pendente)',
+            cliente: lead.razao_social || lead.gestor || 'Lead',
+            categoria: 'Venda',
+            recorrencia: 'Avulso',
+            valor: lead.valor || 0,
+            data: new Date().toISOString().split('T')[0],
+            status: 'pendente'
+          });
+          showToast('🎉 Venda criada automaticamente em Registro de Vendas!', 'success');
+        }
+      }
+    }
+  }
   draggedId = null;
   loadLeads();
+  loadVendas();
 }
 
 function renderClientes(leads) {
@@ -1557,6 +1792,13 @@ function renderClientes(leads) {
       <div style="color:var(--purple-light);font-weight:600">${l.valor?'R$'+l.valor+'/mês':'—'}</div>
       <div><button onclick="event.stopPropagation();deleteLeadById('${l.id}')" style="background:none;border:none;color:var(--muted);cursor:pointer"><i class="ti ti-trash"></i></button></div>
     </div>`).join('');
+}
+
+async function refreshDashboard(btn) {
+  if (btn) { btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Atualizando...'; btn.disabled = true; }
+  await loadAll();
+  if (btn) { btn.innerHTML = '<i class="ti ti-refresh"></i> Atualizar'; btn.disabled = false; }
+  showToast('Dashboard atualizado!', 'success');
 }
 
 function renderDashboard(leads) {
@@ -1595,7 +1837,7 @@ function renderDashboard(leads) {
 }
 
 function renderEquipe(leads) {
-  const jv=leads.filter(l=>l.responsavel==='Joao Victor'), tg=leads.filter(l=>l.responsavel==='Tiago');
+  const jv=leads.filter(l=>l.responsavel==='João Ramos'), tg=leads.filter(l=>l.responsavel==='Tiago Barbosa');
   document.getElementById('jv-leads').textContent=jv.length;
   document.getElementById('jv-vendas').textContent=jv.filter(l=>l.status==='Venda Realizada').length;
   document.getElementById('jv-quentes').textContent=jv.filter(l=>l.temperatura==='Quente').length;
@@ -1613,7 +1855,7 @@ function renderTarefas() {
       ${pendentes.map(l=>`<div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr" onclick="editLead('${l.id}')">
         <div style="font-weight:600">${l.razao_social||'—'}</div>
         <div style="color:var(--warning)">${l.status}</div>
-        <div><div class="owner-av" style="background:${l.responsavel==='Tiago'?'var(--purple)':'var(--neon)'};display:inline-flex">${l.responsavel==='Tiago'?'TG':'JV'}</div></div>
+        <div><div class="owner-av" style="background:${l.responsavel==='Tiago Barbosa'?'var(--purple)':'var(--neon)'};display:inline-flex">${l.responsavel==='Tiago Barbosa'?'TG':'JV'}</div></div>
         <div style="color:var(--purple-light)">${l.valor?'R$'+l.valor+'/mês':'—'}</div>
       </div>`).join('')}
     </div>` : '<div style="text-align:center;padding:60px;color:var(--muted)">Nenhuma tarefa pendente</div>';
@@ -1678,7 +1920,7 @@ function openLeadModal() {
   document.getElementById('f-segmento').value='Clínica / Saúde';
   document.getElementById('f-temperatura').value='Frio';
   document.getElementById('f-status').value='Retornar';
-  document.getElementById('f-responsavel').value='Joao Victor';
+  document.getElementById('f-responsavel').value='João Ramos';
   document.getElementById('leadModal').classList.add('open');
 }
 
@@ -1696,7 +1938,7 @@ function editLead(id) {
   document.getElementById('f-segmento').value=l.segmento||'Clínica / Saúde';
   document.getElementById('f-temperatura').value=l.temperatura||'Frio';
   document.getElementById('f-status').value=l.status||'Retornar';
-  document.getElementById('f-responsavel').value=l.responsavel||'Joao Victor';
+  document.getElementById('f-responsavel').value=l.responsavel||'João Ramos';
   document.getElementById('leadModal').classList.add('open');
 }
 
@@ -1724,6 +1966,15 @@ async function deleteLeadById(id) {
   const {error}=await sb.from('leads').delete().eq('id',id);
   if(error){showToast('Erro ao excluir','error');return;}
   showToast('Lead excluído','success');loadLeads();
+}
+
+// C2 — JITSI MEET
+function gerarJitsiLink() {
+  const id = Math.random().toString(36).substr(2,8);
+  const link = 'https://meet.jit.si/desiberne-' + id;
+  document.getElementById('agenda-meet-link').value = link;
+  navigator.clipboard.writeText(link).catch(()=>{});
+  showToast('Link gerado e copiado: ' + link, 'success');
 }
 
 function openAgendaModal() {
@@ -1890,12 +2141,67 @@ async function saveDespesa(){
 setTimeout(checkFunilAlertas, 3000);
 }
 
+// MÁSCARA MONETÁRIA
+function applyMoneyMask(input) {
+  let v = input.value.replace(/\D/g,'');
+  if (!v) { input.value = ''; return; }
+  v = (parseInt(v) / 100).toFixed(2);
+  v = v.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  input.value = 'R$ ' + v;
+}
+
+function moneyToNum(str) {
+  if (!str) return 0;
+  return parseFloat(str.replace('R$','').replace(/\./g,'').replace(',','.').trim()) || 0;
+}
+
+function numToMoney(n) {
+  if (!n && n !== 0) return '';
+  return 'R$ ' + Number(n).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+// A5 — Edição de contrato ativo
+function editContrato(id) {
+  const c = contratos.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('contrato-modal-title').textContent = 'Editar Contrato';
+  document.getElementById('con-edit-id').value = c.id;
+  document.getElementById('con-delete-btn').style.display = 'block';
+  document.getElementById('con-nome').value = c.nome || '';
+  document.getElementById('con-seg').value = c.segmento || 'Clínica / Saúde';
+  document.getElementById('con-status').value = c.status || 'ativo';
+  document.getElementById('con-fixo1').value = c.fixo_inicial ? numToMoney(c.fixo_inicial) : '';
+  document.getElementById('con-fixo-meses').value = c.fixo_meses_inicial || '';
+  document.getElementById('con-fixo2').value = c.fixo_reajuste ? numToMoney(c.fixo_reajuste) : '';
+  document.getElementById('con-var-modelo').value = c.modelo_variavel || 'nenhum';
+  document.getElementById('con-var-pct').value = c.pct_variavel || '';
+  document.getElementById('con-meta').value = c.meta_mensal ? numToMoney(c.meta_mensal) : '';
+  document.getElementById('con-var-pct2').value = c.pct_variavel2 || '';
+  document.getElementById('con-inicio').value = c.inicio || '';
+  document.getElementById('con-obs').value = c.obs || '';
+  openModal('contratoModal');
+}
+
+async function deleteContrato() {
+  const id = document.getElementById('con-edit-id').value;
+  if (!id || !confirm('Excluir este contrato?')) return;
+  await sb.from('contratos_parceiros').delete().eq('id', id);
+  showToast('Contrato excluído', 'success');
+  closeModal('contratoModal');
+  loadContratos();
+}
+
 async function saveContrato(){
   const nome=document.getElementById('con-nome').value.trim();
   if(!nome){showToast('Nome obrigatório','error');return;}
-  const{error}=await sb.from('contratos_parceiros').insert({nome,segmento:document.getElementById('con-seg').value,status:document.getElementById('con-status').value,fixo_inicial:Number(document.getElementById('con-fixo1').value||0),fixo_meses_inicial:Number(document.getElementById('con-fixo-meses').value||6),fixo_reajuste:Number(document.getElementById('con-fixo2').value||0)||null,modelo_variavel:document.getElementById('con-var-modelo').value,pct_variavel:Number(document.getElementById('con-var-pct').value||0),meta_mensal:Number(document.getElementById('con-meta').value||0)||null,pct_variavel2:Number(document.getElementById('con-var-pct2').value||0)||null,inicio:document.getElementById('con-inicio').value||null,obs:document.getElementById('con-obs').value});
-  if(error){showToast('Erro: '+error.message,'error');return;}showToast('Contrato salvo!','success');closeModal('contratoModal');loadFinanceiro();
-setTimeout(checkFunilAlertas, 3000);
+  const editId=document.getElementById('con-edit-id').value;
+  const fixo1=moneyToNum(document.getElementById('con-fixo1').value);
+  const fixo2=moneyToNum(document.getElementById('con-fixo2').value);
+  const meta=moneyToNum(document.getElementById('con-meta').value);
+  const data={nome,segmento:document.getElementById('con-seg').value,status:document.getElementById('con-status').value,fixo_inicial:fixo1,fixo_meses_inicial:Number(document.getElementById('con-fixo-meses').value||6),fixo_reajuste:fixo2,modelo_variavel:document.getElementById('con-var-modelo').value,pct_variavel:Number(document.getElementById('con-var-pct').value||0),pct_variavel2:Number(document.getElementById('con-var-pct2').value||0),meta_mensal:meta,inicio:document.getElementById('con-inicio').value||new Date().toISOString().split('T')[0],obs:document.getElementById('con-obs').value};
+  const{error}=editId?await sb.from('contratos_parceiros').update(data).eq('id',editId):await sb.from('contratos_parceiros').insert(data);
+  if(error){showToast('Erro: '+error.message,'error');return;}
+  showToast(editId?'Contrato atualizado!':'Contrato salvo!','success');closeModal('contratoModal');loadContratos();
 }
 
 async function saveFaturamento(){
@@ -2005,7 +2311,7 @@ function openAtivModal() {
   document.getElementById('ativ-prioridade').value = 'normal';
   document.getElementById('ativ-prazo-data').value = '';
   document.getElementById('ativ-prazo-hora').value = '';
-  document.getElementById('ativ-resp').value = 'Joao Victor';
+  document.getElementById('ativ-resp').value = 'João Ramos';
   document.getElementById('ativ-lembrete').checked = false;
   document.getElementById('ativ-delete-btn').style.display = 'none';
   openModal('ativModal');
@@ -2021,7 +2327,7 @@ function editAtiv(id) {
   document.getElementById('ativ-prioridade').value = a.prioridade || 'normal';
   document.getElementById('ativ-prazo-data').value = a.prazo_data || '';
   document.getElementById('ativ-prazo-hora').value = a.prazo_hora || '';
-  document.getElementById('ativ-resp').value = a.responsavel || 'Joao Victor';
+  document.getElementById('ativ-resp').value = a.responsavel || 'João Ramos';
   document.getElementById('ativ-lembrete').checked = !!a.lembrete;
   document.getElementById('ativ-delete-btn').style.display = 'block';
   openModal('ativModal');
@@ -2058,29 +2364,53 @@ async function deleteAtiv() {
   loadAtividades();
 }
 
-// LEMBRETES / POP-UP
+// LEMBRETES / POP-UP — v14 (Notification API + fuso BR)
 let lembreteInterval = null;
+
+function requestNotifPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
+function parsePrazoBR(data, hora) {
+  // Garante parse correto no fuso local sem conversão UTC
+  const h = hora || '09:00';
+  const [y, m, d] = data.split('-').map(Number);
+  const [hh, mm] = h.split(':').map(Number);
+  return new Date(y, m - 1, d, hh, mm, 0);
+}
+
 function startLembretes() {
+  requestNotifPermission();
   if (lembreteInterval) clearInterval(lembreteInterval);
-  lembreteInterval = setInterval(checkAllLembretes, 60000); // verifica a cada 1 min
+  lembreteInterval = setInterval(checkAllLembretes, 60000);
   checkAllLembretes();
 }
 
 async function checkAllLembretes() {
-  // Busca todas atividades com lembrete ativo e prazo nos próximos 15 min ou vencido
   const { data } = await sb.from('atividades').select('*').eq('lembrete', true).neq('status', 'entregue');
   if (!data) return;
   const agora = new Date();
   data.forEach(a => {
     if (!a.prazo_data) return;
-    const prazo = new Date(a.prazo_data + 'T' + (a.prazo_hora || '09:00'));
+    const prazo = parsePrazoBR(a.prazo_data, a.prazo_hora);
     const diffMin = (prazo - agora) / 60000;
     const key = 'notif_' + a.id;
-    if ((diffMin <= 15 && diffMin > -60) && !sessionStorage.getItem(key)) {
+    if ((diffMin <= 15 && diffMin > -120) && !sessionStorage.getItem(key)) {
       sessionStorage.setItem(key, '1');
       showNotificacao(a);
+      // Notification API nativa do browser
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('⏰ Lembrete — ' + (a.titulo || 'Tarefa'), {
+          body: (a.descricao || '') + '\nPrazo: ' + prazo.toLocaleString('pt-BR'),
+          icon: 'https://i.imgur.com/rrQxwkl.png'
+        });
+      }
     }
   });
+  // Verifica tarefas internas
+  checkTarefasInternasLembretes();
   // Verifica agendamentos
   checkAgendaLembretes();
 }
@@ -2089,12 +2419,32 @@ function checkLembretes() {
   if (!atividades.length) return;
   const agora = new Date();
   atividades.filter(a => a.lembrete && a.status !== 'entregue' && a.prazo_data).forEach(a => {
-    const prazo = new Date(a.prazo_data + 'T' + (a.prazo_hora || '09:00'));
+    const prazo = parsePrazoBR(a.prazo_data, a.prazo_hora);
     const diffMin = (prazo - agora) / 60000;
     const key = 'notif_' + a.id;
-    if (diffMin <= 15 && diffMin > -60 && !sessionStorage.getItem(key)) {
+    if (diffMin <= 15 && diffMin > -120 && !sessionStorage.getItem(key)) {
       sessionStorage.setItem(key, '1');
       showNotificacao(a);
+    }
+  });
+}
+
+function checkTarefasInternasLembretes() {
+  if (!tarefasInternas || !tarefasInternas.length) return;
+  const agora = new Date();
+  tarefasInternas.filter(t => t.lembrete && t.status !== 'entregue' && t.prazo_data).forEach(t => {
+    const prazo = parsePrazoBR(t.prazo_data, t.prazo_hora);
+    const diffMin = (prazo - agora) / 60000;
+    const key = 'ti_notif_' + t.id;
+    if (diffMin <= 15 && diffMin > -120 && !sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, '1');
+      showPopup('⚡ Tarefa Interna: ' + (t.titulo || ''), 'Prazo: ' + prazo.toLocaleString('pt-BR'));
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('⚡ Tarefa Interna — ' + (t.titulo || ''), {
+          body: 'Prazo: ' + prazo.toLocaleString('pt-BR'),
+          icon: 'https://i.imgur.com/rrQxwkl.png'
+        });
+      }
     }
   });
 }
@@ -2293,17 +2643,36 @@ async function saveVenda() {
   const editId = document.getElementById('venda-edit-id').value;
   const{error}=editId?await sb.from('vendas').update(data).eq('id',editId):await sb.from('vendas').insert(data);
   if(error){showToast('Erro: '+error.message,'error');return;}
-  // Auto-lança receita se recebido e é novo registro
-  if(!editId && status==='recebido'){
-    await sb.from('financeiro_receitas').insert({
-      descricao:`${cliente} — ${vertical} (venda)`,
-      cliente, categoria:'Venda One-shot',
-      recorrencia:'Avulso', valor:qtd*valorUnit,
-      data: document.getElementById('v-data').value||new Date().toISOString().split('T')[0]
-    });
-    showToast('Venda registrada e receita lançada automaticamente!','success');
+  if(status==='recebido'){
+    if(!editId){
+      // Nova venda recebida — cria receita
+      await sb.from('financeiro_receitas').insert({
+        descricao:`${cliente} — ${vertical} (venda)`,
+        cliente, categoria:'Venda',
+        recorrencia:'Avulso', valor:qtd*valorUnit,
+        data: document.getElementById('v-data').value||new Date().toISOString().split('T')[0],
+        status:'recebido'
+      });
+      showToast('Venda registrada e receita lançada!','success');
+    } else {
+      // B2 — Venda editada para Recebido: atualiza receita existente ou cria
+      const{data:recExist}=await sb.from('financeiro_receitas').select('id').eq('cliente',cliente).eq('categoria','Venda').eq('status','pendente').limit(1);
+      if(recExist && recExist.length>0){
+        await sb.from('financeiro_receitas').update({status:'recebido',valor:qtd*valorUnit}).eq('id',recExist[0].id);
+        showToast('Venda recebida! Receita atualizada automaticamente.','success');
+      } else {
+        await sb.from('financeiro_receitas').insert({
+          descricao:`${cliente} — ${vertical} (venda)`,
+          cliente, categoria:'Venda',
+          recorrencia:'Avulso', valor:qtd*valorUnit,
+          data: document.getElementById('v-data').value||new Date().toISOString().split('T')[0],
+          status:'recebido'
+        });
+        showToast('Venda recebida e receita lançada!','success');
+      }
+    }
   } else {
-    showToast(editId?'Venda atualizada!':'Venda registrada!','success');
+    showToast(editId?'Venda atualizada!':'Venda registrada como pendente!','success');
   }
   closeModal('vendaModal');loadAll();
 }
@@ -2703,6 +3072,154 @@ async function renderMaster(){
 }
 
 
+
+// ============================================================
+// C3 — PROPOSTA COMERCIAL
+// ============================================================
+let propostasGeradas = JSON.parse(localStorage.getItem('desiberne_propostas') || '[]');
+
+function openPropostaModal() {
+  // Reset form
+  ['prop-empresa','prop-resp','prop-contato','prop-meta','prop-situacao','prop-dor','plan-m1','plan-m2','plan-m3','plan-m4','plan-m5','plan-m6','plan-kpis','prop-valor-mensal','prop-comissao','prop-validade'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('prop-vigencia').value=6;
+  ['srv-marketing','srv-trafego','srv-social','srv-gestao','srv-automacao','srv-agente'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
+  document.getElementById('prop-total-display').textContent='R$ 0,00';
+  openModal('propostaModal');
+}
+
+function calcPropostTotal() {
+  const mensal = moneyToNum(document.getElementById('prop-valor-mensal').value);
+  const meses = Number(document.getElementById('prop-vigencia').value) || 0;
+  const total = mensal * meses;
+  document.getElementById('prop-total-display').textContent = meses > 0 ? numToMoney(total) + ' (' + meses + ' meses × ' + numToMoney(mensal) + '/mês)' : numToMoney(mensal) + '/mês';
+}
+
+function renderPropostas() {
+  const el = document.getElementById('propostas-list');
+  if (!el) return;
+  propostasGeradas = JSON.parse(localStorage.getItem('desiberne_propostas') || '[]');
+  if (!propostasGeradas.length) { el.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)"><i class="ti ti-file-description" style="font-size:40px;display:block;margin-bottom:12px"></i>Nenhuma proposta gerada ainda.</div>'; return; }
+  el.innerHTML = propostasGeradas.slice().reverse().map(p => `
+    <div class="chart-card" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-weight:700;font-size:14px">${p.empresa}</div>
+        <div style="font-size:11px;color:var(--muted)">${p.nicho} · ${p.data} · ${p.servicos}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <span style="font-size:13px;font-weight:700;color:var(--neon-light)">${p.valorMensal}/mês</span>
+        <button class="add-btn" style="font-size:11px;padding:6px 12px" onclick="regenarProposta(${JSON.stringify(p).replace(/"/g,'&quot;')})"><i class="ti ti-file-download"></i> PDF</button>
+      </div>
+    </div>`).join('');
+}
+
+async function gerarPropostaPDF() {
+  const empresa = document.getElementById('prop-empresa').value.trim();
+  if (!empresa) { showToast('Informe o nome da empresa', 'error'); return; }
+  const nicho = document.getElementById('prop-nicho').value;
+  const resp = document.getElementById('prop-resp').value;
+  const contato = document.getElementById('prop-contato').value;
+  const situacao = document.getElementById('prop-situacao').value;
+  const dor = document.getElementById('prop-dor').value;
+  const meta = document.getElementById('prop-meta').value;
+  const servicos = ['marketing','trafego','social','gestao','automacao','agente'].filter(s=>document.getElementById('srv-'+s)?.checked).map(s=>({'marketing':'Marketing Digital','trafego':'Tráfego Pago','social':'Social Mídia','gestao':'Gestão Comercial','automacao':'Automação','agente':'Agente de IA'}[s]));
+  const plano = [1,2,3,4,5,6].map(i=>({mes:'Mês '+i, acao:document.getElementById('plan-m'+i)?.value||'—'}));
+  const kpis = document.getElementById('plan-kpis').value;
+  const valorMensal = document.getElementById('prop-valor-mensal').value || 'A definir';
+  const vigencia = document.getElementById('prop-vigencia').value || '—';
+  const comissao = document.getElementById('prop-comissao').value;
+  const validade = document.getElementById('prop-validade').value || '7';
+  const valorTotal = moneyToNum(valorMensal) > 0 && Number(vigencia) > 0 ? numToMoney(moneyToNum(valorMensal) * Number(vigencia)) : '—';
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  const validadeDate = new Date(Date.now() + Number(validade)*24*60*60*1000).toLocaleDateString('pt-BR');
+
+  const html = `
+  <div style="font-family:Arial,sans-serif;max-width:760px;margin:0 auto;background:#fff;color:#111">
+    <!-- CAPA -->
+    <div style="background:linear-gradient(135deg,#070710 0%,#1a0a2e 100%);padding:60px 50px;text-align:center;min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <img src="https://i.imgur.com/rrQxwkl.png" style="width:70px;height:70px;border-radius:16px;margin-bottom:20px">
+      <div style="font-size:11px;color:#a78bfa;letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px">Proposta Comercial</div>
+      <div style="font-size:32px;font-weight:900;color:#fff;margin-bottom:8px">${empresa}</div>
+      <div style="font-size:15px;color:#a78bfa">${nicho}</div>
+      <div style="margin-top:24px;font-size:12px;color:#6b7280">Preparada por Desiberne IA · ${hoje}</div>
+    </div>
+
+    <div style="padding:40px 50px">
+    <!-- BLOCO 1 -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:10px;font-weight:700;color:#7c3aed;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #7c3aed">01 — INFORMAÇÕES DO CLIENTE</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <tr><td style="padding:6px 0;color:#6b7280;width:140px">Empresa</td><td style="padding:6px 0;font-weight:600">${empresa}</td><td style="padding:6px 0;color:#6b7280;width:140px">Nicho</td><td style="padding:6px 0;font-weight:600">${nicho}</td></tr>
+        <tr><td style="padding:6px 0;color:#6b7280">Responsável</td><td style="padding:6px 0;font-weight:600">${resp||'—'}</td><td style="padding:6px 0;color:#6b7280">Contato</td><td style="padding:6px 0;font-weight:600">${contato||'—'}</td></tr>
+      </table>
+    </div>
+
+    <!-- BLOCO 2 -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:10px;font-weight:700;color:#7c3aed;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #7c3aed">02 — DIAGNÓSTICO</div>
+      ${situacao?`<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:4px">SITUAÇÃO ATUAL</div><div style="font-size:13px;line-height:1.6;background:#f9f9f9;padding:12px;border-radius:8px">${situacao}</div></div>`:''}
+      ${dor?`<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:4px">PRINCIPAL DESAFIO</div><div style="font-size:13px;line-height:1.6;background:#f9f9f9;padding:12px;border-radius:8px">${dor}</div></div>`:''}
+      ${meta?`<div><div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:4px">META EM 6 MESES</div><div style="font-size:13px;font-weight:600;color:#10b981;background:#f0fdf4;padding:12px;border-radius:8px">${meta}</div></div>`:''}
+    </div>
+
+    <!-- BLOCO 3 -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:10px;font-weight:700;color:#7c3aed;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #7c3aed">03 — SOLUÇÃO PROPOSTA</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${servicos.map(s=>`<span style="background:#ede9fe;color:#5b21b6;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:700">✓ ${s}</span>`).join('')}
+      </div>
+    </div>
+
+    <!-- BLOCO 4 -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:10px;font-weight:700;color:#7c3aed;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #7c3aed">04 — CRONOGRAMA DE IMPLANTAÇÃO</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        ${plano.filter(p=>p.acao&&p.acao!=='—').map((p,i)=>`<tr style="background:${i%2===0?'#f9f9f9':'#fff'}"><td style="padding:8px 12px;font-weight:700;color:#7c3aed;white-space:nowrap">${p.mes}</td><td style="padding:8px 12px">${p.acao}</td></tr>`).join('')}
+      </table>
+      ${kpis?`<div style="margin-top:12px;background:#ede9fe;padding:12px;border-radius:8px;font-size:12px"><strong>KPIs esperados:</strong> ${kpis}</div>`:''}
+    </div>
+
+    <!-- BLOCO 5 -->
+    <div style="margin-bottom:32px">
+      <div style="font-size:10px;font-weight:700;color:#7c3aed;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #7c3aed">05 — INVESTIMENTO</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div style="background:#f9f9f9;padding:16px;border-radius:10px;text-align:center">
+          <div style="font-size:10px;color:#6b7280;margin-bottom:4px">VALOR MENSAL</div>
+          <div style="font-size:24px;font-weight:900;color:#7c3aed">${valorMensal}</div>
+        </div>
+        ${valorTotal!=='—'?`<div style="background:#f9f9f9;padding:16px;border-radius:10px;text-align:center"><div style="font-size:10px;color:#6b7280;margin-bottom:4px">TOTAL (${vigencia} MESES)</div><div style="font-size:24px;font-weight:900;color:#059669">${valorTotal}</div></div>`:''}
+      </div>
+      <table style="width:100%;font-size:12px;border-collapse:collapse">
+        ${vigencia&&vigencia!=='—'?`<tr><td style="padding:6px 0;color:#6b7280">Vigência</td><td style="font-weight:600">${vigencia} meses</td></tr>`:''}
+        ${comissao?`<tr><td style="padding:6px 0;color:#6b7280">Comissão sobre resultados</td><td style="font-weight:600">${comissao}%</td></tr>`:''}
+        <tr><td style="padding:6px 0;color:#6b7280">Validade desta proposta</td><td style="font-weight:600;color:#ef4444">${validadeDate}</td></tr>
+      </table>
+    </div>
+    </div>
+
+    <!-- RODAPÉ -->
+    <div style="background:#070710;padding:24px 50px;text-align:center">
+      <div style="font-size:13px;font-weight:700;color:#a78bfa">Desiberne IA</div>
+      <div style="font-size:11px;color:#6b7280;margin-top:4px">marketing@desiberneia.com.br · desiberneia.com.br</div>
+      <div style="font-size:10px;color:#374151;margin-top:8px">Proposta gerada em ${hoje} · Válida até ${validadeDate}</div>
+    </div>
+  </div>`;
+
+  const container = document.createElement('div');
+  container.innerHTML = html;
+  document.body.appendChild(container);
+  const opt = { margin: 0, filename: 'Proposta_Desiberne_' + empresa.replace(/\s+/g,'_') + '.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+  showToast('Gerando PDF...', 'success');
+  html2pdf().set(opt).from(container).save().then(() => {
+    document.body.removeChild(container);
+    // Salvar no histórico local
+    const registro = { empresa, nicho, data: hoje, servicos: servicos.join(', '), valorMensal };
+    propostasGeradas.push(registro);
+    localStorage.setItem('desiberne_propostas', JSON.stringify(propostasGeradas));
+    renderPropostas();
+    closeModal('propostaModal');
+  });
+}
+
 // ============================================================
 // MODO FOCO
 // ============================================================
@@ -2924,7 +3441,7 @@ function exportPDF(){
         <p>Relatório Comercial & Financeiro — ${mesStr}</p>
       </div>
       <div class="date-info">
-        <div style="font-size:14px;font-weight:800;color:#111">CRM v13.0</div>
+        <div style="font-size:14px;font-weight:800;color:#111">CRM v14.0</div>
         <div>Gerado em ${dateStr}</div>
       </div>
     </div>
@@ -2993,7 +3510,7 @@ function exportPDF(){
     </div>
 
     <div class="footer">
-      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v13.0
+      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v14.0
     </div>
     </body>
     </html>
@@ -3022,7 +3539,7 @@ let masterTabAtual = 'empresas';
 
 function switchMasterTab(tab){
   masterTabAtual = tab;
-  ['empresas','usuarios','estrategico','carrossel'].forEach(t=>{
+  ['empresas','usuarios','estrategico','integracoes','carrossel'].forEach(t=>{
     const el = document.getElementById('master-tab-'+t);
     if(el) el.style.display = t===tab?'block':'none';
     const btn = document.getElementById('tab-'+t);
@@ -3034,6 +3551,7 @@ function switchMasterTab(tab){
   if(tab==='usuarios') loadUsuarios();
   if(tab==='estrategico') renderMasterEstrategico();
   if(tab==='carrossel') loadSlidesAdmin();
+  if(tab==='integracoes') {} // static content
 }
 
 async function renderMasterEstrategico(){
@@ -3258,7 +3776,7 @@ function openTarefaInternaModal(){
   document.getElementById('ti-categoria').value='Geral';
   document.getElementById('ti-prioridade').value='normal';
   document.getElementById('ti-status').value='pendente';
-  document.getElementById('ti-responsavel').value='Joao Victor';
+  document.getElementById('ti-responsavel').value='João Ramos';
   document.getElementById('ti-prazo-data').value='';
   document.getElementById('ti-prazo-hora').value='';
   document.getElementById('ti-lembrete').checked=false;
@@ -3276,7 +3794,7 @@ function editTarefaInterna(id){
   document.getElementById('ti-categoria').value=t.categoria||'Geral';
   document.getElementById('ti-prioridade').value=t.prioridade||'normal';
   document.getElementById('ti-status').value=t.status||'pendente';
-  document.getElementById('ti-responsavel').value=t.responsavel||'Joao Victor';
+  document.getElementById('ti-responsavel').value=t.responsavel||'João Ramos';
   document.getElementById('ti-prazo-data').value=t.prazo_data||'';
   document.getElementById('ti-prazo-hora').value=t.prazo_hora||'';
   document.getElementById('ti-lembrete').checked=!!t.lembrete;
