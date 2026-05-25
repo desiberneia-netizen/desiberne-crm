@@ -415,7 +415,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
   <div class="topbar">
     <div class="logo-area">
       <img class="logo-img" src="https://i.imgur.com/rrQxwkl.png" alt="Desiberne IA">
-      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v15.0</span></div>
+      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v16.0</span></div>
     </div>
     <div class="topbar-nav">
       <button class="nav-btn active" onclick="showView('home',this)"><i class="ti ti-home"></i> Início</button>
@@ -460,6 +460,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
       <div class="sidebar-item" onclick="showView('links',null,this)"><i class="ti ti-link"></i> Links Úteis</div>
       <div class="sidebar-item" onclick="showView('vendas',null,this)"><i class="ti ti-shopping-cart"></i> Registro de Vendas</div>
       <div class="sidebar-item" onclick="showView('propostas',null,this)"><i class="ti ti-file-description"></i> Propostas</div>
+      <div class="sidebar-item" onclick="showView('faturas',null,this)"><i class="ti ti-receipt"></i> Faturas</div>
       <div class="sidebar-section" id="master-section" style="display:none">Admin</div>
       <div class="sidebar-item" id="master-sidebar" style="display:none" onclick="showView('master',null,this)"><i class="ti ti-shield"></i> Painel Master</div>
     </div>
@@ -544,6 +545,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
             <div id="home-quentes-list"><div class="loading">Carregando...</div></div>
           </div>
         </div>
+        <div class="chart-card" style="margin-bottom:22px">
+          <div class="chart-title"><div style="display:flex;align-items:center;gap:8px"><i class="ti ti-trophy" style="color:var(--warning)"></i> Feed de Vendas</div></div>
+          <div id="home-feed-vendas"><div class="loading">Carregando...</div></div>
+        </div>
       </div>
 
       <!-- PROPOSTAS -->
@@ -553,6 +558,21 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
           <button class="add-btn" onclick="openPropostaModal()"><i class="ti ti-plus"></i> Nova Proposta</button>
         </div>
         <div id="propostas-list"><div class="loading">Nenhuma proposta gerada ainda. Clique em "Nova Proposta" para começar.</div></div>
+      </div>
+
+      <!-- FATURAS -->
+      <div id="view-faturas" class="view">
+        <div class="page-header">
+          <div><div class="page-title">Faturas e Orçamentos</div><div class="page-sub">Gerencie cobranças e envie ao cliente</div></div>
+          <button class="add-btn" onclick="openFaturaModal()"><i class="ti ti-plus"></i> Nova Fatura</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+          <div class="kpi-card"><div class="kpi-label">Total Emitido</div><div class="kpi-value" id="fat-kpi-total">R$ 0</div></div>
+          <div class="kpi-card"><div class="kpi-label">Aguardando</div><div class="kpi-value" id="fat-kpi-pendente" style="color:var(--warning)">R$ 0</div></div>
+          <div class="kpi-card"><div class="kpi-label">Recebido</div><div class="kpi-value" id="fat-kpi-pago" style="color:var(--success)">R$ 0</div></div>
+          <div class="kpi-card"><div class="kpi-label">Vencidas</div><div class="kpi-value" id="fat-kpi-vencida" style="color:var(--danger)">0</div></div>
+        </div>
+        <div id="faturas-list"><div class="loading">Carregando...</div></div>
       </div>
 
       <!-- DASHBOARD -->
@@ -814,6 +834,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
           <button id="tab-integracoes" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('integracoes')">Integrações</button>
           <button id="tab-auditlog" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('auditlog')">Audit Log</button>
           <button id="tab-cases" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('cases')">Cases</button>
+          <button id="tab-gatilhos" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('gatilhos')">Gatilhos</button>
           <button id="tab-carrossel" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('carrossel')">Carrossel</button>
         </div>
 
@@ -871,7 +892,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
             <div style="font-size:12px;color:var(--muted);margin-bottom:24px">Use a API REST do Supabase para conectar qualquer agente de IA, n8n, Make ou sistema externo.</div>
 
             <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
-              <div style="font-size:11px;font-weight:700;color:var(--neon-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Endpoint Base</div>
+              <div style="font-size:11px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">🔗 Formulário Público de Captação</div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Compartilhe este link no Instagram, WhatsApp ou com o agente Rafael Ventura. O lead cai automaticamente no Pipeline.</div>
+              <div style="display:flex;gap:8px;margin-bottom:16px">
+                <input class="form-input" value="https://desiberne-crm.vercel.app/form" readonly id="form-captacao-link" style="font-size:11px;font-family:monospace">
+                <button class="add-btn" onclick="navigator.clipboard.writeText('https://desiberne-crm.vercel.app/form').then(()=>showToast('Link copiado!','success'))"><i class="ti ti-copy"></i></button>
+              </div>
+              <div style="height:1px;background:var(--border);margin-bottom:16px"></div>
+            <div style="font-size:11px;font-weight:700;color:var(--neon-light);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Endpoint Base</div>
               <div style="font-family:monospace;font-size:12px;color:#a78bfa;background:#0a0a14;padding:12px;border-radius:8px;word-break:break-all">https://nzglzeyzczgorvhyrogi.supabase.co/rest/v1/</div>
             </div>
 
@@ -920,6 +948,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
               <div style="font-size:12px;color:var(--muted);line-height:1.8">1. Adicione um nó <strong style="color:var(--text)">HTTP Request</strong><br>2. Method: <strong style="color:var(--text)">POST</strong><br>3. URL: endpoint acima<br>4. Authentication: <strong style="color:var(--text)">Generic Credential Type → Header Auth</strong><br>5. Cole os headers necessários<br>6. Body: JSON com os campos acima</div>
             </div>
           </div>
+        </div>
+
+        <div id="master-tab-gatilhos" style="display:none">
+          <div style="font-size:16px;font-weight:800;margin-bottom:6px">Regras e Gatilhos</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:20px">Automatize ações com base em condições do pipeline</div>
+          <div id="gatilhos-lista" style="display:flex;flex-direction:column;gap:12px"></div>
         </div>
 
         <div id="master-tab-cases" style="display:none">
@@ -1537,6 +1571,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
       <div class="form-group"><label class="form-label">Prazo (data)</label><input class="form-input" id="ti-prazo-data" type="date"></div>
       <div class="form-group"><label class="form-label">Prazo (hora)</label><input class="form-input" id="ti-prazo-hora" type="time"></div>
     </div>
+    <div class="section-divider">Checklist</div>
+    <div id="ti-checklist-list" style="margin-bottom:8px"></div>
+    <button type="button" class="btn-ghost" style="width:100%;border:1px dashed var(--border);border-radius:8px;padding:8px;font-size:11px;margin-bottom:14px" onclick="addTiCheckItem()">
+      <i class="ti ti-plus"></i> Adicionar item ao checklist
+    </button>
     <div class="form-group" style="display:flex;align-items:center;gap:10px">
       <input type="checkbox" id="ti-lembrete" style="width:16px;height:16px;cursor:pointer;accent-color:var(--neon)">
       <label for="ti-lembrete" style="font-size:12px;cursor:pointer;font-weight:600">Ativar lembrete pop-up no prazo</label>
@@ -1706,8 +1745,11 @@ function showApp() {
   loadVendas();
   loadTarefasInternas();
   loadAtividades();
+  loadFaturas();
+  loadFaturas();
   renderAgenda();
   renderPropostas();
+  setTimeout(verificarGatilhos, 5000);
 }
 
 async function doLogout() {
@@ -1759,6 +1801,33 @@ function updateHomeKPIs() {
   const recMes = receitas.filter(r=>r.data&&r.data.startsWith(mesAtual)&&r.recorrencia!=='Mensal').reduce((s,r)=>s+(r.valor||0),0) + mrr;
   const el_rm = document.getElementById('kpi-receita-mes-val');
   if(el_rm) el_rm.textContent = recMes>0 ? 'R$ '+recMes.toLocaleString('pt-BR',{minimumFractionDigits:0}) : 'R$ 0';
+  // Feed de vendas
+  renderFeedVendas();
+}
+
+function renderFeedVendas() {
+  const el = document.getElementById('home-feed-vendas');
+  if(!el) return;
+  const ultimas = (vendas||[]).slice().sort((a,b)=>new Date(b.created_at||b.data)-new Date(a.created_at||a.data)).slice(0,8);
+  if(!ultimas.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Nenhuma venda registrada ainda.</div>';return;}
+  el.innerHTML = ultimas.map(v=>{
+    const dt = v.data?new Date(v.data+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+    const statusColor = {recebido:'var(--success)',pendente:'var(--warning)'}[v.status]||'var(--muted)';
+    const statusLabel = {recebido:'✅ Recebido',pendente:'⏳ Pendente'}[v.status]||v.status;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:32px;height:32px;border-radius:8px;background:rgba(124,58,237,0.15);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🏆</div>
+        <div>
+          <div style="font-weight:700">${v.cliente||'—'}</div>
+          <div style="color:var(--muted);font-size:10px">${v.vertical||''} · ${dt}</div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:800;color:var(--neon-light)">R$ ${Number(v.valor_total||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+        <div style="font-size:10px;color:${statusColor}">${statusLabel}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function renderKanban(leads) {
@@ -2223,6 +2292,305 @@ function applyMoneyMask(input) {
   input.value = 'R$ ' + v;
 }
 
+
+// ============================================================
+// FATURAS E ORÇAMENTOS — v16
+// ============================================================
+let faturas = [];
+let fatItens = [];
+
+async function loadFaturas() {
+  const el = document.getElementById('faturas-list');
+  if(!el) return;
+  const {data,error} = await sb.from('faturas').select('*').order('created_at',{ascending:false});
+  if(error){
+    el.innerHTML=`<div style="color:var(--warning);padding:20px;font-size:12px">
+      Crie a tabela no Supabase:<br>
+      <code style="font-size:10px">CREATE TABLE faturas (id uuid DEFAULT gen_random_uuid() PRIMARY KEY, created_at timestamptz DEFAULT now(), numero text, cliente text, email_cliente text, data date, vencimento date, status text DEFAULT 'rascunho', obs text, itens jsonb, total numeric DEFAULT 0);
+ALTER TABLE faturas ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all" ON faturas FOR ALL USING (true);</code>
+    </div>`;
+    return;
+  }
+  faturas = data||[];
+  renderFaturas();
+}
+
+function renderFaturas() {
+  const el = document.getElementById('faturas-list');
+  if(!el) return;
+  // KPIs
+  const total = faturas.reduce((s,f)=>s+(f.total||0),0);
+  const pendente = faturas.filter(f=>f.status==='enviada').reduce((s,f)=>s+(f.total||0),0);
+  const pago = faturas.filter(f=>f.status==='pago').reduce((s,f)=>s+(f.total||0),0);
+  const vencidas = faturas.filter(f=>f.status==='vencida').length;
+  const fmt = n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:0});
+  ['fat-kpi-total','fat-kpi-pendente','fat-kpi-pago'].forEach((id,i)=>{const el2=document.getElementById(id);if(el2)el2.textContent=[fmt(total),fmt(pendente),fmt(pago)][i];});
+  const elV=document.getElementById('fat-kpi-vencida');if(elV)elV.textContent=vencidas;
+
+  if(!faturas.length){el.innerHTML='<div style="text-align:center;padding:60px;color:var(--muted)"><i class="ti ti-receipt" style="font-size:40px;display:block;margin-bottom:12px"></i>Nenhuma fatura emitida.</div>';return;}
+  const statusInfo={rascunho:{label:'Rascunho',color:'var(--muted)'},enviada:{label:'Enviada',color:'var(--warning)'},pago:{label:'Pago',color:'var(--success)'},vencida:{label:'Vencida',color:'var(--danger)'}};
+  el.innerHTML = faturas.map(f=>{
+    const si=statusInfo[f.status]||{label:f.status,color:'var(--muted)'};
+    const venc=f.vencimento?new Date(f.vencimento+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+    return `<div class="chart-card" style="margin-bottom:10px;cursor:pointer" onclick="editFatura('${f.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <span style="font-size:11px;font-family:monospace;color:var(--muted)">${f.numero||'—'}</span>
+            <span style="padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;background:rgba(0,0,0,0.2);color:${si.color}">${si.label}</span>
+          </div>
+          <div style="font-weight:700;font-size:14px">${f.cliente||'—'}</div>
+          <div style="font-size:11px;color:var(--muted)">Venc: ${venc}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:20px;font-weight:900;color:var(--neon-light)">R$ ${Number(f.total||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+          <div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end">
+            <button class="add-btn" style="font-size:10px;padding:4px 8px" onclick="event.stopPropagation();gerarLinkPublico('${f.id}')"><i class="ti ti-link"></i></button>
+            <button class="add-btn" style="font-size:10px;padding:4px 8px" onclick="event.stopPropagation();gerarFaturaPDFById('${f.id}')"><i class="ti ti-file-download"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openFaturaModal() {
+  document.getElementById('fatura-modal-title').textContent='Nova Fatura';
+  document.getElementById('fat-edit-id').value='';
+  document.getElementById('fat-delete-btn').style.display='none';
+  document.getElementById('fat-numero').value='FAT-'+String(faturas.length+1).padStart(3,'0');
+  document.getElementById('fat-data').value=new Date().toISOString().split('T')[0];
+  const venc=new Date();venc.setDate(venc.getDate()+7);
+  document.getElementById('fat-vencimento').value=venc.toISOString().split('T')[0];
+  document.getElementById('fat-cliente').value='';
+  document.getElementById('fat-email').value='';
+  document.getElementById('fat-status').value='rascunho';
+  document.getElementById('fat-obs').value='Pagamento via Pix. Chave: financeiro@desiberneia.com.br';
+  fatItens=[{desc:'',qtd:1,valor:0}];
+  renderFatItens();
+  openModal('faturaModal');
+}
+
+function editFatura(id) {
+  const f=faturas.find(x=>x.id===id);if(!f)return;
+  document.getElementById('fatura-modal-title').textContent='Editar Fatura';
+  document.getElementById('fat-edit-id').value=f.id;
+  document.getElementById('fat-delete-btn').style.display='block';
+  document.getElementById('fat-numero').value=f.numero||'';
+  document.getElementById('fat-data').value=f.data||'';
+  document.getElementById('fat-vencimento').value=f.vencimento||'';
+  document.getElementById('fat-cliente').value=f.cliente||'';
+  document.getElementById('fat-email').value=f.email_cliente||'';
+  document.getElementById('fat-status').value=f.status||'rascunho';
+  document.getElementById('fat-obs').value=f.obs||'';
+  fatItens=f.itens||[{desc:'',qtd:1,valor:0}];
+  renderFatItens();
+  openModal('faturaModal');
+}
+
+function addFaturaItem(){fatItens.push({desc:'',qtd:1,valor:0});renderFatItens();}
+function removeFaturaItem(i){fatItens.splice(i,1);renderFatItens();}
+
+function renderFatItens(){
+  const el=document.getElementById('fat-itens-list');if(!el)return;
+  el.innerHTML=fatItens.map((it,i)=>`
+    <div style="display:grid;grid-template-columns:2fr 60px 120px 32px;gap:6px;margin-bottom:6px;align-items:center">
+      <input class="form-input" placeholder="Descrição do serviço" value="${it.desc||''}" oninput="fatItens[${i}].desc=this.value" style="font-size:12px">
+      <input class="form-input" type="number" min="1" placeholder="Qtd" value="${it.qtd||1}" oninput="fatItens[${i}].qtd=Number(this.value);calcFatTotal()" style="font-size:12px;text-align:center">
+      <input class="form-input money-mask" placeholder="R$ 0,00" value="${it.valor?numToMoney(it.valor):''}" oninput="applyMoneyMask(this);fatItens[${i}].valor=moneyToNum(this.value);calcFatTotal()" style="font-size:12px">
+      <button type="button" onclick="removeFaturaItem(${i})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px">×</button>
+    </div>`).join('');
+  calcFatTotal();
+}
+
+function calcFatTotal(){
+  const t=fatItens.reduce((s,it)=>s+(it.qtd||1)*(it.valor||0),0);
+  const el=document.getElementById('fat-total-display');
+  if(el)el.textContent=numToMoney(t);
+}
+
+async function salvarFatura(statusOverride){
+  const cliente=document.getElementById('fat-cliente').value.trim();
+  if(!cliente){showToast('Cliente obrigatório','error');return;}
+  const total=fatItens.reduce((s,it)=>s+(it.qtd||1)*(it.valor||0),0);
+  const editId=document.getElementById('fat-edit-id').value;
+  const data={
+    numero:document.getElementById('fat-numero').value,
+    cliente,
+    email_cliente:document.getElementById('fat-email').value,
+    data:document.getElementById('fat-data').value,
+    vencimento:document.getElementById('fat-vencimento').value,
+    status:statusOverride||document.getElementById('fat-status').value,
+    obs:document.getElementById('fat-obs').value,
+    itens:fatItens,
+    total
+  };
+  const{error}=editId?await sb.from('faturas').update(data).eq('id',editId):await sb.from('faturas').insert(data);
+  if(error){showToast('Erro: '+error.message,'error');return;}
+  showToast(editId?'Fatura atualizada!':'Fatura salva!','success');
+  closeModal('faturaModal');loadFaturas();
+}
+
+async function deleteFatura(){
+  const id=document.getElementById('fat-edit-id').value;
+  if(!id||!confirm('Excluir esta fatura?'))return;
+  await sb.from('faturas').delete().eq('id',id);
+  showToast('Fatura excluída','success');closeModal('faturaModal');loadFaturas();
+}
+
+function getFaturaAtual(){
+  return {
+    numero:document.getElementById('fat-numero').value,
+    cliente:document.getElementById('fat-cliente').value,
+    email_cliente:document.getElementById('fat-email').value,
+    data:document.getElementById('fat-data').value,
+    vencimento:document.getElementById('fat-vencimento').value,
+    obs:document.getElementById('fat-obs').value,
+    itens:fatItens,
+    total:fatItens.reduce((s,it)=>s+(it.qtd||1)*(it.valor||0),0)
+  };
+}
+
+function buildFaturaHTML(f){
+  const hoje=f.data?new Date(f.data+'T12:00:00').toLocaleDateString('pt-BR'):new Date().toLocaleDateString('pt-BR');
+  const venc=f.vencimento?new Date(f.vencimento+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+  return `<div style="font-family:Arial,sans-serif;max-width:720px;margin:0 auto;background:#fff;color:#111;padding:0">
+    <div style="background:linear-gradient(135deg,#070710,#1a0a2e);padding:40px 50px;display:flex;align-items:center;justify-content:space-between">
+      <div><img src="https://i.imgur.com/rrQxwkl.png" style="width:50px;height:50px;border-radius:12px;margin-bottom:8px;display:block">
+        <div style="color:#a78bfa;font-size:13px;font-weight:700">Desiberne IA</div>
+        <div style="color:#6b7280;font-size:11px">financeiro@desiberneia.com.br</div>
+      </div>
+      <div style="text-align:right">
+        <div style="color:#a78bfa;font-size:11px;letter-spacing:.1em;text-transform:uppercase">Fatura</div>
+        <div style="color:#fff;font-size:28px;font-weight:900">${f.numero||'—'}</div>
+        <div style="color:#6b7280;font-size:11px">Emissão: ${hoje}</div>
+        <div style="color:#f59e0b;font-size:11px;font-weight:700">Venc: ${venc}</div>
+      </div>
+    </div>
+    <div style="padding:40px 50px">
+      <div style="margin-bottom:28px">
+        <div style="font-size:10px;color:#6b7280;font-weight:700;text-transform:uppercase;margin-bottom:6px">Para</div>
+        <div style="font-size:18px;font-weight:800">${f.cliente||'—'}</div>
+        ${f.email_cliente?`<div style="font-size:12px;color:#6b7280">${f.email_cliente}</div>`:''}
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px">
+        <thead><tr style="background:#f3f4f6">
+          <th style="text-align:left;padding:10px 12px;font-size:10px;text-transform:uppercase;color:#6b7280">Descrição</th>
+          <th style="text-align:center;padding:10px 12px;font-size:10px;text-transform:uppercase;color:#6b7280">Qtd</th>
+          <th style="text-align:right;padding:10px 12px;font-size:10px;text-transform:uppercase;color:#6b7280">Unitário</th>
+          <th style="text-align:right;padding:10px 12px;font-size:10px;text-transform:uppercase;color:#6b7280">Total</th>
+        </tr></thead>
+        <tbody>${(f.itens||[]).map((it,i)=>`
+          <tr style="background:${i%2===0?'#fff':'#f9fafb'}">
+            <td style="padding:10px 12px">${it.desc||'—'}</td>
+            <td style="padding:10px 12px;text-align:center">${it.qtd||1}</td>
+            <td style="padding:10px 12px;text-align:right">${numToMoney(it.valor||0)}</td>
+            <td style="padding:10px 12px;text-align:right;font-weight:600">${numToMoney((it.qtd||1)*(it.valor||0))}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:24px">
+        <div style="background:#ede9fe;padding:16px 24px;border-radius:10px;text-align:right">
+          <div style="font-size:10px;color:#6b7280;margin-bottom:4px">TOTAL A PAGAR</div>
+          <div style="font-size:28px;font-weight:900;color:#5b21b6">${numToMoney(f.total||0)}</div>
+        </div>
+      </div>
+      ${f.obs?`<div style="background:#f9fafb;padding:14px;border-radius:8px;font-size:12px;color:#6b7280;line-height:1.6">${f.obs}</div>`:''}
+    </div>
+    <div style="background:#070710;padding:20px 50px;text-align:center">
+      <div style="font-size:11px;color:#6b7280">Desiberne IA · marketing@desiberneia.com.br · desiberneia.com.br</div>
+    </div>
+  </div>`;
+}
+
+async function gerarFaturaPDF(){
+  await salvarFatura();
+  const f=getFaturaAtual();
+  const container=document.createElement('div');
+  container.innerHTML=buildFaturaHTML(f);
+  document.body.appendChild(container);
+  const opt={margin:0,filename:'Fatura_'+f.numero+'_'+f.cliente.replace(/\s+/g,'_')+'.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
+  html2pdf().set(opt).from(container).save().then(()=>document.body.removeChild(container));
+}
+
+async function gerarFaturaPDFById(id){
+  const f=faturas.find(x=>x.id===id);if(!f)return;
+  const container=document.createElement('div');
+  container.innerHTML=buildFaturaHTML(f);
+  document.body.appendChild(container);
+  const opt={margin:0,filename:'Fatura_'+(f.numero||id)+'.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
+  html2pdf().set(opt).from(container).save().then(()=>document.body.removeChild(container));
+}
+
+function gerarLinkPublico(id){
+  const link=window.location.origin+'/fatura/'+id;
+  document.getElementById('fat-link-publico').value=link;
+  openModal('faturaLinkModal');
+}
+
+function copiarLinkFatura(){
+  const v=document.getElementById('fat-link-publico').value;
+  navigator.clipboard.writeText(v).then(()=>showToast('Link copiado!','success'));
+}
+
+async function enviarFaturaEmail(){
+  const email=document.getElementById('fat-email').value.trim();
+  if(!email){showToast('Informe o e-mail do cliente','error');return;}
+  await salvarFatura('enviada');
+  const f=getFaturaAtual();
+  // EmailJS — requer configuração no painel EmailJS.com
+  if(typeof emailjs==='undefined'){
+    showToast('Configure o EmailJS: adicione seu Service ID e Template ID nas configurações do CRM','error');
+    return;
+  }
+  showToast('Enviando e-mail...','success');
+  emailjs.send('desiberne_service','desiberne_fatura',{
+    to_email:email,
+    to_name:f.cliente,
+    fatura_numero:f.numero,
+    fatura_total:numToMoney(f.total),
+    fatura_vencimento:f.vencimento?new Date(f.vencimento+'T12:00:00').toLocaleDateString('pt-BR'):'—',
+    from_name:'Desiberne IA',
+    reply_to:'financeiro@desiberneia.com.br'
+  }).then(()=>showToast('E-mail enviado com sucesso!','success'))
+    .catch(()=>showToast('Erro no envio. Verifique as configurações do EmailJS.','error'));
+}
+
+
+// ============================================================
+// CHECKLIST DE TAREFAS
+// ============================================================
+let tiChecklist = [];
+
+function addTiCheckItem(texto=''){
+  tiChecklist.push({texto,feito:false});
+  renderTiChecklist();
+}
+
+function renderTiChecklist(){
+  const el=document.getElementById('ti-checklist-list');if(!el)return;
+  const done=tiChecklist.filter(x=>x.feito).length;
+  const pct=tiChecklist.length?Math.round(done/tiChecklist.length*100):0;
+  el.innerHTML=(tiChecklist.length?`
+    <div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:4px"><span>Progresso</span><span>${done}/${tiChecklist.length}</span></div>
+      <div style="background:var(--border);border-radius:999px;height:4px"><div style="background:var(--neon);border-radius:999px;height:4px;width:${pct}%;transition:width .3s"></div></div>
+    </div>`:'') +
+  tiChecklist.map((it,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <input type="checkbox" ${it.feito?'checked':''} style="accent-color:var(--neon);width:14px;height:14px;flex-shrink:0" onchange="tiChecklist[${i}].feito=this.checked;renderTiChecklist()">
+      <input class="form-input" value="${it.texto||''}" placeholder="Item do checklist..." style="flex:1;font-size:12px;padding:4px 8px;${it.feito?'text-decoration:line-through;color:var(--muted)':''}" oninput="tiChecklist[${i}].texto=this.value">
+      <button type="button" onclick="tiChecklist.splice(${i},1);renderTiChecklist()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px">×</button>
+    </div>`).join('');
+}
+
+function getTiChecklistProgress(checklist){
+  if(!checklist||!checklist.length) return null;
+  const done=checklist.filter(x=>x.feito).length;
+  return {done,total:checklist.length,pct:Math.round(done/checklist.length*100)};
+}
+
 // ============================================================
 // M1 — AUDIT LOG
 // ============================================================
@@ -2518,6 +2886,8 @@ async function checkAllLembretes() {
   checkTarefasInternasLembretes();
   // Verifica retornos de leads
   checkRetornoLeads();
+  // Verifica gatilhos automáticos
+  verificarGatilhos();
   // Verifica agendamentos
   checkAgendaLembretes();
 }
@@ -3571,7 +3941,7 @@ function exportPDF(){
         <p>Relatório Comercial & Financeiro — ${mesStr}</p>
       </div>
       <div class="date-info">
-        <div style="font-size:14px;font-weight:800;color:#111">CRM v15.0</div>
+        <div style="font-size:14px;font-weight:800;color:#111">CRM v16.0</div>
         <div>Gerado em ${dateStr}</div>
       </div>
     </div>
@@ -3640,7 +4010,7 @@ function exportPDF(){
     </div>
 
     <div class="footer">
-      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v15.0
+      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v16.0
     </div>
     </body>
     </html>
@@ -3669,7 +4039,7 @@ let masterTabAtual = 'empresas';
 
 function switchMasterTab(tab){
   masterTabAtual = tab;
-  ['empresas','usuarios','estrategico','integracoes','auditlog','cases','carrossel'].forEach(t=>{
+  ['empresas','usuarios','estrategico','integracoes','auditlog','cases','gatilhos','carrossel'].forEach(t=>{
     const el = document.getElementById('master-tab-'+t);
     if(el) el.style.display = t===tab?'block':'none';
     const btn = document.getElementById('tab-'+t);
@@ -3684,6 +4054,7 @@ function switchMasterTab(tab){
   if(tab==='integracoes') {} // static content
   if(tab==='auditlog') loadAuditLog();
   if(tab==='cases') loadCases();
+  if(tab==='gatilhos') renderGatilhos();
 }
 
 async function renderMasterEstrategico(){
@@ -3900,11 +4271,16 @@ function tiCardHTML(t){
     ${t.categoria&&t.categoria!=='Geral'?`<div style="font-size:9px;font-weight:800;color:${catColors[t.categoria]||'var(--muted)'};text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">${t.categoria}</div>`:''}
     <div class="ativ-title">${t.titulo}</div>
     ${t.descricao?`<div class="ativ-desc">${t.descricao}</div>`:''}
+    ${(()=>{const p=getTiChecklistProgress(t.checklist);return p?`<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:2px"><span>Checklist</span><span>${p.done}/${p.total}</span></div><div style="background:var(--border);border-radius:999px;height:3px"><div style="background:var(--neon);border-radius:999px;height:3px;width:${p.pct}%"></div></div></div>`:''})()}
     <div class="ativ-footer">
       <span style="color:var(--muted);font-size:10px;font-weight:600">${t.responsavel||''}</span>
       ${prazoText?`<span class="ativ-prazo ${prazoClass}"><i class="ti ti-clock" style="font-size:9px"></i> ${prazoText}</span>`:''}
     </div>
     ${t.lembrete?'<div style="font-size:10px;color:var(--purple-light);margin-top:5px;font-weight:600"><i class="ti ti-bell" style="font-size:10px"></i> Lembrete ativo</div>':''}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:6px;border-top:1px solid var(--border)">
+      <span style="font-size:10px;color:var(--muted)"><i class="ti ti-clock" style="font-size:10px"></i> ${formatarTempo(t.tempo_segundos)}</span>
+      <button class="crono-btn add-btn" data-id="${t.id}" style="font-size:10px;padding:3px 8px;color:var(--success)" onclick="event.stopPropagation();toggleCronometro('${t.id}',${t.tempo_segundos||0})"><i class="ti ti-player-play"></i></button>
+    </div>
   </div>`;
 }
 
@@ -3936,6 +4312,8 @@ function openTarefaInternaModal(){
   document.getElementById('ti-lembrete').checked=false;
   document.getElementById('ti-delete-btn').style.display='none';
   clearAnexos('ti');
+  tiChecklist=[];
+  renderTiChecklist();
   openModal('tarefaInternaModal');
 }
 
@@ -3953,6 +4331,8 @@ function editTarefaInterna(id){
   document.getElementById('ti-prazo-hora').value=t.prazo_hora||'';
   document.getElementById('ti-lembrete').checked=!!t.lembrete;
   document.getElementById('ti-delete-btn').style.display='block';
+  tiChecklist=Array.isArray(t.checklist)?t.checklist.map(x=>({...x})):[];
+  renderTiChecklist();
   openModal('tarefaInternaModal');
 }
 
@@ -3969,7 +4349,8 @@ async function saveTarefaInterna(){
     responsavel:document.getElementById('ti-responsavel').value,
     prazo_data:document.getElementById('ti-prazo-data').value||null,
     prazo_hora:document.getElementById('ti-prazo-hora').value||null,
-    lembrete:document.getElementById('ti-lembrete').checked
+    lembrete:document.getElementById('ti-lembrete').checked,
+    checklist:tiChecklist
   };
   const{error}=editId?await sb.from('tarefas_internas').update(data).eq('id',editId):await sb.from('tarefas_internas').insert(data);
   if(error){showToast('Erro: '+error.message,'error');return;}
@@ -4281,6 +4662,153 @@ function renderFinanceiroSync(){
 // SWITCH MASTER TAB — update for carrossel
 // ============================================================
 
+
+
+
+// ============================================================
+// REGRAS E GATILHOS — v16
+// ============================================================
+const GATILHOS_DEFAULT = [
+  {id:'g1', nome:'Follow-up automático', desc:'Lead sem movimentação por X dias → cria tarefa de follow-up', ativo:true, dias:7, param:'dias'},
+  {id:'g2', nome:'Alerta lead Quente', desc:'Lead movido para Quente → notificação pop-up para o responsável', ativo:true, dias:0, param:null},
+  {id:'g3', nome:'Onboarding pós-venda', desc:'Venda fechada → cria tarefa de onboarding automaticamente', ativo:true, dias:0, param:null},
+  {id:'g4', nome:'Alerta contrato vencendo', desc:'Contrato vencendo em X dias → alerta no dashboard', ativo:true, dias:30, param:'dias'},
+  {id:'g5', nome:'Tarefa de renovação', desc:'Contrato vencendo → cria tarefa de renovação para o responsável', ativo:false, dias:15, param:'dias'},
+];
+
+let gatilhosConfig = JSON.parse(localStorage.getItem('desiberne_gatilhos')||JSON.stringify(GATILHOS_DEFAULT));
+
+function salvarGatilhos(){localStorage.setItem('desiberne_gatilhos',JSON.stringify(gatilhosConfig));}
+
+function renderGatilhos(){
+  const el=document.getElementById('gatilhos-lista');if(!el)return;
+  el.innerHTML=gatilhosConfig.map((g,i)=>`
+    <div style="background:var(--card);border:1px solid ${g.ativo?'rgba(124,58,237,0.3)':'var(--border)'};border-radius:12px;padding:16px;display:flex;align-items:flex-start;gap:14px">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-size:14px;font-weight:700">${g.nome}</span>
+          <span style="padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;background:${g.ativo?'rgba(16,185,129,0.15)':'rgba(107,114,128,0.15)'};color:${g.ativo?'var(--success)':'var(--muted)'}">${g.ativo?'Ativo':'Inativo'}</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:${g.param?'10px':'0'}">${g.desc.replace('X dias',g.dias+' dias')}</div>
+        ${g.param==='dias'?`<div style="display:flex;align-items:center;gap:8px"><span style="font-size:12px;color:var(--muted)">Dias:</span><input type="number" min="1" max="365" value="${g.dias}" style="width:70px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px" onchange="gatilhosConfig[${i}].dias=Number(this.value);salvarGatilhos()"></div>`:''}
+      </div>
+      <label style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;flex-shrink:0">
+        <div style="position:relative;width:40px;height:22px" onclick="gatilhosConfig[${i}].ativo=!gatilhosConfig[${i}].ativo;salvarGatilhos();renderGatilhos()">
+          <div style="position:absolute;inset:0;background:${g.ativo?'var(--neon)':'var(--border)'};border-radius:999px;transition:background .2s"></div>
+          <div style="position:absolute;top:2px;left:${g.ativo?'20px':'2px'};width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s"></div>
+        </div>
+      </label>
+    </div>`).join('');
+}
+
+async function verificarGatilhos(){
+  const cfg = JSON.parse(localStorage.getItem('desiberne_gatilhos')||JSON.stringify(GATILHOS_DEFAULT));
+
+  // G1 — Follow-up por inatividade
+  const g1=cfg.find(g=>g.id==='g1'&&g.ativo);
+  if(g1&&allLeads.length){
+    const limite=new Date();limite.setDate(limite.getDate()-g1.dias);
+    const inativos=allLeads.filter(l=>l.temperatura!=='Fechado'&&l.updated_at&&new Date(l.updated_at)<limite);
+    for(const l of inativos.slice(0,3)){
+      const key='g1_'+l.id+'_'+limite.toDateString();
+      if(!sessionStorage.getItem(key)){
+        sessionStorage.setItem(key,'1');
+        await sb.from('tarefas_internas').insert({titulo:'Follow-up: '+l.razao_social,descricao:'Lead sem movimentação por '+g1.dias+' dias',status:'pendente',prioridade:'alta',responsavel:l.responsavel||'João Ramos',prazo_data:new Date().toISOString().split('T')[0],lembrete:true,categoria:'Comercial'});
+        showPopup('⚡ Gatilho ativado',l.razao_social+' sem movimentação há '+g1.dias+' dias. Tarefa criada!');
+      }
+    }
+  }
+
+  // G4 — Contrato vencendo
+  const g4=cfg.find(g=>g.id==='g4'&&g.ativo);
+  if(g4&&contratos.length){
+    const hoje=new Date();
+    contratos.filter(c=>c.status==='ativo'&&c.inicio).forEach(c=>{
+      const inicio=new Date(c.inicio);
+      const meses=c.fixo_meses_inicial||6;
+      const venc=new Date(inicio);venc.setMonth(venc.getMonth()+meses);
+      const diffDias=Math.ceil((venc-hoje)/(1000*60*60*24));
+      if(diffDias<=g4.dias&&diffDias>0){
+        const key='g4_'+c.id+'_'+hoje.toDateString();
+        if(!sessionStorage.getItem(key)){
+          sessionStorage.setItem(key,'1');
+          showPopup('📋 Contrato vencendo',c.nome+' vence em '+diffDias+' dias');
+        }
+      }
+    });
+  }
+}
+
+// ============================================================
+// CRONÔMETRO DE TEMPO POR TAREFA — v16
+// ============================================================
+let timerAtivo = null;
+let timerTarefaId = null;
+let timerInicio = null;
+let timerSegundos = 0;
+
+function iniciarCronometro(tarefaId, segundosAcumulados=0) {
+  if(timerAtivo) pararCronometro();
+  timerTarefaId = tarefaId;
+  timerSegundos = segundosAcumulados;
+  timerInicio = Date.now() - timerSegundos*1000;
+  timerAtivo = setInterval(()=>{
+    timerSegundos = Math.floor((Date.now()-timerInicio)/1000);
+    atualizarDisplayCronometro();
+  }, 1000);
+  showToast('⏱ Cronômetro iniciado','success');
+  atualizarBotoesCronometro(tarefaId, true);
+}
+
+function pararCronometro(salvar=true) {
+  if(!timerAtivo) return;
+  clearInterval(timerAtivo);
+  timerAtivo = null;
+  if(salvar && timerTarefaId) {
+    salvarTempoCronometro(timerTarefaId, timerSegundos);
+  }
+  atualizarBotoesCronometro(timerTarefaId, false);
+  timerTarefaId = null;
+}
+
+async function salvarTempoCronometro(tarefaId, segundos) {
+  const {data:t} = await sb.from('tarefas_internas').select('tempo_segundos').eq('id',tarefaId).single();
+  const total = (t?.tempo_segundos||0) + segundos;
+  await sb.from('tarefas_internas').update({tempo_segundos:total}).eq('id',tarefaId);
+  loadTarefasInternas();
+}
+
+function atualizarDisplayCronometro() {
+  const h=Math.floor(timerSegundos/3600);
+  const m=Math.floor((timerSegundos%3600)/60);
+  const s=timerSegundos%60;
+  const str=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  // Atualizar todos os displays de cronômetro ativos
+  document.querySelectorAll('.crono-display').forEach(el=>el.textContent=str);
+}
+
+function atualizarBotoesCronometro(id, ativo) {
+  document.querySelectorAll(`.crono-btn[data-id="${id}"]`).forEach(btn=>{
+    btn.innerHTML = ativo ? '<i class="ti ti-player-pause"></i>' : '<i class="ti ti-player-play"></i>';
+    btn.style.color = ativo ? 'var(--warning)' : 'var(--success)';
+  });
+}
+
+function formatarTempo(segundos) {
+  if(!segundos) return '—';
+  const h=Math.floor(segundos/3600);
+  const m=Math.floor((segundos%3600)/60);
+  if(h>0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+function toggleCronometro(tarefaId, segundosAtuais) {
+  if(timerAtivo && timerTarefaId===tarefaId) {
+    pararCronometro(true);
+  } else {
+    iniciarCronometro(tarefaId, segundosAtuais||0);
+  }
+}
 
 // ============================================================
 // CASES DE SUCESSO
