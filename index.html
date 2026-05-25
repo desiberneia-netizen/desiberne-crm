@@ -415,7 +415,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
   <div class="topbar">
     <div class="logo-area">
       <img class="logo-img" src="https://i.imgur.com/rrQxwkl.png" alt="Desiberne IA">
-      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v14.0</span></div>
+      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v15.0</span></div>
     </div>
     <div class="topbar-nav">
       <button class="nav-btn active" onclick="showView('home',this)"><i class="ti ti-home"></i> Início</button>
@@ -812,6 +812,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
           <button id="tab-usuarios" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('usuarios')">Usuários</button>
           <button id="tab-estrategico" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('estrategico')">Estratégico</button>
           <button id="tab-integracoes" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('integracoes')">Integrações</button>
+          <button id="tab-auditlog" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('auditlog')">Audit Log</button>
+          <button id="tab-cases" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('cases')">Cases</button>
           <button id="tab-carrossel" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('carrossel')">Carrossel</button>
         </div>
 
@@ -848,6 +850,21 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
           <div class="chart-card"><div class="chart-title"><i class="ti ti-brain" style="color:var(--purple-light);margin-right:6px"></i>Análise Estratégica</div><div id="master-analise" style="font-size:13px;color:var(--muted);line-height:1.8;margin-top:4px">Carregando...</div></div>
 
         <!-- CARROSSEL -->
+        <div id="master-tab-auditlog" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div>
+              <div style="font-size:16px;font-weight:800">Audit Log</div>
+              <div style="font-size:12px;color:var(--muted)">Registro de todas as ações no sistema</div>
+            </div>
+            <button class="add-btn" style="font-size:11px" onclick="loadAuditLog()"><i class="ti ti-refresh"></i> Atualizar</button>
+          </div>
+          <div style="background:var(--bg);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:12px;margin-bottom:16px;font-size:11px;color:var(--warning)">
+            <strong>SQL para criar a tabela:</strong><br>
+            <code style="font-size:10px;color:var(--muted)">CREATE TABLE audit_log (id uuid DEFAULT gen_random_uuid() PRIMARY KEY, created_at timestamptz DEFAULT now(), usuario text, acao text, tabela text, id_registro text, detalhes text); ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY; CREATE POLICY "Allow all" ON audit_log FOR ALL USING (true);</code>
+          </div>
+          <div id="audit-log-list"><div class="loading">Clique em Atualizar para carregar</div></div>
+        </div>
+
         <div id="master-tab-integracoes" style="display:none">
           <div style="max-width:700px">
             <div style="font-size:16px;font-weight:800;margin-bottom:6px">Integração com n8n / Agentes de IA</div>
@@ -905,6 +922,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
           </div>
         </div>
 
+        <div id="master-tab-cases" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+            <div><div style="font-size:16px;font-weight:800">Cases de Sucesso</div><div style="font-size:12px;color:var(--muted)">Resultados reais para usar nas propostas</div></div>
+            <button class="add-btn" onclick="openCaseModal()"><i class="ti ti-plus"></i> Novo Case</button>
+          </div>
+          <div id="cases-list"><div class="loading">Carregando...</div></div>
+        </div>
+
         <div id="master-tab-carrossel" style="display:none">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
             <div><div style="font-size:15px;font-weight:800">Slides do Carrossel</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Gerencie os conteúdos que aparecem na tela Início</div></div>
@@ -937,6 +962,17 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
     <div class="form-row"><div class="form-group"><label class="form-label">Valor (R$/mês)</label><input class="form-input" id="f-valor" placeholder="0,00"></div><div class="form-group"><label class="form-label">Responsável</label><select class="form-select" id="f-responsavel"><option>João Ramos</option><option>Tiago Barbosa</option></select></div></div>
     <div class="section-divider">Observações</div>
     <textarea class="form-input" id="f-obs" rows="3" placeholder="Notas e histórico..." style="resize:vertical"></textarea>
+    <div style="background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.15);border-radius:10px;padding:14px;margin:12px 0">
+      <div style="font-size:11px;font-weight:700;color:var(--neon-light);margin-bottom:10px"><i class="ti ti-bell-ringing"></i> Lembrete de Retorno</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Data do retorno</label><input class="form-input" id="f-retorno-data" type="date"></div>
+        <div class="form-group"><label class="form-label">Hora</label><input class="form-input" id="f-retorno-hora" type="time"></div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin-top:6px">
+        <input type="checkbox" id="f-retorno-lembrete" style="accent-color:var(--neon)">
+        Ativar lembrete pop-up na data/hora definida
+      </label>
+    </div>
     <div class="modal-footer">
       <button class="btn-danger" id="delete-btn" style="display:none;margin-right:auto" onclick="deleteLead()"><i class="ti ti-trash"></i> Excluir</button>
       <button class="btn-ghost" onclick="closeModal('leadModal')">Cancelar</button>
@@ -1103,6 +1139,21 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('propostaModal')">Cancelar</button>
       <button class="btn-primary" onclick="gerarPropostaPDF()"><i class="ti ti-file-download"></i> Gerar PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAREFA INTERNA DETALHE MODAL -->
+<div class="modal-overlay" id="tiDetalheModal" onclick="closeModalOutside(event,'tiDetalheModal')">
+  <div class="modal" style="width:500px">
+    <div class="modal-header">
+      <div class="modal-title" id="ti-det-titulo">Tarefa</div>
+      <button class="modal-close" onclick="closeModal('tiDetalheModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="ti-det-body" style="padding:0 0 8px"></div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('tiDetalheModal')">Fechar</button>
+      <button class="btn-primary" id="ti-det-edit-btn" onclick=""><i class="ti ti-pencil"></i> Editar</button>
     </div>
   </div>
 </div>
@@ -1582,7 +1633,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let allLeads = [];
 let currentUser = null;
 let isMaster = false;
-let agendamentos = JSON.parse(localStorage.getItem('agendamentos_crm') || '[]');
+let agendamentos = [];
 
 // AUTH
 async function checkSession() {
@@ -1651,7 +1702,12 @@ function showApp() {
     document.getElementById('master-sidebar').style.display = 'flex';
   }
   loadLeads();
+  loadFinanceiro();
+  loadVendas();
+  loadTarefasInternas();
+  loadAtividades();
   renderAgenda();
+  renderPropostas();
 }
 
 async function doLogout() {
@@ -1743,7 +1799,7 @@ async function dropCard(e, temperatura) {
   if (error) { showToast('Erro ao mover lead', 'error'); return; }
   // B1 — Auto-cria venda pendente quando mover para Fechado
   if (temperatura === 'Fechado') {
-    const lead = leads.find(l => l.id === draggedId);
+    const lead = allLeads.find(l => l.id === draggedId);
     if (lead) {
       // Verifica se já existe venda para esse lead
       const { data: existeVenda } = await sb.from('vendas').select('id').eq('cliente', lead.razao_social).eq('status', 'pendente').limit(1);
@@ -1921,6 +1977,9 @@ function openLeadModal() {
   document.getElementById('f-temperatura').value='Frio';
   document.getElementById('f-status').value='Retornar';
   document.getElementById('f-responsavel').value='João Ramos';
+  if(document.getElementById('f-retorno-data'))document.getElementById('f-retorno-data').value='';
+  if(document.getElementById('f-retorno-hora'))document.getElementById('f-retorno-hora').value='';
+  if(document.getElementById('f-retorno-lembrete'))document.getElementById('f-retorno-lembrete').checked=false;
   document.getElementById('leadModal').classList.add('open');
 }
 
@@ -1939,6 +1998,9 @@ function editLead(id) {
   document.getElementById('f-temperatura').value=l.temperatura||'Frio';
   document.getElementById('f-status').value=l.status||'Retornar';
   document.getElementById('f-responsavel').value=l.responsavel||'João Ramos';
+  if(document.getElementById('f-retorno-data'))document.getElementById('f-retorno-data').value=l.retorno_data||'';
+  if(document.getElementById('f-retorno-hora'))document.getElementById('f-retorno-hora').value=l.retorno_hora||'';
+  if(document.getElementById('f-retorno-lembrete'))document.getElementById('f-retorno-lembrete').checked=!!l.retorno_lembrete;
   document.getElementById('leadModal').classList.add('open');
 }
 
@@ -1947,7 +2009,7 @@ async function saveLead() {
   if(!razao){showToast('Razão Social obrigatória','error');return;}
   const btn=document.getElementById('save-lead-btn');
   btn.disabled=true;btn.textContent='Salvando...';
-  const data={razao_social:razao,cnpj:document.getElementById('f-cnpj').value,gestor:document.getElementById('f-gestor').value,celular:document.getElementById('f-celular').value,email:document.getElementById('f-email').value,cep:document.getElementById('f-cep').value,cidade:document.getElementById('f-cidade').value,logradouro:document.getElementById('f-logradouro').value,bairro:document.getElementById('f-bairro').value,segmento:document.getElementById('f-segmento').value,temperatura:document.getElementById('f-temperatura').value,status:document.getElementById('f-status').value,valor:document.getElementById('f-valor').value,responsavel:document.getElementById('f-responsavel').value,observacoes:document.getElementById('f-obs').value,vertical:document.getElementById('f-vertical')?.value||'',modelo:document.getElementById('f-modelo')?.value||'',quantidade:document.getElementById('f-quantidade')?.value||1,proximo_passo:document.getElementById('f-proximo-passo')?.value||''};
+  const data={razao_social:razao,cnpj:document.getElementById('f-cnpj').value,gestor:document.getElementById('f-gestor').value,celular:document.getElementById('f-celular').value,email:document.getElementById('f-email').value,cep:document.getElementById('f-cep').value,cidade:document.getElementById('f-cidade').value,logradouro:document.getElementById('f-logradouro').value,bairro:document.getElementById('f-bairro').value,segmento:document.getElementById('f-segmento').value,temperatura:document.getElementById('f-temperatura').value,status:document.getElementById('f-status').value,valor:document.getElementById('f-valor').value,responsavel:document.getElementById('f-responsavel').value,observacoes:document.getElementById('f-obs').value,vertical:document.getElementById('f-vertical')?.value||'',modelo:document.getElementById('f-modelo')?.value||'',quantidade:document.getElementById('f-quantidade')?.value||1,proximo_passo:document.getElementById('f-proximo-passo')?.value||'',retorno_data:document.getElementById('f-retorno-data')?.value||null,retorno_hora:document.getElementById('f-retorno-hora')?.value||null,retorno_lembrete:document.getElementById('f-retorno-lembrete')?.checked||false};
   const editId=document.getElementById('edit-id').value;
   const {error}=editId?await sb.from('leads').update(data).eq('id',editId):await sb.from('leads').insert(data);
   btn.disabled=false;btn.textContent='Salvar Lead';
@@ -1970,11 +2032,19 @@ async function deleteLeadById(id) {
 
 // C2 — JITSI MEET
 function gerarJitsiLink() {
-  const id = Math.random().toString(36).substr(2,8);
-  const link = 'https://meet.jit.si/desiberne-' + id;
-  document.getElementById('agenda-meet-link').value = link;
-  navigator.clipboard.writeText(link).catch(()=>{});
-  showToast('Link gerado e copiado: ' + link, 'success');
+  const uid = Math.random().toString(36).substr(2,8) + Math.random().toString(36).substr(2,4);
+  const link = 'https://meet.jit.si/desiberne-' + uid;
+  const campo = document.getElementById('ag-meet-link');
+  if(campo) {
+    campo.value = link;
+    campo.style.borderColor = 'rgba(124,58,237,0.6)';
+    setTimeout(()=>campo.style.borderColor='', 2000);
+  }
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(link).then(()=>showToast('✅ Link Jitsi gerado e copiado!','success')).catch(()=>showToast('Link gerado: '+link,'success'));
+  } else {
+    showToast('Link gerado: '+link,'success');
+  }
 }
 
 function openAgendaModal() {
@@ -1986,12 +2056,15 @@ function openAgendaModal() {
   document.getElementById('agendaModal').classList.add('open');
 }
 
-function saveAgenda() {
+async function saveAgenda() {
   const titulo=document.getElementById('ag-titulo').value.trim();
   if(!titulo){showToast('Título obrigatório','error');return;}
-  agendamentos.push({id:Date.now().toString(),titulo,data:document.getElementById('ag-data').value,hora:document.getElementById('ag-hora').value,duracao:document.getElementById('ag-duracao').value,tipo:document.getElementById('ag-tipo').value,lead:document.getElementById('ag-lead').value,obs:document.getElementById('ag-obs').value});
-  localStorage.setItem('agendamentos_crm',JSON.stringify(agendamentos));
-  showToast('Agendamento salvo!','success');closeModal('agendaModal');renderAgenda();
+  const meet_link=document.getElementById('ag-meet-link')?.value||'';
+  const payload={titulo,data:document.getElementById('ag-data').value,hora:document.getElementById('ag-hora').value,duracao:document.getElementById('ag-duracao').value,tipo:document.getElementById('ag-tipo').value,lead:document.getElementById('ag-lead').value,obs:document.getElementById('ag-obs').value,meet_link,categoria:'agendamento',status:'pendente'};
+  const{error}=await sb.from('atividades').insert(payload);
+  if(error){showToast('Erro: '+error.message,'error');return;}
+  showToast('Agendamento salvo!','success');closeModal('agendaModal');
+  await loadAtividades();renderAgenda();
 }
 
 function deleteAgenda(id) {
@@ -2148,6 +2221,38 @@ function applyMoneyMask(input) {
   v = (parseInt(v) / 100).toFixed(2);
   v = v.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   input.value = 'R$ ' + v;
+}
+
+// ============================================================
+// M1 — AUDIT LOG
+// ============================================================
+async function logAudit(acao, tabela, id_registro, detalhes) {
+  try {
+    await sb.from('audit_log').insert({
+      usuario: currentUser?.email||'unknown',
+      acao, tabela, id_registro: id_registro||null,
+      detalhes: detalhes||null,
+      created_at: new Date().toISOString()
+    });
+  } catch(e) { /* silencioso */ }
+}
+
+async function loadAuditLog() {
+  const el = document.getElementById('audit-log-list');
+  if(!el) return;
+  el.innerHTML = '<div class="loading">Carregando...</div>';
+  const {data,error} = await sb.from('audit_log').select('*').order('created_at',{ascending:false}).limit(100);
+  if(error){el.innerHTML='<div style="color:var(--muted);padding:20px">Tabela audit_log não encontrada. Execute o SQL abaixo para criar.</div>';return;}
+  if(!data||!data.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">Nenhuma ação registrada ainda.</div>';return;}
+  el.innerHTML = data.map(a=>{
+    const dt = new Date(a.created_at).toLocaleString('pt-BR');
+    const acoColor = {criar:'var(--success)',editar:'var(--warning)',excluir:'var(--danger)',login:'var(--blue)'}[a.acao]||'var(--muted)';
+    return `<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px">
+      <span style="min-width:60px;font-weight:700;color:${acoColor};text-transform:uppercase">${a.acao||'—'}</span>
+      <div style="flex:1"><div style="font-weight:600">${a.tabela||'—'} ${a.id_registro?'· '+a.id_registro.substring(0,8)+'...':''}</div>${a.detalhes?`<div style="color:var(--muted)">${a.detalhes}</div>`:''}</div>
+      <div style="color:var(--muted);white-space:nowrap">${a.usuario||'?'}<br>${dt}</div>
+    </div>`;
+  }).join('');
 }
 
 function moneyToNum(str) {
@@ -2411,6 +2516,8 @@ async function checkAllLembretes() {
   });
   // Verifica tarefas internas
   checkTarefasInternasLembretes();
+  // Verifica retornos de leads
+  checkRetornoLeads();
   // Verifica agendamentos
   checkAgendaLembretes();
 }
@@ -2425,6 +2532,24 @@ function checkLembretes() {
     if (diffMin <= 15 && diffMin > -120 && !sessionStorage.getItem(key)) {
       sessionStorage.setItem(key, '1');
       showNotificacao(a);
+    }
+  });
+}
+
+// F1 — Lembretes de retorno dos leads
+function checkRetornoLeads() {
+  if(!allLeads||!allLeads.length) return;
+  const agora = new Date();
+  allLeads.filter(l=>l.retorno_lembrete&&l.retorno_data).forEach(l=>{
+    const prazo = parsePrazoBR(l.retorno_data, l.retorno_hora||'09:00');
+    const diffMin = (prazo-agora)/60000;
+    const key = 'retorno_notif_'+l.id;
+    if(diffMin<=15&&diffMin>-120&&!sessionStorage.getItem(key)){
+      sessionStorage.setItem(key,'1');
+      showPopup('📞 Retorno: '+(l.razao_social||l.gestor||'Lead'), 'Prazo: '+prazo.toLocaleString('pt-BR'));
+      if('Notification'in window&&Notification.permission==='granted'){
+        new Notification('📞 Retorno — '+(l.razao_social||'Lead'),{body:'Prazo: '+prazo.toLocaleString('pt-BR'),icon:'https://i.imgur.com/rrQxwkl.png'});
+      }
     }
   });
 }
@@ -3098,18 +3223,23 @@ function renderPropostas() {
   const el = document.getElementById('propostas-list');
   if (!el) return;
   propostasGeradas = JSON.parse(localStorage.getItem('desiberne_propostas') || '[]');
-  if (!propostasGeradas.length) { el.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)"><i class="ti ti-file-description" style="font-size:40px;display:block;margin-bottom:12px"></i>Nenhuma proposta gerada ainda.</div>'; return; }
-  el.innerHTML = propostasGeradas.slice().reverse().map(p => `
-    <div class="chart-card" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <div style="font-weight:700;font-size:14px">${p.empresa}</div>
-        <div style="font-size:11px;color:var(--muted)">${p.nicho} · ${p.data} · ${p.servicos}</div>
+  if (!propostasGeradas.length) { el.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)"><i class="ti ti-file-description" style="font-size:40px;display:block;margin-bottom:12px"></i>Nenhuma proposta gerada ainda.<br><small>Clique em "Nova Proposta" para começar.</small></div>'; return; }
+  el.innerHTML = propostasGeradas.slice().reverse().map((p,ri) => {
+    const idx = propostasGeradas.length - 1 - ri;
+    return `<div class="chart-card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:14px">${p.empresa}</div>
+          <div style="font-size:11px;color:var(--muted)">${p.nicho||''} · ${p.data||''} · ${p.servicos||''}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:13px;font-weight:700;color:var(--neon-light)">${p.valorMensal||''}/mês</span>
+          <button class="add-btn" style="font-size:11px;padding:6px 10px;background:rgba(124,58,237,0.15)" onclick="openEditPropostaModal(${idx})"><i class="ti ti-pencil"></i></button>
+          <button class="delete-btn" style="font-size:11px;padding:6px 10px" onclick="excluirProposta(${idx})"><i class="ti ti-trash"></i></button>
+        </div>
       </div>
-      <div style="display:flex;gap:8px">
-        <span style="font-size:13px;font-weight:700;color:var(--neon-light)">${p.valorMensal}/mês</span>
-        <button class="add-btn" style="font-size:11px;padding:6px 12px" onclick="regenarProposta(${JSON.stringify(p).replace(/"/g,'&quot;')})"><i class="ti ti-file-download"></i> PDF</button>
-      </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 async function gerarPropostaPDF() {
@@ -3212,8 +3342,8 @@ async function gerarPropostaPDF() {
   html2pdf().set(opt).from(container).save().then(() => {
     document.body.removeChild(container);
     // Salvar no histórico local
-    const registro = { empresa, nicho, data: hoje, servicos: servicos.join(', '), valorMensal };
-    propostasGeradas.push(registro);
+    const raw = {empresa,nicho,resp,contato,situacao,dor,meta,servicos:servicos.map(s=>({'Marketing Digital':'marketing','Tráfego Pago':'trafego','Social Mídia':'social','Gestão Comercial':'gestao','Automação':'automacao','Agente de IA':'agente'}[s]||s)),plano:[1,2,3,4,5,6].map(i=>({mes:'Mês '+i,acao:document.getElementById('plan-m'+i)?.value||''})),kpis,valorMensal,vigencia,comissao,validade};
+    if(editingPropostaIdx!==null){propostasGeradas[editingPropostaIdx]={empresa,nicho,data:hoje,servicos:servicos.join(', '),valorMensal,raw};editingPropostaIdx=null;}else{propostasGeradas.push({empresa,nicho,data:hoje,servicos:servicos.join(', '),valorMensal,raw});}
     localStorage.setItem('desiberne_propostas', JSON.stringify(propostasGeradas));
     renderPropostas();
     closeModal('propostaModal');
@@ -3441,7 +3571,7 @@ function exportPDF(){
         <p>Relatório Comercial & Financeiro — ${mesStr}</p>
       </div>
       <div class="date-info">
-        <div style="font-size:14px;font-weight:800;color:#111">CRM v14.0</div>
+        <div style="font-size:14px;font-weight:800;color:#111">CRM v15.0</div>
         <div>Gerado em ${dateStr}</div>
       </div>
     </div>
@@ -3510,7 +3640,7 @@ function exportPDF(){
     </div>
 
     <div class="footer">
-      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v14.0
+      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v15.0
     </div>
     </body>
     </html>
@@ -3539,7 +3669,7 @@ let masterTabAtual = 'empresas';
 
 function switchMasterTab(tab){
   masterTabAtual = tab;
-  ['empresas','usuarios','estrategico','integracoes','carrossel'].forEach(t=>{
+  ['empresas','usuarios','estrategico','integracoes','auditlog','cases','carrossel'].forEach(t=>{
     const el = document.getElementById('master-tab-'+t);
     if(el) el.style.display = t===tab?'block':'none';
     const btn = document.getElementById('tab-'+t);
@@ -3552,6 +3682,8 @@ function switchMasterTab(tab){
   if(tab==='estrategico') renderMasterEstrategico();
   if(tab==='carrossel') loadSlidesAdmin();
   if(tab==='integracoes') {} // static content
+  if(tab==='auditlog') loadAuditLog();
+  if(tab==='cases') loadCases();
 }
 
 async function renderMasterEstrategico(){
@@ -3707,6 +3839,28 @@ async function applyPermissions(){
 // TAREFAS INTERNAS
 // ============================================================
 let tarefasInternas = [], draggedTiId = null;
+
+// F4 — Visualizar tarefa interna
+function openTiDetalhe(id) {
+  const t = tarefasInternas.find(x=>x.id===id);
+  if(!t) return;
+  document.getElementById('ti-det-titulo').textContent = t.titulo||'Tarefa';
+  const prazo = t.prazo_data ? parsePrazoBR(t.prazo_data, t.prazo_hora||'09:00') : null;
+  const priorCor = {alta:'var(--danger)',normal:'var(--neon-light)',baixa:'var(--muted)'}[t.prioridade]||'var(--muted)';
+  const statusLabel = {pendente:'Pendente',andamento:'Em Andamento',entregue:'Entregue'}[t.status]||t.status;
+  document.getElementById('ti-det-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px 0">
+      <div><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px">Status</div><div style="font-weight:600">${statusLabel}</div></div>
+      <div><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px">Prioridade</div><div style="font-weight:600;color:${priorCor}">${(t.prioridade||'normal').toUpperCase()}</div></div>
+      <div><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px">Responsável</div><div style="font-weight:600">${t.responsavel||'—'}</div></div>
+      <div><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px">Categoria</div><div style="font-weight:600">${t.categoria||'—'}</div></div>
+      ${prazo?`<div style="grid-column:span 2"><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px">Prazo</div><div style="font-weight:600">${prazo.toLocaleString('pt-BR')}</div></div>`:''}
+      ${t.descricao?`<div style="grid-column:span 2"><div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px">Descrição</div><div style="font-size:13px;line-height:1.6;background:var(--bg);padding:10px;border-radius:8px">${t.descricao}</div></div>`:''}
+      ${t.lembrete?`<div style="grid-column:span 2;font-size:11px;color:var(--neon-light)"><i class="ti ti-bell"></i> Lembrete ativo</div>`:''}
+    </div>`;
+  document.getElementById('ti-det-edit-btn').onclick = ()=>{ closeModal('tiDetalheModal'); openTarefaInternaModal(); setTimeout(()=>editTarefaInterna(id),50); };
+  openModal('tiDetalheModal');
+}
 
 async function loadTarefasInternas(){
   const{data,error}=await sb.from('tarefas_internas').select('*').order('created_at',{ascending:true});
@@ -4126,6 +4280,133 @@ function renderFinanceiroSync(){
 // ============================================================
 // SWITCH MASTER TAB — update for carrossel
 // ============================================================
+
+
+// ============================================================
+// CASES DE SUCESSO
+// ============================================================
+let cases = [];
+
+async function loadCases() {
+  const el = document.getElementById('cases-list');
+  if(!el) return;
+  const {data,error} = await sb.from('cases_proposta').select('*').order('created_at',{ascending:false});
+  if(error){
+    el.innerHTML='<div style="color:var(--warning);padding:20px">Crie a tabela com o SQL: <code>CREATE TABLE cases_proposta (id uuid DEFAULT gen_random_uuid() PRIMARY KEY, created_at timestamptz DEFAULT now(), empresa text, nicho text, desafio text, solucao text, faturamento text, leads text, conversao text, visibilidade text, roi text, prazo text, depoimento text); ALTER TABLE cases_proposta ENABLE ROW LEVEL SECURITY; CREATE POLICY "Allow all" ON cases_proposta FOR ALL USING (true);</code></div>';
+    return;
+  }
+  cases = data||[];
+  if(!cases.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">Nenhum case cadastrado.</div>';return;}
+  el.innerHTML = cases.map(c=>`
+    <div class="chart-card" style="margin-bottom:12px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <div style="flex:1">
+          <div style="font-weight:800;font-size:14px;margin-bottom:4px">${c.empresa}</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${c.nicho}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            ${c.faturamento?`<span style="background:rgba(16,185,129,0.1);color:var(--success);padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700">📈 ${c.faturamento}</span>`:''}
+            ${c.leads?`<span style="background:rgba(59,130,246,0.1);color:var(--blue);padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700">👥 ${c.leads}</span>`:''}
+            ${c.conversao?`<span style="background:rgba(124,58,237,0.1);color:var(--neon-light);padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700">🎯 ${c.conversao}</span>`:''}
+            ${c.roi?`<span style="background:rgba(245,158,11,0.1);color:var(--warning);padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700">💰 ${c.roi}</span>`:''}
+          </div>
+          ${c.depoimento?`<div style="margin-top:10px;font-size:12px;color:var(--muted);font-style:italic">"${c.depoimento}"</div>`:''}
+        </div>
+        <button class="add-btn" style="font-size:11px;padding:6px 12px;flex-shrink:0" onclick="editCaseModal('${c.id}')"><i class="ti ti-pencil"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+function openCaseModal() {
+  document.getElementById('case-modal-title').textContent='Novo Case';
+  document.getElementById('case-edit-id').value='';
+  document.getElementById('case-delete-btn').style.display='none';
+  ['case-empresa','case-desafio','case-solucao','case-faturamento','case-leads','case-conversao','case-visibilidade','case-roi','case-prazo','case-depoimento'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  openModal('caseModal');
+}
+
+function editCaseModal(id) {
+  const c = cases.find(x=>x.id===id);
+  if(!c) return;
+  document.getElementById('case-modal-title').textContent='Editar Case';
+  document.getElementById('case-edit-id').value=c.id;
+  document.getElementById('case-delete-btn').style.display='block';
+  document.getElementById('case-empresa').value=c.empresa||'';
+  document.getElementById('case-nicho').value=c.nicho||'Clínica / Saúde';
+  document.getElementById('case-desafio').value=c.desafio||'';
+  document.getElementById('case-solucao').value=c.solucao||'';
+  document.getElementById('case-faturamento').value=c.faturamento||'';
+  document.getElementById('case-leads').value=c.leads||'';
+  document.getElementById('case-conversao').value=c.conversao||'';
+  document.getElementById('case-visibilidade').value=c.visibilidade||'';
+  document.getElementById('case-roi').value=c.roi||'';
+  document.getElementById('case-prazo').value=c.prazo||'';
+  document.getElementById('case-depoimento').value=c.depoimento||'';
+  openModal('caseModal');
+}
+
+async function saveCase() {
+  const empresa = document.getElementById('case-empresa').value.trim();
+  if(!empresa){showToast('Informe o nome do cliente','error');return;}
+  const editId = document.getElementById('case-edit-id').value;
+  const data = {empresa,nicho:document.getElementById('case-nicho').value,desafio:document.getElementById('case-desafio').value,solucao:document.getElementById('case-solucao').value,faturamento:document.getElementById('case-faturamento').value,leads:document.getElementById('case-leads').value,conversao:document.getElementById('case-conversao').value,visibilidade:document.getElementById('case-visibilidade').value,roi:document.getElementById('case-roi').value,prazo:document.getElementById('case-prazo').value,depoimento:document.getElementById('case-depoimento').value};
+  const{error}=editId?await sb.from('cases_proposta').update(data).eq('id',editId):await sb.from('cases_proposta').insert(data);
+  if(error){showToast('Erro: '+error.message,'error');return;}
+  showToast(editId?'Case atualizado!':'Case salvo!','success');
+  closeModal('caseModal');loadCases();
+}
+
+async function deleteCase() {
+  const id=document.getElementById('case-edit-id').value;
+  if(!id||!confirm('Excluir este case?'))return;
+  await sb.from('cases_proposta').delete().eq('id',id);
+  showToast('Case excluído','success');closeModal('caseModal');loadCases();
+}
+
+// ============================================================
+// PROPOSTAS — Editar + Excluir (F5)
+// ============================================================
+let editingPropostaIdx = null;
+
+function openEditPropostaModal(idx) {
+  const p = propostasGeradas[idx];
+  if(!p) return;
+  editingPropostaIdx = idx;
+  // Preencher campos do modal de proposta com dados salvos
+  if(p.raw) {
+    const r = p.raw;
+    document.getElementById('prop-empresa').value=r.empresa||'';
+    document.getElementById('prop-nicho').value=r.nicho||'Clínica / Saúde';
+    document.getElementById('prop-resp').value=r.resp||'';
+    document.getElementById('prop-contato').value=r.contato||'';
+    document.getElementById('prop-situacao').value=r.situacao||'';
+    document.getElementById('prop-dor').value=r.dor||'';
+    document.getElementById('prop-meta').value=r.meta||'';
+    document.getElementById('prop-valor-mensal').value=r.valorMensal||'';
+    document.getElementById('prop-vigencia').value=r.vigencia||6;
+    document.getElementById('prop-comissao').value=r.comissao||'';
+    document.getElementById('prop-validade').value=r.validade||7;
+    ['marketing','trafego','social','gestao','automacao','agente'].forEach(s=>{
+      const el=document.getElementById('srv-'+s);
+      if(el)el.checked=(r.servicos||[]).includes(s);
+    });
+    [1,2,3,4,5,6].forEach(i=>{
+      const el=document.getElementById('plan-m'+i);
+      if(el)el.value=(r.plano&&r.plano[i-1])?r.plano[i-1].acao:'';
+    });
+    document.getElementById('plan-kpis').value=r.kpis||'';
+  }
+  openModal('propostaModal');
+}
+
+function excluirProposta(idx) {
+  if(!confirm('Excluir esta proposta?')) return;
+  propostasGeradas.splice(idx,1);
+  localStorage.setItem('desiberne_propostas',JSON.stringify(propostasGeradas));
+  renderPropostas();
+  showToast('Proposta excluída','success');
+}
+
+// Versão atualizada
 
 checkSession();
 startLembretes();
