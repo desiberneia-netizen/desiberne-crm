@@ -41,13 +41,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 .login-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(124,58,237,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,0.03) 1px,transparent 1px);background-size:40px 40px}
 .login-box{background:rgba(13,13,26,0.9);border:1px solid rgba(124,58,237,0.15);border-radius:24px;padding:44px;width:420px;text-align:center;position:relative;z-index:1;box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 0 1px rgba(124,58,237,0.08);backdrop-filter:blur(20px);animation:fadeUp .4s ease}
 .login-logo{width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 20px;display:block;box-shadow:0 0 30px rgba(124,58,237,0.4),0 0 0 4px rgba(124,58,237,0.1)}
-.login-title{font-size:26px;font-weight:900;margin-bottom:6px;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.03em}
+.login-title{font-size:22px;font-weight:800;margin-bottom:6px;font-family:'Syne',sans-serif;background:linear-gradient(135deg,#e0d0ff,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.01em}
 .login-sub{font-size:13px;color:var(--muted);margin-bottom:32px;font-weight:500}
 .login-form{display:flex;flex-direction:column;gap:16px;text-align:left}
 .login-label{font-size:10px;color:var(--muted);margin-bottom:5px;display:block;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .login-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:12px 16px;color:var(--text);font-size:13px;outline:none;transition:all .2s;font-family:inherit}
 .login-input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,0.12),inset 0 1px 0 rgba(255,255,255,0.05)}
-.login-btn{width:100%;background:linear-gradient(135deg,#7c3aed,#06b6d4);border:none;border-radius:12px;padding:13px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;transition:all .2s;font-family:'Syne',sans-serif;letter-spacing:.02em}.login-btn:hover{opacity:.88;transform:translateY(-1px)}
+.login-btn{width:100%;background:linear-gradient(135deg,#7c3aed,#06b6d4);border:none;border-radius:12px;padding:13px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;letter-spacing:.01em}
 .login-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.1) 0%,transparent 100%)}
 .login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(124,58,237,0.45)}
 .login-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
@@ -95,6 +95,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 .sidebar-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;cursor:pointer;color:var(--muted);font-size:12px;font-weight:600;transition:all .15s;position:relative}
 .sidebar-item:hover{background:rgba(255,255,255,0.04);color:var(--text)}
 .sidebar-item.active{background:rgba(124,58,237,0.12);color:#c084fc}.sidebar-item.active::before{background:linear-gradient(180deg,#7c3aed,#06b6d4)}
+.sidebar-group{overflow:hidden;max-height:500px;transition:max-height .3s ease}
+.sidebar-group.collapsed{max-height:0}
+.sidebar-section{cursor:pointer;user-select:none}
+.sec-arrow{font-size:9px;opacity:.4;transition:transform .2s}
+.sidebar-section.collapsed .sec-arrow{transform:rotate(-90deg)}
 .sidebar-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:55%;background:var(--gradient);border-radius:0 3px 3px 0}
 .sidebar-item i{font-size:15px;opacity:.85}
 .sidebar-badge{margin-left:auto;background:var(--neon);color:#fff;font-size:9px;border-radius:20px;padding:2px 7px;font-weight:800}
@@ -470,28 +475,46 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
         <img src="https://i.imgur.com/rrQxwkl.png" alt="D" style="width:28px;height:28px;border-radius:8px">
         <div class="sidebar-logo-text">Desiberne IA</div>
       </div>
-      <div class="sidebar-section">Operacional</div>
-      <div class="sidebar-item active" onclick="showView('home',null,this)"><i class="ti ti-home-2"></i> Início</div>
-      <div class="sidebar-item" onclick="showView('dashboard',null,this)"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
-      <div class="sidebar-item" onclick="showView('kanban',null,this)"><i class="ti ti-columns"></i> Pipeline Kanban</div>
-      <div class="sidebar-item" onclick="showView('agenda',null,this)"><i class="ti ti-calendar-event"></i> Agendamentos</div>
-      <div class="sidebar-item" onclick="showView('clientes',null,this)"><i class="ti ti-users"></i> Clientes</div>
-      <div class="sidebar-section">Gestão</div>
-      <div class="sidebar-item" onclick="showView('tarefas',null,this)"><i class="ti ti-checklist"></i> Tarefas <span class="sidebar-badge" id="badge-tarefas">0</span></div>
-      <div class="sidebar-item" onclick="showView('equipe',null,this)"><i class="ti ti-users-group"></i> Equipe</div>
-      <div class="sidebar-section">Financeiro</div>
-      <div class="sidebar-item" onclick="showView('financeiro',null,this)"><i class="ti ti-chart-pie"></i> Visão Geral</div>
-      <div class="sidebar-item" onclick="showView('receitas',null,this)"><i class="ti ti-trending-up"></i> Receitas</div>
-      <div class="sidebar-item" onclick="showView('despesas',null,this)"><i class="ti ti-trending-down"></i> Despesas</div>
-      <div class="sidebar-item" onclick="showView('contratos',null,this)"><i class="ti ti-file-dollar"></i> Contratos</div>
-      <div class="sidebar-section">Comercial</div>
-      <div class="sidebar-item" onclick="showView('vendas',null,this)"><i class="ti ti-shopping-cart"></i> Registro de Vendas</div>
-      <div class="sidebar-item" onclick="showView('faturas',null,this)"><i class="ti ti-receipt"></i> Faturas</div>
-      <div class="sidebar-item" onclick="showView('propostas',null,this)"><i class="ti ti-file-description"></i> Propostas</div>
-      <div class="sidebar-section">Ferramentas</div>
-      <div class="sidebar-item" onclick="showView('links',null,this)"><i class="ti ti-link"></i> Links Úteis</div>
-      <div class="sidebar-section" id="master-section" style="display:none">Admin</div>
-      <div class="sidebar-item" id="master-sidebar" style="display:none" onclick="showView('master',null,this)"><i class="ti ti-shield-lock"></i> Painel Master</div>
+
+      <div class="sidebar-section" onclick="toggleSidebarGroup('grp-operacional',this)">Operacional <span class="sec-arrow">▾</span></div>
+      <div class="sidebar-group" id="grp-operacional" style="max-height:300px">
+        <div class="sidebar-item active" onclick="showView('home',null,this)"><i class="ti ti-home-2"></i> Início</div>
+        <div class="sidebar-item" onclick="showView('dashboard',null,this)"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+        <div class="sidebar-item" onclick="showView('kanban',null,this)"><i class="ti ti-columns"></i> Pipeline Kanban</div>
+        <div class="sidebar-item" onclick="showView('agenda',null,this)"><i class="ti ti-calendar-event"></i> Agendamentos</div>
+        <div class="sidebar-item" onclick="showView('clientes',null,this)"><i class="ti ti-users"></i> Clientes</div>
+      </div>
+
+      <div class="sidebar-section" onclick="toggleSidebarGroup('grp-gestao',this)">Gestão <span class="sec-arrow">▾</span></div>
+      <div class="sidebar-group" id="grp-gestao" style="max-height:200px">
+        <div class="sidebar-item" onclick="showView('tarefas',null,this)"><i class="ti ti-checklist"></i> Tarefas <span class="sidebar-badge" id="badge-tarefas">0</span></div>
+        <div class="sidebar-item" onclick="showView('equipe',null,this)"><i class="ti ti-users-group"></i> Equipe</div>
+      </div>
+
+      <div class="sidebar-section" onclick="toggleSidebarGroup('grp-financeiro',this)">Financeiro <span class="sec-arrow">▾</span></div>
+      <div class="sidebar-group" id="grp-financeiro" style="max-height:300px">
+        <div class="sidebar-item" onclick="showView('financeiro',null,this)"><i class="ti ti-chart-pie"></i> Visão Geral</div>
+        <div class="sidebar-item" onclick="showView('receitas',null,this)"><i class="ti ti-trending-up"></i> Receitas</div>
+        <div class="sidebar-item" onclick="showView('despesas',null,this)"><i class="ti ti-trending-down"></i> Despesas</div>
+        <div class="sidebar-item" onclick="showView('contratos',null,this)"><i class="ti ti-file-dollar"></i> Contratos</div>
+      </div>
+
+      <div class="sidebar-section" onclick="toggleSidebarGroup('grp-comercial',this)">Comercial <span class="sec-arrow">▾</span></div>
+      <div class="sidebar-group" id="grp-comercial" style="max-height:300px">
+        <div class="sidebar-item" onclick="showView('vendas',null,this)"><i class="ti ti-shopping-cart"></i> Registro de Vendas</div>
+        <div class="sidebar-item" onclick="showView('faturas',null,this)"><i class="ti ti-receipt"></i> Faturas</div>
+        <div class="sidebar-item" onclick="showView('propostas',null,this)"><i class="ti ti-file-description"></i> Propostas</div>
+      </div>
+
+      <div class="sidebar-section" onclick="toggleSidebarGroup('grp-ferramentas',this)">Ferramentas <span class="sec-arrow">▾</span></div>
+      <div class="sidebar-group" id="grp-ferramentas" style="max-height:200px">
+        <div class="sidebar-item" onclick="showView('links',null,this)"><i class="ti ti-link"></i> Links Úteis</div>
+      </div>
+
+      <div class="sidebar-section" id="master-section" style="display:none" onclick="toggleSidebarGroup('grp-admin',this)">Admin <span class="sec-arrow">▾</span></div>
+      <div class="sidebar-group" id="grp-admin" style="max-height:100px">
+        <div class="sidebar-item" id="master-sidebar" style="display:none" onclick="showView('master',null,this)"><i class="ti ti-shield-lock"></i> Painel Master</div>
+      </div>
     </div>
 
     <div class="content">
@@ -1775,7 +1798,6 @@ function showApp() {
   loadVendas();
   loadTarefasInternas();
   loadAtividades();
-  loadFaturas();
   loadFaturas();
   setUserAvatar(currentUser?.email||'');
   startStatusChecker();
@@ -3603,10 +3625,10 @@ async function renderMaster(){
 // ============================================================
 // C3 — PROPOSTA COMERCIAL
 // ============================================================
-let propostasGeradas = JSON.parse(localStorage.getItem('desiberne_propostas') || '[]');
+let propostasGeradas = [];
 
 function openPropostaModal() {
-  // Reset form
+  editingPropostaId = null;
   ['prop-empresa','prop-resp','prop-contato','prop-meta','prop-situacao','prop-dor','plan-m1','plan-m2','plan-m3','plan-m4','plan-m5','plan-m6','plan-kpis','prop-valor-mensal','prop-comissao','prop-validade'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('prop-vigencia').value=6;
   ['srv-marketing','srv-trafego','srv-social','srv-gestao','srv-automacao','srv-agente'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
@@ -3621,27 +3643,47 @@ function calcPropostTotal() {
   document.getElementById('prop-total-display').textContent = meses > 0 ? numToMoney(total) + ' (' + meses + ' meses × ' + numToMoney(mensal) + '/mês)' : numToMoney(mensal) + '/mês';
 }
 
-function renderPropostas() {
+async function renderPropostas() {
   const el = document.getElementById('propostas-list');
   if (!el) return;
-  propostasGeradas = JSON.parse(localStorage.getItem('desiberne_propostas') || '[]');
-  if (!propostasGeradas.length) { el.innerHTML = emptyState('file-description','Nenhuma proposta gerada ainda','Clique em "Nova Proposta" para começar'); return; }
-  el.innerHTML = propostasGeradas.slice().reverse().map((p,ri) => {
-    const idx = propostasGeradas.length - 1 - ri;
-    return `<div class="chart-card" style="margin-bottom:12px">
+  el.innerHTML = '<div class="loading">Carregando propostas...</div>';
+  const {data, error} = await sb.from('propostas_comerciais').select('*').order('created_at',{ascending:false});
+  if (error) {
+    el.innerHTML = `<div style="color:var(--warning);padding:20px;font-size:12px;line-height:1.8">
+      <strong>Crie a tabela no Supabase SQL Editor:</strong><br>
+      <code style="font-size:10px;color:#a78bfa;display:block;margin-top:8px;padding:10px;background:rgba(0,0,0,0.3);border-radius:6px">
+CREATE TABLE propostas_comerciais (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at timestamptz DEFAULT now(),
+  empresa text, nicho text, servicos text,
+  valor_mensal text, vigencia text,
+  data_geracao date, raw jsonb
+);
+ALTER TABLE propostas_comerciais ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all" ON propostas_comerciais FOR ALL USING (true);
+      </code>
+    </div>`;
+    return;
+  }
+  propostasGeradas = data || [];
+  if (!propostasGeradas.length) {
+    el.innerHTML = emptyState('file-description','Nenhuma proposta gerada ainda','Clique em "Nova Proposta" para começar');
+    return;
+  }
+  el.innerHTML = propostasGeradas.map(p => `
+    <div class="chart-card" style="margin-bottom:12px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
         <div style="flex:1">
-          <div style="font-weight:700;font-size:14px">${p.empresa}</div>
-          <div style="font-size:11px;color:var(--muted)">${p.nicho||''} · ${p.data||''} · ${p.servicos||''}</div>
+          <div style="font-weight:700;font-size:14px">${p.empresa||'—'}</div>
+          <div style="font-size:11px;color:var(--muted)">${p.nicho||''} · ${p.data_geracao||''} · ${p.servicos||''}</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
-          <span style="font-size:13px;font-weight:700;color:var(--neon-light)">${p.valorMensal||''}/mês</span>
-          <button class="add-btn" style="font-size:11px;padding:6px 10px;background:rgba(124,58,237,0.15)" onclick="openEditPropostaModal(${idx})"><i class="ti ti-pencil"></i></button>
-          <button class="delete-btn" style="font-size:11px;padding:6px 10px" onclick="excluirProposta(${idx})"><i class="ti ti-trash"></i></button>
+          <span style="font-size:13px;font-weight:700;color:var(--neon-light)">${p.valor_mensal||''}/mês</span>
+          <button class="add-btn" style="font-size:11px;padding:6px 10px;background:rgba(124,58,237,0.15)" onclick="openEditPropostaById('${p.id}')"><i class="ti ti-pencil"></i></button>
+          <button class="delete-btn" style="font-size:11px;padding:6px 10px" onclick="excluirPropostaById('${p.id}')"><i class="ti ti-trash"></i></button>
         </div>
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
 }
 
 async function gerarPropostaPDF() {
@@ -3745,9 +3787,14 @@ async function gerarPropostaPDF() {
     document.body.removeChild(container);
     // Salvar no histórico local
     const raw = {empresa,nicho,resp,contato,situacao,dor,meta,servicos:servicos.map(s=>({'Marketing Digital':'marketing','Tráfego Pago':'trafego','Social Mídia':'social','Gestão Comercial':'gestao','Automação':'automacao','Agente de IA':'agente'}[s]||s)),plano:[1,2,3,4,5,6].map(i=>({mes:'Mês '+i,acao:document.getElementById('plan-m'+i)?.value||''})),kpis,valorMensal,vigencia,comissao,validade};
-    if(editingPropostaIdx!==null){propostasGeradas[editingPropostaIdx]={empresa,nicho,data:hoje,servicos:servicos.join(', '),valorMensal,raw};editingPropostaIdx=null;}else{propostasGeradas.push({empresa,nicho,data:hoje,servicos:servicos.join(', '),valorMensal,raw});}
-    localStorage.setItem('desiberne_propostas', JSON.stringify(propostasGeradas));
-    renderPropostas();
+    const propPayload = {empresa,nicho,servicos:servicos.join(', '),valor_mensal:valorMensal,vigencia,data_geracao:new Date().toISOString().split('T')[0],raw};
+    if(editingPropostaId){
+      await sb.from('propostas_comerciais').update(propPayload).eq('id',editingPropostaId);
+      editingPropostaId=null;
+    } else {
+      await sb.from('propostas_comerciais').insert(propPayload);
+    }
+    await renderPropostas();
     closeModal('propostaModal');
   });
 }
@@ -3756,6 +3803,19 @@ async function gerarPropostaPDF() {
 // MODO FOCO
 // ============================================================
 let focoAtivo = false;
+function toggleSidebarGroup(id, section) {
+  const grp = document.getElementById(id);
+  if (!grp) return;
+  const isCollapsed = grp.classList.contains('collapsed');
+  if (isCollapsed) {
+    grp.classList.remove('collapsed');
+    if(section) section.classList.remove('collapsed');
+  } else {
+    grp.classList.add('collapsed');
+    if(section) section.classList.add('collapsed');
+  }
+}
+
 function toggleFoco(){
   focoAtivo = !focoAtivo;
   const overlay = document.getElementById('modoFoco');
@@ -4925,12 +4985,12 @@ async function deleteCase() {
 // ============================================================
 // PROPOSTAS — Editar + Excluir (F5)
 // ============================================================
-let editingPropostaIdx = null;
+let editingPropostaId = null;
 
 function openEditPropostaModal(idx) {
   const p = propostasGeradas[idx];
   if(!p) return;
-  editingPropostaIdx = idx;
+  editingPropostaId = idx;
   // Preencher campos do modal de proposta com dados salvos
   if(p.raw) {
     const r = p.raw;
@@ -4958,12 +5018,17 @@ function openEditPropostaModal(idx) {
   openModal('propostaModal');
 }
 
-function excluirProposta(idx) {
+async function excluirProposta(idx) {
+  // Compatibilidade — redireciona para excluir por ID
+  const p = propostasGeradas[idx];
+  if(p && p.id) await excluirPropostaById(p.id);
+}
+
+async function excluirPropostaById(id) {
   if(!confirm('Excluir esta proposta?')) return;
-  propostasGeradas.splice(idx,1);
-  localStorage.setItem('desiberne_propostas',JSON.stringify(propostasGeradas));
-  renderPropostas();
+  await sb.from('propostas_comerciais').delete().eq('id',id);
   showToast('Proposta excluída','success');
+  await renderPropostas();
 }
 
 // Versão atualizada
