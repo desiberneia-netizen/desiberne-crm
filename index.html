@@ -9,13 +9,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 /* V7 DESIGN UPGRADE */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;font-size:13px}
+body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;font-size:13px}
 :root{
-  --bg:#070710;--surface:#0d0d1a;--card:#12121e;--border:#1c1c2e;
-  --purple:#8b5cf6;--purple-light:#a78bfa;--neon:#7c3aed;
-  --blue:#3b82f6;--blue-light:#60a5fa;--text:#e2e2f0;--muted:#6b7280;
+  --bg:#06060e;--surface:#09091a;--card:#0e0e1c;--border:#1a1a2e;
+  --purple:#8b5cf6;--purple-light:#c084fc;--neon:#7c3aed;
+  --blue:#3b82f6;--blue-light:#38bdf8;--cyan:#06b6d4;--cyan-light:#67e8f9;
+  --text:#ddd8f0;--muted:#5a5a85;
+  --gradient:linear-gradient(135deg,#7c3aed 0%,#06b6d4 100%);
   --success:#10b981;--warning:#f59e0b;--danger:#ef4444;
   --hot:#f43f5e;--warm:#f59e0b;--cold:#3b82f6;
   --gradient:linear-gradient(135deg,#7c3aed 0%,#a78bfa 100%);
@@ -31,7 +33,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 @keyframes carouselIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
 
 /* LOGIN */
-.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden;background-image:linear-gradient(rgba(124,58,237,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,0.07) 1px,transparent 1px),radial-gradient(circle at 1px 1px,rgba(124,58,237,0.18) 1px,transparent 0);background-size:32px 32px,32px 32px,32px 32px}
 .login-bg{position:absolute;inset:0;background:
   radial-gradient(ellipse at 15% 50%,rgba(124,58,237,0.07) 0%,transparent 55%),
   radial-gradient(ellipse at 85% 15%,rgba(167,139,250,0.05) 0%,transparent 45%),
@@ -45,7 +47,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 .login-label{font-size:10px;color:var(--muted);margin-bottom:5px;display:block;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .login-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:12px 16px;color:var(--text);font-size:13px;outline:none;transition:all .2s;font-family:inherit}
 .login-input:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,0.12),inset 0 1px 0 rgba(255,255,255,0.05)}
-.login-btn{width:100%;background:var(--gradient);border:none;border-radius:12px;padding:14px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;margin-top:4px;transition:all .25s;letter-spacing:.02em;font-family:inherit;position:relative;overflow:hidden}
+.login-btn{width:100%;background:linear-gradient(135deg,#7c3aed,#06b6d4);border:none;border-radius:12px;padding:13px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;transition:all .2s;font-family:'Syne',sans-serif;letter-spacing:.02em}.login-btn:hover{opacity:.88;transform:translateY(-1px)}
 .login-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.1) 0%,transparent 100%)}
 .login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(124,58,237,0.45)}
 .login-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
@@ -53,7 +55,22 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 
 /* TOPBAR */
 .crm-wrap{display:flex;flex-direction:column;min-height:100vh}
-.topbar{background:rgba(13,13,26,0.95);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:50;backdrop-filter:blur(16px)}
+.topbar{background:rgba(6,6,14,0.96);border-bottom:1px solid rgba(124,58,237,0.2);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:50;backdrop-filter:blur(20px)}
+.status-indicator{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:rgba(6,6,14,0.8);border:1px solid rgba(16,185,129,0.25);font-size:10px;font-weight:600;cursor:default;transition:all .3s}
+.status-indicator.warn{border-color:rgba(245,158,11,0.3)}
+.status-indicator.err{border-color:rgba(239,68,68,0.3)}
+.status-pulse{width:6px;height:6px;border-radius:50%;background:#10b981;animation:statusPulse 2s infinite}
+.status-pulse.warn{background:#f59e0b;animation:statusBlink 1s infinite}
+.status-pulse.err{background:#ef4444;animation:none}
+.user-avatar{width:30px;height:30px;border-radius:50%;background:rgba(124,58,237,0.2);border:1px solid rgba(192,132,252,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#c084fc;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:.02em;transition:all .2s}
+.user-avatar:hover{background:rgba(124,58,237,0.35);border-color:rgba(192,132,252,0.6)}
+@keyframes statusPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.85)}}
+@keyframes statusBlink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes gridScan{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}
+.view.active{animation:fadeIn .18s ease}
+.page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,#e0d0ff 0%,#67e8f9 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.page-sub{font-size:12px;color:var(--muted);margin-top:2px}
 .logo-area{display:flex;align-items:center;gap:10px}
 .logo-img{width:32px;height:32px;border-radius:50%;object-fit:cover;box-shadow:0 0 12px rgba(124,58,237,0.3)}
 .logo-text{font-size:15px;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.02em}
@@ -62,7 +79,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 .nav-btn{background:none;border:none;color:var(--muted);padding:6px 11px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:5px;font-family:inherit;letter-spacing:.01em}
 .nav-btn i{font-size:14px}
 .nav-btn:hover{background:rgba(255,255,255,0.05);color:var(--text)}
-.nav-btn.active{background:rgba(124,58,237,0.12);color:var(--purple-light)}
+.nav-btn.active{background:rgba(124,58,237,0.15);color:#c084fc;border-color:rgba(192,132,252,0.2)}
 .topbar-right{display:flex;align-items:center;gap:10px}
 .user-email{font-size:11px;color:var(--muted);font-weight:600}
 .logout-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 11px;color:var(--muted);font-size:11px;cursor:pointer;transition:all .15s;font-weight:600;font-family:inherit}
@@ -70,20 +87,20 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 
 /* SIDEBAR */
 .main-body{display:flex;flex:1;overflow:hidden}
-.sidebar{width:218px;background:var(--surface);border-right:1px solid var(--border);padding:12px 8px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.sidebar{width:218px;background:rgba(9,9,26,0.98);border-right:1px solid rgba(124,58,237,0.12);padding:12px 8px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
 .sidebar-logo{display:flex;align-items:center;gap:9px;padding:10px 10px 14px;border-bottom:1px solid var(--border);margin-bottom:8px}
 .sidebar-logo img{width:26px;height:26px;border-radius:50%;object-fit:cover}
 .sidebar-logo-text{font-size:13px;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .sidebar-section{font-size:9px;color:rgba(107,114,128,0.7);text-transform:uppercase;letter-spacing:.1em;padding:10px 10px 4px;font-weight:800}
 .sidebar-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;cursor:pointer;color:var(--muted);font-size:12px;font-weight:600;transition:all .15s;position:relative}
 .sidebar-item:hover{background:rgba(255,255,255,0.04);color:var(--text)}
-.sidebar-item.active{background:rgba(124,58,237,0.1);color:var(--purple-light)}
+.sidebar-item.active{background:rgba(124,58,237,0.12);color:#c084fc}.sidebar-item.active::before{background:linear-gradient(180deg,#7c3aed,#06b6d4)}
 .sidebar-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:55%;background:var(--gradient);border-radius:0 3px 3px 0}
 .sidebar-item i{font-size:15px;opacity:.85}
 .sidebar-badge{margin-left:auto;background:var(--neon);color:#fff;font-size:9px;border-radius:20px;padding:2px 7px;font-weight:800}
 
 /* CONTENT */
-.content{flex:1;overflow-y:auto;padding:24px;background:var(--bg)}
+.content{flex:1;overflow-y:auto;padding:24px;background:var(--bg);background-image:linear-gradient(rgba(124,58,237,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,0.05) 1px,transparent 1px),radial-gradient(circle at 1px 1px,rgba(124,58,237,0.14) 1px,transparent 0);background-size:32px 32px,32px 32px,32px 32px}
 .view{display:none}.view.active{display:block;animation:fadeUp .25s ease}
 .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
 .page-title{font-size:22px;font-weight:900;letter-spacing:-.03em}
@@ -93,7 +110,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 
 /* KPI CARDS */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
-.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;transition:all .25s;position:relative;overflow:hidden}
+.kpi-card{background:var(--card);border:1px solid rgba(124,58,237,0.15);border-radius:14px;padding:18px 20px;transition:all .25s;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#7c3aed,#06b6d4);opacity:0;transition:opacity .25s}
+.kpi-card:hover{border-color:rgba(124,58,237,0.35);transform:translateY(-2px)}
+.kpi-card:hover::before{opacity:1}
 .kpi-card:hover{border-color:rgba(124,58,237,0.25);transform:translateY(-3px);box-shadow:var(--glow)}
 .kpi-label{font-size:10px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .kpi-value{font-size:28px;font-weight:900;letter-spacing:-.03em}
@@ -129,7 +149,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 .col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .col-title{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.01em}
 .col-count{font-size:11px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2px 9px;color:var(--muted);font-weight:700}
-.lead-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:9px;cursor:grab;transition:all .2s;position:relative;overflow:hidden}
+.lead-card{background:var(--card);border-left:2px solid rgba(124,58,237,0.4);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:9px;cursor:grab;transition:all .2s;position:relative;overflow:hidden}
 .lead-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:12px 12px 0 0}
 .lead-card.cold::after{background:var(--cold)}.lead-card.warm::after{background:var(--warm)}.lead-card.hot::after{background:linear-gradient(90deg,var(--hot),#ff8a65)}.lead-card.done::after{background:var(--success)}
 .lead-card:hover{border-color:rgba(124,58,237,0.25);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.25)}
@@ -308,7 +328,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 .notif-close{position:absolute;top:9px;right:11px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px}
 
 /* TOAST */
-.toast{position:fixed;bottom:22px;right:22px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 20px;font-size:12px;z-index:999;opacity:0;transform:translateY(12px);transition:all .3s;font-weight:700;box-shadow:var(--shadow)}
+.toast{position:fixed;bottom:22px;right:22px;background:rgba(14,14,28,0.95);border:1px solid rgba(124,58,237,0.2);border-radius:10px;padding:12px 18px;font-size:12px;z-index:999;opacity:0;transform:translateY(12px);transition:all .3s;font-weight:700;backdrop-filter:blur(12px)}
 .toast.show{opacity:1;transform:translateY(0)}
 .toast.success{border-color:var(--success);color:var(--success)}.toast.error{border-color:var(--danger);color:var(--danger)}
 .loading{text-align:center;padding:34px;color:var(--muted);font-size:12px;font-weight:600}
@@ -413,56 +433,65 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
 <div id="app-screen" style="display:none">
 <div class="crm-wrap">
   <div class="topbar">
-    <div class="logo-area">
+    <div class="logo-area" onclick="showView('home',document.querySelector('.nav-btn'))" style="cursor:pointer;user-select:none" title="Ir para Início">
       <img class="logo-img" src="https://i.imgur.com/rrQxwkl.png" alt="Desiberne IA">
-      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v16.0</span></div>
+      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v17.0</span></div>
     </div>
     <div class="topbar-nav">
       <button class="nav-btn active" onclick="showView('home',this)"><i class="ti ti-home"></i> Início</button>
       <button class="nav-btn" onclick="showView('dashboard',this)"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
       <button class="nav-btn" onclick="showView('kanban',this)"><i class="ti ti-columns"></i> Pipeline</button>
       <button class="nav-btn" onclick="showView('agenda',this)"><i class="ti ti-calendar"></i> Agenda</button>
-      <button class="nav-btn" onclick="showView('clientes',this)"><i class="ti ti-users"></i> Clientes</button>
       <button class="nav-btn" onclick="showView('financeiro',this)"><i class="ti ti-coin"></i> Financeiro</button>
-      <button class="nav-btn" onclick="showView('contratos',this)"><i class="ti ti-file-dollar"></i> Contratos</button>
       <button class="nav-btn" onclick="showView('vendas',this)"><i class="ti ti-shopping-cart"></i> Vendas</button>
-      <button class="nav-btn" onclick="showView('links',this)"><i class="ti ti-link"></i> Links</button>
+      <button class="nav-btn" onclick="showView('faturas',this)"><i class="ti ti-receipt"></i> Faturas</button>
       <button class="nav-btn" id="master-btn" style="display:none" onclick="showView('master',this)"><i class="ti ti-shield"></i> Master</button>
     </div>
-    <div class="topbar-right">
-      <div class="user-info"><div class="user-email" id="user-email-display"></div></div>
+    <div class="topbar-right" style="display:flex;align-items:center;gap:10px">
+      <div class="status-indicator" id="sys-status-chip" title="Status do sistema">
+        <div class="status-pulse" id="sys-status-dot"></div>
+        <span id="sys-status-txt" style="color:#10b981">Supabase · Online</span>
+        <span id="sys-status-ms" style="color:#3a3a5e;margin-left:2px"></span>
+        <i class="ti ti-lock" style="font-size:10px;color:#3a3a5e;margin-left:3px" title="TLS 1.3"></i>
+      </div>
       <button class="logout-btn" onclick="toggleFoco()" id="foco-btn" title="Modo Foco"><i class="ti ti-focus-2"></i></button>
-      <button class="logout-btn" onclick="doLogout()"><i class="ti ti-logout"></i> Sair</button>
+      <div class="user-avatar" id="user-avatar-btn" onclick="toggleUserMenu()" title="Menu do usuário">DR</div>
+      <div id="user-menu" style="display:none;position:absolute;top:54px;right:20px;background:#0e0e1c;border:1px solid rgba(124,58,237,0.25);border-radius:10px;padding:6px;z-index:200;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.4)">
+        <div id="user-menu-email" style="padding:8px 10px;font-size:11px;color:#5a5a85;border-bottom:1px solid #1a1a2e;margin-bottom:4px"></div>
+        <div onclick="showView('master',null,null);toggleUserMenu()" style="padding:8px 10px;font-size:12px;color:#c084fc;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='rgba(124,58,237,0.1)'" onmouseout="this.style.background='none'"><i class="ti ti-shield"></i> Painel Master</div>
+        <div onclick="doLogout()" style="padding:8px 10px;font-size:12px;color:#ef4444;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='rgba(239,68,68,0.1)'" onmouseout="this.style.background='none'"><i class="ti ti-logout"></i> Sair</div>
+      </div>
     </div>
   </div>
 
   <div class="main-body">
     <div class="sidebar">
-      <div class="sidebar-logo">
-        <img src="https://i.imgur.com/rrQxwkl.png" alt="D">
+      <div class="sidebar-logo" onclick="showView('home',document.querySelector('.nav-btn'),this)" style="cursor:pointer" title="Início">
+        <img src="https://i.imgur.com/rrQxwkl.png" alt="D" style="width:28px;height:28px;border-radius:8px">
         <div class="sidebar-logo-text">Desiberne IA</div>
       </div>
-      <div class="sidebar-section">Menu</div>
-      <div class="sidebar-item active" onclick="showView('dashboard',null,this)"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+      <div class="sidebar-section">Operacional</div>
+      <div class="sidebar-item active" onclick="showView('home',null,this)"><i class="ti ti-home-2"></i> Início</div>
+      <div class="sidebar-item" onclick="showView('dashboard',null,this)"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
       <div class="sidebar-item" onclick="showView('kanban',null,this)"><i class="ti ti-columns"></i> Pipeline Kanban</div>
-      <div class="sidebar-item" onclick="showView('agenda',null,this)"><i class="ti ti-calendar"></i> Agendamentos</div>
+      <div class="sidebar-item" onclick="showView('agenda',null,this)"><i class="ti ti-calendar-event"></i> Agendamentos</div>
       <div class="sidebar-item" onclick="showView('clientes',null,this)"><i class="ti ti-users"></i> Clientes</div>
       <div class="sidebar-section">Gestão</div>
-      <div class="sidebar-item" onclick="showView('tarefas',null,this)"><i class="ti ti-subtask"></i> Tarefas <span class="sidebar-badge" id="badge-tarefas">0</span></div>
+      <div class="sidebar-item" onclick="showView('tarefas',null,this)"><i class="ti ti-checklist"></i> Tarefas <span class="sidebar-badge" id="badge-tarefas">0</span></div>
       <div class="sidebar-item" onclick="showView('equipe',null,this)"><i class="ti ti-users-group"></i> Equipe</div>
       <div class="sidebar-section">Financeiro</div>
-      <div class="sidebar-item" onclick="showView('financeiro',null,this)"><i class="ti ti-coin"></i> Visão Geral</div>
+      <div class="sidebar-item" onclick="showView('financeiro',null,this)"><i class="ti ti-chart-pie"></i> Visão Geral</div>
       <div class="sidebar-item" onclick="showView('receitas',null,this)"><i class="ti ti-trending-up"></i> Receitas</div>
       <div class="sidebar-item" onclick="showView('despesas',null,this)"><i class="ti ti-trending-down"></i> Despesas</div>
       <div class="sidebar-item" onclick="showView('contratos',null,this)"><i class="ti ti-file-dollar"></i> Contratos</div>
+      <div class="sidebar-section">Comercial</div>
       <div class="sidebar-item" onclick="showView('vendas',null,this)"><i class="ti ti-shopping-cart"></i> Registro de Vendas</div>
+      <div class="sidebar-item" onclick="showView('faturas',null,this)"><i class="ti ti-receipt"></i> Faturas</div>
+      <div class="sidebar-item" onclick="showView('propostas',null,this)"><i class="ti ti-file-description"></i> Propostas</div>
       <div class="sidebar-section">Ferramentas</div>
       <div class="sidebar-item" onclick="showView('links',null,this)"><i class="ti ti-link"></i> Links Úteis</div>
-      <div class="sidebar-item" onclick="showView('vendas',null,this)"><i class="ti ti-shopping-cart"></i> Registro de Vendas</div>
-      <div class="sidebar-item" onclick="showView('propostas',null,this)"><i class="ti ti-file-description"></i> Propostas</div>
-      <div class="sidebar-item" onclick="showView('faturas',null,this)"><i class="ti ti-receipt"></i> Faturas</div>
       <div class="sidebar-section" id="master-section" style="display:none">Admin</div>
-      <div class="sidebar-item" id="master-sidebar" style="display:none" onclick="showView('master',null,this)"><i class="ti ti-shield"></i> Painel Master</div>
+      <div class="sidebar-item" id="master-sidebar" style="display:none" onclick="showView('master',null,this)"><i class="ti ti-shield-lock"></i> Painel Master</div>
     </div>
 
     <div class="content">
@@ -476,29 +505,29 @@ body{font-family:'Inter',system-ui,sans-serif;background:#070710;color:#e2e2f0;f
         </div>
         <!-- KPI BANNER v14 -->
         <div id="home-kpi-banner" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px">
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor='rgba(124,58,237,0.3)'" onmouseout="this.style.borderColor='var(--border)'">
-            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--neon),var(--blue))"></div>
-            <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">MRR</div>
-            <div id="kpi-mrr-val" style="font-size:24px;font-weight:900;color:var(--neon-light);letter-spacing:-.02em">—</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:4px">Receita Recorrente Mensal</div>
+          <div class="kpi-card" onmouseover="this.style.borderColor='rgba(192,132,252,0.4)'" onmouseout="this.style.borderColor='rgba(124,58,237,0.15)'" style="cursor:default">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#7c3aed,#c084fc)"></div>
+            <div style="font-size:10px;color:#5a5a85;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="ti ti-trending-up" style="font-size:11px;color:#7c3aed"></i>MRR</div>
+            <div id="kpi-mrr-val" style="font-size:26px;font-weight:900;color:#c084fc;letter-spacing:-.02em;font-family:'Syne',sans-serif">—</div>
+            <div style="font-size:10px;color:#3a3a5e;margin-top:4px">Receita recorrente mensal</div>
           </div>
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor='rgba(59,130,246,0.3)'" onmouseout="this.style.borderColor='var(--border)'">
-            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--purple))"></div>
-            <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Leads Hoje</div>
-            <div id="kpi-leads-hoje-val" style="font-size:24px;font-weight:900;color:var(--blue);letter-spacing:-.02em">—</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:4px">Novos leads cadastrados</div>
+          <div class="kpi-card" onmouseover="this.style.borderColor='rgba(56,189,248,0.4)'" onmouseout="this.style.borderColor='rgba(124,58,237,0.15)'" style="cursor:default">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#06b6d4,#38bdf8)"></div>
+            <div style="font-size:10px;color:#5a5a85;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="ti ti-users" style="font-size:11px;color:#06b6d4"></i>Leads Hoje</div>
+            <div id="kpi-leads-hoje-val" style="font-size:26px;font-weight:900;color:#38bdf8;letter-spacing:-.02em;font-family:'Syne',sans-serif">—</div>
+            <div style="font-size:10px;color:#3a3a5e;margin-top:4px">Novos leads cadastrados</div>
           </div>
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor='rgba(245,158,11,0.3)'" onmouseout="this.style.borderColor='var(--border)'">
-            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--warning),var(--hot))"></div>
-            <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Tarefas Pendentes</div>
-            <div id="kpi-tarefas-val" style="font-size:24px;font-weight:900;color:var(--warning);letter-spacing:-.02em">—</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:4px">Aguardando execução</div>
+          <div class="kpi-card" onmouseover="this.style.borderColor='rgba(245,158,11,0.4)'" onmouseout="this.style.borderColor='rgba(124,58,237,0.15)'" style="cursor:default">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div>
+            <div style="font-size:10px;color:#5a5a85;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="ti ti-checklist" style="font-size:11px;color:#f59e0b"></i>Tarefas</div>
+            <div id="kpi-tarefas-val" style="font-size:26px;font-weight:900;color:#f59e0b;letter-spacing:-.02em;font-family:'Syne',sans-serif">—</div>
+            <div style="font-size:10px;color:#3a3a5e;margin-top:4px">Pendentes de execução</div>
           </div>
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor='rgba(16,185,129,0.3)'" onmouseout="this.style.borderColor='var(--border)'">
-            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--success),#34d399)"></div>
-            <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Receita do Mês</div>
-            <div id="kpi-receita-mes-val" style="font-size:24px;font-weight:900;color:var(--success);letter-spacing:-.02em">—</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:4px">Total recebido este mês</div>
+          <div class="kpi-card" onmouseover="this.style.borderColor='rgba(16,185,129,0.4)'" onmouseout="this.style.borderColor='rgba(124,58,237,0.15)'" style="cursor:default">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#10b981,#34d399)"></div>
+            <div style="font-size:10px;color:#5a5a85;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="ti ti-coin" style="font-size:11px;color:#10b981"></i>Receita do Mês</div>
+            <div id="kpi-receita-mes-val" style="font-size:26px;font-weight:900;color:#10b981;letter-spacing:-.02em;font-family:'Syne',sans-serif">—</div>
+            <div style="font-size:10px;color:#3a3a5e;margin-top:4px">Total recebido este mês</div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
@@ -1734,7 +1763,8 @@ function showApp() {
   isMaster = currentUser.email === MASTER_EMAIL;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = 'block';
-  document.getElementById('user-email-display').textContent = currentUser.email;
+  if(document.getElementById('user-email-display'))document.getElementById('user-email-display').textContent = currentUser.email;
+  setUserAvatar(currentUser.email);
   if (isMaster) {
     document.getElementById('master-btn').style.display = 'inline-flex';
     document.getElementById('master-section').style.display = 'block';
@@ -1747,6 +1777,8 @@ function showApp() {
   loadAtividades();
   loadFaturas();
   loadFaturas();
+  setUserAvatar(currentUser?.email||'');
+  startStatusChecker();
   renderAgenda();
   renderPropostas();
   setTimeout(verificarGatilhos, 5000);
@@ -2328,7 +2360,7 @@ function renderFaturas() {
   ['fat-kpi-total','fat-kpi-pendente','fat-kpi-pago'].forEach((id,i)=>{const el2=document.getElementById(id);if(el2)el2.textContent=[fmt(total),fmt(pendente),fmt(pago)][i];});
   const elV=document.getElementById('fat-kpi-vencida');if(elV)elV.textContent=vencidas;
 
-  if(!faturas.length){el.innerHTML='<div style="text-align:center;padding:60px;color:var(--muted)"><i class="ti ti-receipt" style="font-size:40px;display:block;margin-bottom:12px"></i>Nenhuma fatura emitida.</div>';return;}
+  if(!faturas.length){el.innerHTML=emptyState('receipt','Nenhuma fatura emitida','Clique em "Nova Fatura" para começar');return;}
   const statusInfo={rascunho:{label:'Rascunho',color:'var(--muted)'},enviada:{label:'Enviada',color:'var(--warning)'},pago:{label:'Pago',color:'var(--success)'},vencida:{label:'Vencida',color:'var(--danger)'}};
   el.innerHTML = faturas.map(f=>{
     const si=statusInfo[f.status]||{label:f.status,color:'var(--muted)'};
@@ -3593,7 +3625,7 @@ function renderPropostas() {
   const el = document.getElementById('propostas-list');
   if (!el) return;
   propostasGeradas = JSON.parse(localStorage.getItem('desiberne_propostas') || '[]');
-  if (!propostasGeradas.length) { el.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)"><i class="ti ti-file-description" style="font-size:40px;display:block;margin-bottom:12px"></i>Nenhuma proposta gerada ainda.<br><small>Clique em "Nova Proposta" para começar.</small></div>'; return; }
+  if (!propostasGeradas.length) { el.innerHTML = emptyState('file-description','Nenhuma proposta gerada ainda','Clique em "Nova Proposta" para começar'); return; }
   el.innerHTML = propostasGeradas.slice().reverse().map((p,ri) => {
     const idx = propostasGeradas.length - 1 - ri;
     return `<div class="chart-card" style="margin-bottom:12px">
@@ -3941,7 +3973,7 @@ function exportPDF(){
         <p>Relatório Comercial & Financeiro — ${mesStr}</p>
       </div>
       <div class="date-info">
-        <div style="font-size:14px;font-weight:800;color:#111">CRM v16.0</div>
+        <div style="font-size:14px;font-weight:800;color:#111">CRM v17.0</div>
         <div>Gerado em ${dateStr}</div>
       </div>
     </div>
@@ -4010,7 +4042,7 @@ function exportPDF(){
     </div>
 
     <div class="footer">
-      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v16.0
+      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v17.0
     </div>
     </body>
     </html>
@@ -4935,6 +4967,50 @@ function excluirProposta(idx) {
 }
 
 // Versão atualizada
+
+function emptyState(icon,msg,sub=''){
+  return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center">
+    <div style="width:56px;height:56px;border-radius:16px;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:24px;color:#4a4a7a"><i class="ti ti-${icon}"></i></div>
+    <div style="font-size:14px;font-weight:700;color:#5050a0;margin-bottom:4px">${msg}</div>
+    ${sub?`<div style="font-size:12px;color:#3a3a5e">${sub}</div>`:''}
+  </div>`;
+}
+function animateCounter(el,target,prefix='',suffix=''){
+  if(!el||!target)return;
+  const steps=20,duration=600,step=duration/steps;
+  let i=0;
+  const interval=setInterval(()=>{
+    i++;const current=Math.round(target*(i/steps));
+    el.textContent=prefix+current.toLocaleString('pt-BR')+suffix;
+    if(i>=steps){clearInterval(interval);}
+  },step);
+}
+
+async function checkSystemStatus(){
+  const chip=document.getElementById('sys-status-chip');
+  const dot=document.getElementById('sys-status-dot');
+  const txt=document.getElementById('sys-status-txt');
+  const ms=document.getElementById('sys-status-ms');
+  if(!chip)return;
+  const t0=performance.now();
+  try{
+    const r=await sb.from('usuarios').select('id').limit(1);
+    const ping=Math.round(performance.now()-t0);
+    if(r.error)throw r.error;
+    dot.className='status-pulse';dot.style.background='#10b981';
+    txt.style.color='#10b981';txt.textContent='Supabase · Online';
+    ms.textContent=ping+'ms';chip.className='status-indicator';
+  }catch(e){
+    dot.className='status-pulse err';dot.style.background='#ef4444';
+    txt.style.color='#ef4444';txt.textContent='Supabase · Offline';
+    ms.textContent='';chip.className='status-indicator err';
+  }
+}
+
+function startStatusChecker(){
+  checkSystemStatus();
+  setInterval(checkSystemStatus,30000);
+}
 
 checkSession();
 startLembretes();
