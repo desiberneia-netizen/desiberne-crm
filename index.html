@@ -3790,9 +3790,8 @@ async function gerarPropostaPDF() {
   document.body.appendChild(container);
   const opt = { margin: 0, filename: 'Proposta_Desiberne_' + empresa.replace(/\s+/g,'_') + '.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
   showToast('Gerando PDF...', 'success');
-  html2pdf().set(opt).from(container).save().then(() => {
+  html2pdf().set(opt).from(container).save().then(async () => {
     document.body.removeChild(container);
-    // Salvar no histórico local
     const raw = {empresa,nicho,resp,contato,situacao,dor,meta,servicos:servicos.map(s=>({'Marketing Digital':'marketing','Tráfego Pago':'trafego','Social Mídia':'social','Gestão Comercial':'gestao','Automação':'automacao','Agente de IA':'agente'}[s]||s)),plano:[1,2,3,4,5,6].map(i=>({mes:'Mês '+i,acao:document.getElementById('plan-m'+i)?.value||''})),kpis,valorMensal,vigencia,comissao,validade};
     const propPayload = {empresa,nicho,servicos:servicos.join(', '),valor_mensal:valorMensal,vigencia,data_geracao:new Date().toISOString().split('T')[0],raw};
     if(editingPropostaId){
