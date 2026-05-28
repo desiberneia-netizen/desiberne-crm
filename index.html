@@ -862,7 +862,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
         <!-- USUÁRIOS -->
         <div id="master-tab-usuarios" style="display:none">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-            <div><div style="font-size:15px;font-weight:800">Gestão de Usuários</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Crie e gerencie acessos ao CRM</div></div>
+            <div>
+              <div style="font-size:15px;font-weight:800">Gestão de Usuários</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">Crie e gerencie acessos ao CRM</div>
+              <div style="margin-top:8px;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:8px;padding:10px;font-size:11px">
+                <strong style="color:#c084fc">SQL para criar usuário master no Supabase:</strong><br>
+                <code style="font-size:10px;color:#a78bfa;display:block;margin-top:4px">INSERT INTO usuarios (nome, email, permissao, ativo) VALUES ('João Ramos', 'marketing@desiberneia.com.br', 'master', true) ON CONFLICT (email) DO UPDATE SET permissao='master';</code>
+              </div>
+            </div>
             <button class="add-btn" onclick="openUsuarioModal()"><i class="ti ti-user-plus"></i> Novo Usuário</button>
           </div>
           <div id="usuarios-list"><div class="loading">Carregando...</div></div>
@@ -1743,15 +1750,37 @@ function showLoginError(msg) {
 }
 
 function showApp() {
+  // isMaster: email master OU permissão master na tabela usuarios
   isMaster = currentUser.email === MASTER_EMAIL;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = 'block';
   document.getElementById('user-email-display').textContent = currentUser.email;
   setUserAvatar(currentUser.email);
+
+  function ativarMaster() {
+    isMaster = true;
+    const mb = document.getElementById('master-btn');
+    const ms = document.getElementById('master-section');
+    const msi = document.getElementById('master-sidebar');
+    if(mb) mb.style.display = 'inline-flex';
+    if(ms) ms.style.display = 'block';
+    if(msi) msi.style.display = 'flex';
+  }
+
   if (isMaster) {
-    document.getElementById('master-btn').style.display = 'inline-flex';
-    document.getElementById('master-section').style.display = 'block';
-    document.getElementById('master-sidebar').style.display = 'flex';
+    ativarMaster();
+  } else {
+    // Verificar também na tabela usuarios (case-insensitive)
+    sb.from('usuarios').select('permissao,email').eq('email', currentUser.email).limit(1)
+      .then(({data}) => {
+        if(data && data.length > 0 && (data[0].permissao === 'master' || data[0].permissao === 'admin')) {
+          ativarMaster();
+        }
+      }).catch(()=>{});
+  }
+  // Garantia extra: email do domínio desiberneia sempre é master
+  if(currentUser.email && currentUser.email.toLowerCase() === MASTER_EMAIL.toLowerCase()) {
+    ativarMaster();
   }
   loadLeads();
   loadFinanceiro();
