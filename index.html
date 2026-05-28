@@ -291,7 +291,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 /* MASTER */
 .master-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
 .master-chart{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px}
-.empresa-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;transition:all .2s}
+.empresa-card{background:#0e0e1c;border:1px solid rgba(124,58,237,0.2);border-radius:14px;padding:18px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;transition:all .2s}
 .empresa-card:hover{border-color:rgba(124,58,237,0.2)}
 
 /* MODAL */
@@ -371,7 +371,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 
 /* USUÁRIOS */
-.usuario-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;display:flex;align-items:center;gap:16px;transition:all .2s}
+.usuario-card{background:#0e0e1c;border:1px solid rgba(124,58,237,0.2);border-radius:14px;padding:18px;margin-bottom:12px;display:flex;align-items:center;gap:16px;transition:all .2s}
 .usuario-card:hover{border-color:rgba(124,58,237,0.2)}
 .usuario-card.inativo{opacity:.5}
 .usuario-avatar{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0}
@@ -879,15 +879,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
           </div>
         </div>
         <!-- TABS -->
-        <div style="display:flex;gap:4px;margin-bottom:20px;background:var(--card);padding:4px;border-radius:12px;border:1px solid var(--border);flex-wrap:wrap">
-          <button id="tab-empresas" class="btn-primary" style="flex:1;border-radius:9px;font-size:11px;min-width:100px" onclick="switchMasterTab('empresas')">Empresas</button>
-          <button id="tab-usuarios" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('usuarios')">Usuários</button>
-          <button id="tab-estrategico" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('estrategico')">Estratégico</button>
-          <button id="tab-integracoes" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('integracoes')">Integrações</button>
-          <button id="tab-auditlog" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('auditlog')">Audit Log</button>
-          <button id="tab-cases" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('cases')">Cases</button>
-          <button id="tab-gatilhos" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('gatilhos')">Gatilhos</button>
-          <button id="tab-carrossel" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('carrossel')">Carrossel</button>
+        <div style="display:flex;gap:4px;margin-bottom:20px;background:#0e0e1c;padding:4px;border-radius:12px;border:1px solid rgba(124,58,237,0.25);flex-wrap:wrap">
+          <button id="tab-empresas" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:none;cursor:pointer;font-weight:700;background:linear-gradient(135deg,#7c3aed,#06b6d4);color:#fff" onclick="switchMasterTab('empresas')">Empresas</button>
+          <button id="tab-usuarios" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:1px solid rgba(124,58,237,0.15);cursor:pointer;font-weight:600;background:transparent;color:#6b6b9e" onclick="switchMasterTab('usuarios')">Usuários</button>
+          <button id="tab-estrategico" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:1px solid rgba(124,58,237,0.15);cursor:pointer;font-weight:600;background:transparent;color:#6b6b9e" onclick="switchMasterTab('estrategico')">Estratégico</button>
+          <button id="tab-integracoes" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:1px solid rgba(124,58,237,0.15);cursor:pointer;font-weight:600;background:transparent;color:#6b6b9e" onclick="switchMasterTab('integracoes')">Integrações</button>
+          <button id="tab-auditlog" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:1px solid rgba(124,58,237,0.15);cursor:pointer;font-weight:600;background:transparent;color:#6b6b9e" onclick="switchMasterTab('auditlog')">Audit Log</button>
+          <button id="tab-cases" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:1px solid rgba(124,58,237,0.15);cursor:pointer;font-weight:600;background:transparent;color:#6b6b9e" onclick="switchMasterTab('cases')">Cases</button>
+          <button id="tab-gatilhos" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:1px solid rgba(124,58,237,0.15);cursor:pointer;font-weight:600;background:transparent;color:#6b6b9e" onclick="switchMasterTab('gatilhos')">Gatilhos</button>
+          <button id="tab-carrossel" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:1px solid rgba(124,58,237,0.15);cursor:pointer;font-weight:600;background:transparent;color:#6b6b9e" onclick="switchMasterTab('carrossel')">Carrossel</button>
         </div>
 
         <!-- EMPRESAS -->
@@ -4178,17 +4178,26 @@ function switchMasterTab(tab){
     if(el) el.style.display = t===tab?'block':'none';
     const btn = document.getElementById('tab-'+t);
     if(btn){
-      if(t===tab){btn.className='btn-primary';btn.style.cssText='flex:1;border-radius:9px;font-size:11px;min-width:100px';}
-      else{btn.className='btn-ghost';btn.style.cssText='flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px';}
+      if(t===tab){
+        btn.style.background='linear-gradient(135deg,#7c3aed,#06b6d4)';
+        btn.style.color='#fff';
+        btn.style.border='none';
+        btn.style.fontWeight='700';
+      } else {
+        btn.style.background='transparent';
+        btn.style.color='#6b6b9e';
+        btn.style.border='1px solid rgba(124,58,237,0.15)';
+        btn.style.fontWeight='600';
+      }
     }
   });
   if(tab==='usuarios') loadUsuarios();
   if(tab==='estrategico') renderMasterEstrategico();
   if(tab==='carrossel') loadSlidesAdmin();
-  if(tab==='integracoes') {} // static content
   if(tab==='auditlog') loadAuditLog();
   if(tab==='cases') loadCases();
   if(tab==='gatilhos') renderGatilhos();
+  if(tab==='integracoes') {} // static content
 }
 
 async function renderMasterEstrategico(){
