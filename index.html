@@ -17,7 +17,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
   --purple:#8b5cf6;--purple-light:#c084fc;--neon:#7c3aed;
   --blue:#3b82f6;--blue-light:#38bdf8;--cyan:#06b6d4;--cyan-light:#67e8f9;
   --text:#ddd8f0;--muted:#5a5a85;
-  --gradient:linear-gradient(135deg,#7c3aed 0%,#06b6d4 100%);
   --success:#10b981;--warning:#f59e0b;--danger:#ef4444;
   --hot:#f43f5e;--warm:#f59e0b;--cold:#3b82f6;
   --gradient:linear-gradient(135deg,#7c3aed 0%,#a78bfa 100%);
@@ -33,7 +32,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 @keyframes carouselIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
 
 /* LOGIN */
-.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden;background-image:linear-gradient(rgba(124,58,237,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,0.07) 1px,transparent 1px),radial-gradient(circle at 1px 1px,rgba(124,58,237,0.18) 1px,transparent 0);background-size:32px 32px,32px 32px,32px 32px}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
 .login-bg{position:absolute;inset:0;background:
   radial-gradient(ellipse at 15% 50%,rgba(124,58,237,0.07) 0%,transparent 55%),
   radial-gradient(ellipse at 85% 15%,rgba(167,139,250,0.05) 0%,transparent 45%),
@@ -41,36 +40,22 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 .login-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(124,58,237,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,0.03) 1px,transparent 1px);background-size:40px 40px}
 .login-box{background:rgba(13,13,26,0.9);border:1px solid rgba(124,58,237,0.15);border-radius:24px;padding:44px;width:420px;text-align:center;position:relative;z-index:1;box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 0 1px rgba(124,58,237,0.08);backdrop-filter:blur(20px);animation:fadeUp .4s ease}
 .login-logo{width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 20px;display:block;box-shadow:0 0 30px rgba(124,58,237,0.4),0 0 0 4px rgba(124,58,237,0.1)}
-.login-title{font-size:22px;font-weight:800;margin-bottom:6px;font-family:'Syne',sans-serif;background:linear-gradient(135deg,#e0d0ff,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.01em}
+.login-title{font-size:26px;font-weight:900;margin-bottom:6px;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.03em}
 .login-sub{font-size:13px;color:var(--muted);margin-bottom:32px;font-weight:500}
 .login-form{display:flex;flex-direction:column;gap:16px;text-align:left}
 .login-label{font-size:10px;color:var(--muted);margin-bottom:5px;display:block;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .login-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:12px 16px;color:var(--text);font-size:13px;outline:none;transition:all .2s;font-family:inherit}
 .login-input:focus{border-color:#c084fc;box-shadow:0 0 0 3px rgba(192,132,252,0.1)}
 .login-input:-webkit-autofill,.login-input:-webkit-autofill:hover,.login-input:-webkit-autofill:focus{-webkit-box-shadow:0 0 0 1000px #0e0e1c inset!important;-webkit-text-fill-color:#ddd8f0!important;border-color:rgba(124,58,237,0.25)!important;transition:background-color 5000s ease-in-out 0s}
-.login-btn{width:100%;background:linear-gradient(135deg,#7c3aed,#06b6d4);border:none;border-radius:12px;padding:13px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;letter-spacing:.01em}
-.login-btn:hover{opacity:.9}
-.login-btn:disabled{opacity:.6;cursor:not-allowed}
+.login-btn{width:100%;background:var(--gradient);border:none;border-radius:12px;padding:14px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;margin-top:4px;transition:all .25s;letter-spacing:.02em;font-family:inherit;position:relative;overflow:hidden}
+.login-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.1) 0%,transparent 100%)}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(124,58,237,0.45)}
+.login-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
 .login-footer{font-size:11px;color:var(--muted);margin-top:24px;font-weight:500}
 
 /* TOPBAR */
 .crm-wrap{display:flex;flex-direction:column;min-height:100vh}
-.topbar{background:rgba(6,6,14,0.96);border-bottom:1px solid rgba(124,58,237,0.2);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:50;backdrop-filter:blur(20px)}
-.status-indicator{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:rgba(6,6,14,0.8);border:1px solid rgba(16,185,129,0.25);font-size:10px;font-weight:600;cursor:default;transition:all .3s}
-.status-indicator.warn{border-color:rgba(245,158,11,0.3)}
-.status-indicator.err{border-color:rgba(239,68,68,0.3)}
-.status-pulse{width:6px;height:6px;border-radius:50%;background:#10b981;animation:statusPulse 2s infinite}
-.status-pulse.warn{background:#f59e0b;animation:statusBlink 1s infinite}
-.status-pulse.err{background:#ef4444;animation:none}
-.user-avatar{width:30px;height:30px;border-radius:50%;background:rgba(124,58,237,0.2);border:1px solid rgba(192,132,252,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#c084fc;cursor:pointer;font-family:'Syne',sans-serif;letter-spacing:.02em;transition:all .2s}
-.user-avatar:hover{background:rgba(124,58,237,0.35);border-color:rgba(192,132,252,0.6)}
-@keyframes statusPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.85)}}
-@keyframes statusBlink{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-@keyframes gridScan{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}
-.view.active{animation:fadeIn .18s ease}
-.page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,#e0d0ff 0%,#67e8f9 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.page-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.topbar{background:rgba(13,13,26,0.95);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:50;backdrop-filter:blur(16px)}
 .logo-area{display:flex;align-items:center;gap:10px}
 .logo-img{width:32px;height:32px;border-radius:50%;object-fit:cover;box-shadow:0 0 12px rgba(124,58,237,0.3)}
 .logo-text{font-size:15px;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.02em}
@@ -79,7 +64,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 .nav-btn{background:none;border:none;color:var(--muted);padding:6px 11px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:5px;font-family:inherit;letter-spacing:.01em}
 .nav-btn i{font-size:14px}
 .nav-btn:hover{background:rgba(255,255,255,0.05);color:var(--text)}
-.nav-btn.active{background:rgba(124,58,237,0.15);color:#c084fc;border-color:rgba(192,132,252,0.2)}
+.nav-btn.active{background:rgba(124,58,237,0.12);color:var(--purple-light)}
 .topbar-right{display:flex;align-items:center;gap:10px}
 .user-email{font-size:11px;color:var(--muted);font-weight:600}
 .logout-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 11px;color:var(--muted);font-size:11px;cursor:pointer;transition:all .15s;font-weight:600;font-family:inherit}
@@ -87,19 +72,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 /* SIDEBAR */
 .main-body{display:flex;flex:1;overflow:hidden}
-.sidebar{width:218px;background:rgba(9,9,26,0.98);border-right:1px solid rgba(124,58,237,0.12);padding:12px 8px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.sidebar{width:218px;background:var(--surface);border-right:1px solid var(--border);padding:12px 8px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
 .sidebar-logo{display:flex;align-items:center;gap:9px;padding:10px 10px 14px;border-bottom:1px solid var(--border);margin-bottom:8px}
 .sidebar-logo img{width:26px;height:26px;border-radius:50%;object-fit:cover}
 .sidebar-logo-text{font-size:13px;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .sidebar-section{font-size:9px;color:rgba(107,114,128,0.7);text-transform:uppercase;letter-spacing:.1em;padding:10px 10px 4px;font-weight:800}
 .sidebar-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;cursor:pointer;color:var(--muted);font-size:12px;font-weight:600;transition:all .15s;position:relative}
 .sidebar-item:hover{background:rgba(255,255,255,0.04);color:var(--text)}
-.sidebar-item.active{background:rgba(124,58,237,0.12);color:#c084fc}.sidebar-item.active::before{background:linear-gradient(180deg,#7c3aed,#06b6d4)}
-.sidebar-group{overflow:hidden;max-height:500px;transition:max-height .3s ease}
-.sidebar-group.collapsed{max-height:0}
-.sidebar-section{cursor:pointer;user-select:none}
-.sec-arrow{font-size:9px;opacity:.4;transition:transform .2s}
-.sidebar-section.collapsed .sec-arrow{transform:rotate(-90deg)}
+.sidebar-item.active{background:rgba(124,58,237,0.1);color:var(--purple-light)}
 .sidebar-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:55%;background:var(--gradient);border-radius:0 3px 3px 0}
 .sidebar-item i{font-size:15px;opacity:.85}
 .sidebar-badge{margin-left:auto;background:var(--neon);color:#fff;font-size:9px;border-radius:20px;padding:2px 7px;font-weight:800}
@@ -115,10 +95,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 /* KPI CARDS */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
-.kpi-card{background:var(--card);border:1px solid rgba(124,58,237,0.15);border-radius:14px;padding:18px 20px;transition:all .25s;position:relative;overflow:hidden}
-.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#7c3aed,#06b6d4);opacity:0;transition:opacity .25s}
-.kpi-card:hover{border-color:rgba(124,58,237,0.35);transform:translateY(-2px)}
-.kpi-card:hover::before{opacity:1}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;transition:all .25s;position:relative;overflow:hidden}
 .kpi-card:hover{border-color:rgba(124,58,237,0.25);transform:translateY(-3px);box-shadow:var(--glow)}
 .kpi-label{font-size:10px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .kpi-value{font-size:28px;font-weight:900;letter-spacing:-.03em}
@@ -154,7 +131,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 .col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .col-title{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.01em}
 .col-count{font-size:11px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2px 9px;color:var(--muted);font-weight:700}
-.lead-card{background:var(--card);border-left:2px solid rgba(124,58,237,0.4);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:9px;cursor:grab;transition:all .2s;position:relative;overflow:hidden}
+.lead-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:9px;cursor:grab;transition:all .2s;position:relative;overflow:hidden}
 .lead-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:12px 12px 0 0}
 .lead-card.cold::after{background:var(--cold)}.lead-card.warm::after{background:var(--warm)}.lead-card.hot::after{background:linear-gradient(90deg,var(--hot),#ff8a65)}.lead-card.done::after{background:var(--success)}
 .lead-card:hover{border-color:rgba(124,58,237,0.25);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.25)}
@@ -291,7 +268,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 /* MASTER */
 .master-kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
 .master-chart{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px}
-.empresa-card{background:#0e0e1c;border:1px solid rgba(124,58,237,0.2);border-radius:14px;padding:18px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;transition:all .2s}
+.empresa-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;transition:all .2s}
 .empresa-card:hover{border-color:rgba(124,58,237,0.2)}
 
 /* MODAL */
@@ -333,7 +310,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 .notif-close{position:absolute;top:9px;right:11px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px}
 
 /* TOAST */
-.toast{position:fixed;bottom:22px;right:22px;background:rgba(14,14,28,0.95);border:1px solid rgba(124,58,237,0.2);border-radius:10px;padding:12px 18px;font-size:12px;z-index:999;opacity:0;transform:translateY(12px);transition:all .3s;font-weight:700;backdrop-filter:blur(12px)}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 20px;font-size:12px;z-index:999;opacity:0;transform:translateY(12px);transition:all .3s;font-weight:700;box-shadow:var(--shadow)}
 .toast.show{opacity:1;transform:translateY(0)}
 .toast.success{border-color:var(--success);color:var(--success)}.toast.error{border-color:var(--danger);color:var(--danger)}
 .loading{text-align:center;padding:34px;color:var(--muted);font-size:12px;font-weight:600}
@@ -371,7 +348,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 
 /* USUÁRIOS */
-.usuario-card{background:#0e0e1c;border:1px solid rgba(124,58,237,0.2);border-radius:14px;padding:18px;margin-bottom:12px;display:flex;align-items:center;gap:16px;transition:all .2s}
+.usuario-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px;display:flex;align-items:center;gap:16px;transition:all .2s}
 .usuario-card:hover{border-color:rgba(124,58,237,0.2)}
 .usuario-card.inativo{opacity:.5}
 .usuario-avatar{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0}
@@ -438,7 +415,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 <div id="app-screen" style="display:none">
 <div class="crm-wrap">
   <div class="topbar">
-    <div class="logo-area" onclick="showView('home',document.querySelector('.nav-btn'))" style="cursor:pointer;user-select:none" title="Ir para Início">
+    <div class="logo-area" onclick="showView('home',document.querySelector('.nav-btn'))" style="cursor:pointer" title="Início">
       <img class="logo-img" src="https://i.imgur.com/rrQxwkl.png" alt="Desiberne IA">
       <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v17.0</span></div>
     </div>
@@ -447,20 +424,22 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
       <button class="nav-btn" onclick="showView('dashboard',this)"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
       <button class="nav-btn" onclick="showView('kanban',this)"><i class="ti ti-columns"></i> Pipeline</button>
       <button class="nav-btn" onclick="showView('agenda',this)"><i class="ti ti-calendar"></i> Agenda</button>
+      <button class="nav-btn" onclick="showView('clientes',this)"><i class="ti ti-users"></i> Clientes</button>
       <button class="nav-btn" onclick="showView('financeiro',this)"><i class="ti ti-coin"></i> Financeiro</button>
+      <button class="nav-btn" onclick="showView('contratos',this)"><i class="ti ti-file-dollar"></i> Contratos</button>
       <button class="nav-btn" onclick="showView('vendas',this)"><i class="ti ti-shopping-cart"></i> Vendas</button>
-      <button class="nav-btn" onclick="showView('faturas',this)"><i class="ti ti-receipt"></i> Faturas</button>
+      <button class="nav-btn" onclick="showView('links',this)"><i class="ti ti-link"></i> Links</button>
       <button class="nav-btn" id="master-btn" style="display:none" onclick="showView('master',this)"><i class="ti ti-shield"></i> Master</button>
     </div>
     <div class="topbar-right" style="display:flex;align-items:center;gap:10px">
-      <div class="status-indicator" id="sys-status-chip" title="Status do sistema">
-        <div class="status-pulse" id="sys-status-dot"></div>
+      <div id="sys-status-chip" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:rgba(6,6,14,0.8);border:1px solid rgba(16,185,129,0.25);font-size:10px;font-weight:600;cursor:default">
+        <div id="sys-status-dot" style="width:6px;height:6px;border-radius:50%;background:#10b981;animation:statusPulse 2s infinite"></div>
         <span id="sys-status-txt" style="color:#10b981">Supabase · Online</span>
         <span id="sys-status-ms" style="color:#3a3a5e;margin-left:2px"></span>
-        <i class="ti ti-lock" style="font-size:10px;color:#3a3a5e;margin-left:3px" title="TLS 1.3"></i>
+        <i class="ti ti-lock" style="font-size:10px;color:#3a3a5e;margin-left:3px"></i>
       </div>
       <button class="logout-btn" onclick="toggleFoco()" id="foco-btn" title="Modo Foco"><i class="ti ti-focus-2"></i></button>
-      <div class="user-avatar" id="user-avatar-btn" onclick="toggleUserMenu()" title="Menu do usuário">DR</div>
+      <div id="user-avatar-btn" onclick="toggleUserMenu()" style="width:30px;height:30px;border-radius:50%;background:rgba(124,58,237,0.2);border:1px solid rgba(192,132,252,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#c084fc;cursor:pointer;font-family:'Syne',sans-serif">DR</div>
       <div id="user-menu" style="display:none;position:absolute;top:54px;right:20px;background:#0e0e1c;border:1px solid rgba(124,58,237,0.25);border-radius:10px;padding:6px;z-index:200;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.4)">
         <div id="user-menu-email" style="padding:8px 10px;font-size:11px;color:#5a5a85;border-bottom:1px solid #1a1a2e;margin-bottom:4px"></div>
         <div onclick="showView('master',null,null);toggleUserMenu()" style="padding:8px 10px;font-size:12px;color:#c084fc;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='rgba(124,58,237,0.1)'" onmouseout="this.style.background='none'"><i class="ti ti-shield"></i> Painel Master</div>
@@ -471,50 +450,31 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
   <div class="main-body">
     <div class="sidebar">
-      <div class="sidebar-logo" onclick="showView('home',document.querySelector('.nav-btn'),this)" style="cursor:pointer" title="Início">
-        <img src="https://i.imgur.com/rrQxwkl.png" alt="D" style="width:28px;height:28px;border-radius:8px">
+      <div class="sidebar-logo">
+        <img src="https://i.imgur.com/rrQxwkl.png" alt="D">
         <div class="sidebar-logo-text">Desiberne IA</div>
       </div>
-
-      <div class="sidebar-section" onclick="toggleSidebarGroup('grp-operacional',this)">Operacional <span class="sec-arrow">▾</span></div>
-      <div class="sidebar-group" id="grp-operacional" style="max-height:300px">
-        <div class="sidebar-item active" onclick="showView('home',null,this)"><i class="ti ti-home-2"></i> Início</div>
-        <div class="sidebar-item" onclick="showView('dashboard',null,this)"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
-        <div class="sidebar-item" onclick="showView('kanban',null,this)"><i class="ti ti-columns"></i> Pipeline Kanban</div>
-        <div class="sidebar-item" onclick="showView('agenda',null,this)"><i class="ti ti-calendar-event"></i> Agendamentos</div>
-        <div class="sidebar-item" onclick="showView('clientes',null,this)"><i class="ti ti-users"></i> Clientes</div>
-      </div>
-
-      <div class="sidebar-section" onclick="toggleSidebarGroup('grp-gestao',this)">Gestão <span class="sec-arrow">▾</span></div>
-      <div class="sidebar-group" id="grp-gestao" style="max-height:200px">
-        <div class="sidebar-item" onclick="showView('tarefas',null,this)"><i class="ti ti-checklist"></i> Tarefas <span class="sidebar-badge" id="badge-tarefas">0</span></div>
-        <div class="sidebar-item" onclick="showView('equipe',null,this)"><i class="ti ti-users-group"></i> Equipe</div>
-      </div>
-
-      <div class="sidebar-section" onclick="toggleSidebarGroup('grp-financeiro',this)">Financeiro <span class="sec-arrow">▾</span></div>
-      <div class="sidebar-group" id="grp-financeiro" style="max-height:300px">
-        <div class="sidebar-item" onclick="showView('financeiro',null,this)"><i class="ti ti-chart-pie"></i> Visão Geral</div>
-        <div class="sidebar-item" onclick="showView('receitas',null,this)"><i class="ti ti-trending-up"></i> Receitas</div>
-        <div class="sidebar-item" onclick="showView('despesas',null,this)"><i class="ti ti-trending-down"></i> Despesas</div>
-        <div class="sidebar-item" onclick="showView('contratos',null,this)"><i class="ti ti-file-dollar"></i> Contratos</div>
-      </div>
-
-      <div class="sidebar-section" onclick="toggleSidebarGroup('grp-comercial',this)">Comercial <span class="sec-arrow">▾</span></div>
-      <div class="sidebar-group" id="grp-comercial" style="max-height:300px">
-        <div class="sidebar-item" onclick="showView('vendas',null,this)"><i class="ti ti-shopping-cart"></i> Registro de Vendas</div>
-        <div class="sidebar-item" onclick="showView('faturas',null,this)"><i class="ti ti-receipt"></i> Faturas</div>
-        <div class="sidebar-item" onclick="showView('propostas',null,this)"><i class="ti ti-file-description"></i> Propostas</div>
-      </div>
-
-      <div class="sidebar-section" onclick="toggleSidebarGroup('grp-ferramentas',this)">Ferramentas <span class="sec-arrow">▾</span></div>
-      <div class="sidebar-group" id="grp-ferramentas" style="max-height:200px">
-        <div class="sidebar-item" onclick="showView('links',null,this)"><i class="ti ti-link"></i> Links Úteis</div>
-      </div>
-
-      <div class="sidebar-section" id="master-section" style="display:none" onclick="toggleSidebarGroup('grp-admin',this)">Admin <span class="sec-arrow">▾</span></div>
-      <div class="sidebar-group" id="grp-admin" style="max-height:100px">
-        <div class="sidebar-item" id="master-sidebar" style="display:none" onclick="showView('master',null,this)"><i class="ti ti-shield-lock"></i> Painel Master</div>
-      </div>
+      <div class="sidebar-section">Menu</div>
+      <div class="sidebar-item active" onclick="showView('dashboard',null,this)"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+      <div class="sidebar-item" onclick="showView('kanban',null,this)"><i class="ti ti-columns"></i> Pipeline Kanban</div>
+      <div class="sidebar-item" onclick="showView('agenda',null,this)"><i class="ti ti-calendar"></i> Agendamentos</div>
+      <div class="sidebar-item" onclick="showView('clientes',null,this)"><i class="ti ti-users"></i> Clientes</div>
+      <div class="sidebar-section">Gestão</div>
+      <div class="sidebar-item" onclick="showView('tarefas',null,this)"><i class="ti ti-subtask"></i> Tarefas <span class="sidebar-badge" id="badge-tarefas">0</span></div>
+      <div class="sidebar-item" onclick="showView('equipe',null,this)"><i class="ti ti-users-group"></i> Equipe</div>
+      <div class="sidebar-section">Financeiro</div>
+      <div class="sidebar-item" onclick="showView('financeiro',null,this)"><i class="ti ti-coin"></i> Visão Geral</div>
+      <div class="sidebar-item" onclick="showView('receitas',null,this)"><i class="ti ti-trending-up"></i> Receitas</div>
+      <div class="sidebar-item" onclick="showView('despesas',null,this)"><i class="ti ti-trending-down"></i> Despesas</div>
+      <div class="sidebar-item" onclick="showView('contratos',null,this)"><i class="ti ti-file-dollar"></i> Contratos</div>
+      <div class="sidebar-item" onclick="showView('vendas',null,this)"><i class="ti ti-shopping-cart"></i> Registro de Vendas</div>
+      <div class="sidebar-section">Ferramentas</div>
+      <div class="sidebar-item" onclick="showView('links',null,this)"><i class="ti ti-link"></i> Links Úteis</div>
+      <div class="sidebar-item" onclick="showView('vendas',null,this)"><i class="ti ti-shopping-cart"></i> Registro de Vendas</div>
+      <div class="sidebar-item" onclick="showView('propostas',null,this)"><i class="ti ti-file-description"></i> Propostas</div>
+      <div class="sidebar-item" onclick="showView('faturas',null,this)"><i class="ti ti-receipt"></i> Faturas</div>
+      <div class="sidebar-section" id="master-section" style="display:none">Admin</div>
+      <div class="sidebar-item" id="master-sidebar" style="display:none" onclick="showView('master',null,this)"><i class="ti ti-shield"></i> Painel Master</div>
     </div>
 
     <div class="content">
@@ -528,29 +488,29 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
         </div>
         <!-- KPI BANNER v14 -->
         <div id="home-kpi-banner" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px">
-          <div class="kpi-card" onmouseover="this.style.borderColor='rgba(192,132,252,0.4)'" onmouseout="this.style.borderColor='rgba(124,58,237,0.15)'" style="cursor:default">
-            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#7c3aed,#c084fc)"></div>
-            <div style="font-size:10px;color:#5a5a85;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="ti ti-trending-up" style="font-size:11px;color:#7c3aed"></i>MRR</div>
-            <div id="kpi-mrr-val" style="font-size:26px;font-weight:900;color:#c084fc;letter-spacing:-.02em;font-family:'Syne',sans-serif">—</div>
-            <div style="font-size:10px;color:#3a3a5e;margin-top:4px">Receita recorrente mensal</div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor='rgba(124,58,237,0.3)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--neon),var(--blue))"></div>
+            <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">MRR</div>
+            <div id="kpi-mrr-val" style="font-size:24px;font-weight:900;color:var(--neon-light);letter-spacing:-.02em">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Receita Recorrente Mensal</div>
           </div>
-          <div class="kpi-card" onmouseover="this.style.borderColor='rgba(56,189,248,0.4)'" onmouseout="this.style.borderColor='rgba(124,58,237,0.15)'" style="cursor:default">
-            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#06b6d4,#38bdf8)"></div>
-            <div style="font-size:10px;color:#5a5a85;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="ti ti-users" style="font-size:11px;color:#06b6d4"></i>Leads Hoje</div>
-            <div id="kpi-leads-hoje-val" style="font-size:26px;font-weight:900;color:#38bdf8;letter-spacing:-.02em;font-family:'Syne',sans-serif">—</div>
-            <div style="font-size:10px;color:#3a3a5e;margin-top:4px">Novos leads cadastrados</div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor='rgba(59,130,246,0.3)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--purple))"></div>
+            <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Leads Hoje</div>
+            <div id="kpi-leads-hoje-val" style="font-size:24px;font-weight:900;color:var(--blue);letter-spacing:-.02em">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Novos leads cadastrados</div>
           </div>
-          <div class="kpi-card" onmouseover="this.style.borderColor='rgba(245,158,11,0.4)'" onmouseout="this.style.borderColor='rgba(124,58,237,0.15)'" style="cursor:default">
-            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div>
-            <div style="font-size:10px;color:#5a5a85;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="ti ti-checklist" style="font-size:11px;color:#f59e0b"></i>Tarefas</div>
-            <div id="kpi-tarefas-val" style="font-size:26px;font-weight:900;color:#f59e0b;letter-spacing:-.02em;font-family:'Syne',sans-serif">—</div>
-            <div style="font-size:10px;color:#3a3a5e;margin-top:4px">Pendentes de execução</div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor='rgba(245,158,11,0.3)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--warning),var(--hot))"></div>
+            <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Tarefas Pendentes</div>
+            <div id="kpi-tarefas-val" style="font-size:24px;font-weight:900;color:var(--warning);letter-spacing:-.02em">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Aguardando execução</div>
           </div>
-          <div class="kpi-card" onmouseover="this.style.borderColor='rgba(16,185,129,0.4)'" onmouseout="this.style.borderColor='rgba(124,58,237,0.15)'" style="cursor:default">
-            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#10b981,#34d399)"></div>
-            <div style="font-size:10px;color:#5a5a85;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:5px"><i class="ti ti-coin" style="font-size:11px;color:#10b981"></i>Receita do Mês</div>
-            <div id="kpi-receita-mes-val" style="font-size:26px;font-weight:900;color:#10b981;letter-spacing:-.02em;font-family:'Syne',sans-serif">—</div>
-            <div style="font-size:10px;color:#3a3a5e;margin-top:4px">Total recebido este mês</div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .2s" onmouseover="this.style.borderColor='rgba(16,185,129,0.3)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--success),#34d399)"></div>
+            <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Receita do Mês</div>
+            <div id="kpi-receita-mes-val" style="font-size:24px;font-weight:900;color:var(--success);letter-spacing:-.02em">—</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Total recebido este mês</div>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
@@ -750,7 +710,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
       <!-- CONTRATOS -->
       <div id="view-contratos" class="view">
-        <div class="page-header"><div><div class="page-title">Contratos & Parceiros</div><div class="page-sub">Gestão de receita variável por cliente</div></div><button class="add-btn" onclick="openContratoModal()"><i class="ti ti-plus"></i> Novo Contrato</button></div>
+        <div class="page-header"><div><div class="page-title">Contratos & Parceiros</div><div class="page-sub">Gestão de receita variável por cliente</div></div><button class="add-btn" onclick="openModal('contratoModal')"><i class="ti ti-plus"></i> Novo Contrato</button></div>
         <div id="contratos-list"><div class="loading">Carregando...</div></div>
         <div style="margin-top:20px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
@@ -879,15 +839,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
           </div>
         </div>
         <!-- TABS -->
-        <div style="display:flex;gap:4px;margin-bottom:20px;background:#0e0e1c;padding:4px;border-radius:12px;border:1px solid rgba(124,58,237,0.25);flex-wrap:wrap">
-          <button id="tab-empresas" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:none;cursor:pointer;font-weight:700;background:linear-gradient(135deg,#7c3aed,#06b6d4);color:#fff" onclick="switchMasterTab('empresas')">Empresas</button>
-          <button id="tab-usuarios" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:1px solid rgba(124,58,237,0.15);cursor:pointer;font-weight:600;background:transparent;color:#6b6b9e" onclick="switchMasterTab('usuarios')">Usuários</button>
-          <button id="tab-estrategico" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:1px solid rgba(124,58,237,0.15);cursor:pointer;font-weight:600;background:transparent;color:#6b6b9e" onclick="switchMasterTab('estrategico')">Estratégico</button>
-          <button id="tab-integracoes" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:1px solid rgba(124,58,237,0.15);cursor:pointer;font-weight:600;background:transparent;color:#6b6b9e" onclick="switchMasterTab('integracoes')">Integrações</button>
-          <button id="tab-auditlog" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:1px solid rgba(124,58,237,0.15);cursor:pointer;font-weight:600;background:transparent;color:#6b6b9e" onclick="switchMasterTab('auditlog')">Audit Log</button>
-          <button id="tab-cases" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:1px solid rgba(124,58,237,0.15);cursor:pointer;font-weight:600;background:transparent;color:#6b6b9e" onclick="switchMasterTab('cases')">Cases</button>
-          <button id="tab-gatilhos" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:1px solid rgba(124,58,237,0.15);cursor:pointer;font-weight:600;background:transparent;color:#6b6b9e" onclick="switchMasterTab('gatilhos')">Gatilhos</button>
-          <button id="tab-carrossel" style="flex:1;border-radius:9px;font-size:11px;min-width:100px;padding:8px;border:1px solid rgba(124,58,237,0.15);cursor:pointer;font-weight:600;background:transparent;color:#6b6b9e" onclick="switchMasterTab('carrossel')">Carrossel</button>
+        <div style="display:flex;gap:4px;margin-bottom:20px;background:var(--card);padding:4px;border-radius:12px;border:1px solid var(--border);flex-wrap:wrap">
+          <button id="tab-empresas" class="btn-primary" style="flex:1;border-radius:9px;font-size:11px;min-width:100px" onclick="switchMasterTab('empresas')">Empresas</button>
+          <button id="tab-usuarios" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('usuarios')">Usuários</button>
+          <button id="tab-estrategico" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('estrategico')">Estratégico</button>
+          <button id="tab-integracoes" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('integracoes')">Integrações</button>
+          <button id="tab-auditlog" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('auditlog')">Audit Log</button>
+          <button id="tab-cases" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('cases')">Cases</button>
+          <button id="tab-gatilhos" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('gatilhos')">Gatilhos</button>
+          <button id="tab-carrossel" class="btn-ghost" style="flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px" onclick="switchMasterTab('carrossel')">Carrossel</button>
         </div>
 
         <!-- EMPRESAS -->
@@ -1736,27 +1696,20 @@ async function checkSession() {
 }
 
 async function doLogin() {
-  const emailEl = document.getElementById('login-email');
-  const passEl = document.getElementById('login-password');
-  const email = (emailEl.value || '').trim();
-  const password = passEl.value || '';
-  const remember = document.getElementById('login-remember')?.checked;
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const remember = document.getElementById('login-remember').checked;
   const btn = document.getElementById('login-btn');
   const errEl = document.getElementById('login-error');
   if (!email || !password) { showLoginError('Preencha e-mail e senha'); return; }
   btn.disabled = true; btn.textContent = 'Entrando...';
-  try {
-    const { data, error } = await sb.auth.signInWithPassword({ email, password });
-    btn.disabled = false; btn.textContent = 'Entrar';
-    if (error) { showLoginError('E-mail ou senha incorretos. Verifique e tente novamente.'); return; }
-    if (remember) localStorage.setItem('crm_remember', '1');
-    currentUser = data.user;
-    if(errEl) errEl.style.display = 'none';
-    showApp();
-  } catch(e) {
-    btn.disabled = false; btn.textContent = 'Entrar';
-    showLoginError('Erro de conexão. Verifique sua internet.');
-  }
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = 'Entrar';
+  if (error) { showLoginError('E-mail ou senha incorretos'); return; }
+  if (remember) localStorage.setItem('crm_remember', '1');
+  currentUser = data.user;
+  errEl.style.display = 'none';
+  showApp();
 }
 
 async function showForgotPassword() {
@@ -1793,18 +1746,12 @@ function showApp() {
   isMaster = currentUser.email === MASTER_EMAIL;
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = 'block';
-  if(document.getElementById('user-email-display'))document.getElementById('user-email-display').textContent = currentUser.email;
+  document.getElementById('user-email-display').textContent = currentUser.email;
   setUserAvatar(currentUser.email);
   if (isMaster) {
-    const mb = document.getElementById('master-btn');
-    if(mb) mb.style.display = 'inline-flex';
-    const ms = document.getElementById('master-section');
-    if(ms) ms.style.display = 'block';
-    const msi = document.getElementById('master-sidebar');
-    if(msi) msi.style.display = 'flex';
-    // Expandir grupo admin na sidebar
-    const grpAdmin = document.getElementById('grp-admin');
-    if(grpAdmin) grpAdmin.style.maxHeight = '200px';
+    document.getElementById('master-btn').style.display = 'inline-flex';
+    document.getElementById('master-section').style.display = 'block';
+    document.getElementById('master-sidebar').style.display = 'flex';
   }
   loadLeads();
   loadFinanceiro();
@@ -2231,22 +2178,12 @@ function closeModalOutside(e,id){if(e.target===document.getElementById(id))close
 
 function showView(name,topBtn,sideItem){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const vEl=document.getElementById('view-'+name);
-  if(!vEl)return;
-  vEl.classList.add('active');
+  document.getElementById('view-'+name).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
   if(topBtn)topBtn.classList.add('active');
   if(sideItem)sideItem.classList.add('active');
-  if(name==='master') renderMaster();
-  if(name==='tarefas'||name==='home') loadTarefasInternas();
-  if(name==='vendas') loadVendas();
-  if(name==='faturas') loadFaturas();
-  if(name==='receitas'||name==='despesas'||name==='financeiro'||name==='contratos') loadFinanceiro();
-  if(name==='links') loadLinks();
-  if(name==='propostas') renderPropostas();
-  if(name==='agenda') renderAgenda();
-  if(name==='kanban'||name==='clientes'||name==='dashboard'||name==='equipe') loadLeads();
+  if(name==='master')renderMaster();
 }
 
 function showToast(msg,type){
@@ -2405,7 +2342,7 @@ function renderFaturas() {
   ['fat-kpi-total','fat-kpi-pendente','fat-kpi-pago'].forEach((id,i)=>{const el2=document.getElementById(id);if(el2)el2.textContent=[fmt(total),fmt(pendente),fmt(pago)][i];});
   const elV=document.getElementById('fat-kpi-vencida');if(elV)elV.textContent=vencidas;
 
-  if(!faturas.length){el.innerHTML=emptyState('receipt','Nenhuma fatura emitida','Clique em "Nova Fatura" para começar');return;}
+  if(!faturas.length){el.innerHTML='<div style="text-align:center;padding:60px;color:var(--muted)"><i class="ti ti-receipt" style="font-size:40px;display:block;margin-bottom:12px"></i>Nenhuma fatura emitida.</div>';return;}
   const statusInfo={rascunho:{label:'Rascunho',color:'var(--muted)'},enviada:{label:'Enviada',color:'var(--warning)'},pago:{label:'Pago',color:'var(--success)'},vencida:{label:'Vencida',color:'var(--danger)'}};
   el.innerHTML = faturas.map(f=>{
     const si=statusInfo[f.status]||{label:f.status,color:'var(--muted)'};
@@ -2739,26 +2676,6 @@ async function deleteContrato() {
   showToast('Contrato excluído', 'success');
   closeModal('contratoModal');
   loadContratos();
-}
-
-function loadContratos() { loadFinanceiro(); }
-
-function openContratoModal() {
-  document.getElementById('con-edit-id').value='';
-  document.getElementById('con-delete-btn').style.display='none';
-  document.getElementById('contrato-modal-title').textContent='Novo Contrato / Parceiro';
-  ['con-nome','con-fixo1','con-fixo2','con-meta','con-obs'].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.value='';
-  });
-  document.getElementById('con-seg').value='Clínica / Saúde';
-  document.getElementById('con-status').value='ativo';
-  document.getElementById('con-fixo-meses').value='6';
-  document.getElementById('con-var-modelo').value='nenhum';
-  document.getElementById('con-var-pct').value='';
-  document.getElementById('con-var-pct2').value='';
-  const d=new Date();
-  document.getElementById('con-inicio').value=d.toISOString().split('T')[0];
-  openModal('contratoModal');
 }
 
 async function saveContrato(){
@@ -3668,10 +3585,10 @@ async function renderMaster(){
 // ============================================================
 // C3 — PROPOSTA COMERCIAL
 // ============================================================
-let propostasGeradas = [];
+let propostasGeradas = JSON.parse(localStorage.getItem('desiberne_propostas') || '[]');
 
 function openPropostaModal() {
-  editingPropostaId = null;
+  // Reset form
   ['prop-empresa','prop-resp','prop-contato','prop-meta','prop-situacao','prop-dor','plan-m1','plan-m2','plan-m3','plan-m4','plan-m5','plan-m6','plan-kpis','prop-valor-mensal','prop-comissao','prop-validade'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('prop-vigencia').value=6;
   ['srv-marketing','srv-trafego','srv-social','srv-gestao','srv-automacao','srv-agente'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
@@ -3686,47 +3603,27 @@ function calcPropostTotal() {
   document.getElementById('prop-total-display').textContent = meses > 0 ? numToMoney(total) + ' (' + meses + ' meses × ' + numToMoney(mensal) + '/mês)' : numToMoney(mensal) + '/mês';
 }
 
-async function renderPropostas() {
+function renderPropostas() {
   const el = document.getElementById('propostas-list');
   if (!el) return;
-  el.innerHTML = '<div class="loading">Carregando propostas...</div>';
-  const {data, error} = await sb.from('propostas_comerciais').select('*').order('created_at',{ascending:false});
-  if (error) {
-    el.innerHTML = `<div style="color:var(--warning);padding:20px;font-size:12px;line-height:1.8">
-      <strong>Crie a tabela no Supabase SQL Editor:</strong><br>
-      <code style="font-size:10px;color:#a78bfa;display:block;margin-top:8px;padding:10px;background:rgba(0,0,0,0.3);border-radius:6px">
-CREATE TABLE propostas_comerciais (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  created_at timestamptz DEFAULT now(),
-  empresa text, nicho text, servicos text,
-  valor_mensal text, vigencia text,
-  data_geracao date, raw jsonb
-);
-ALTER TABLE propostas_comerciais ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow all" ON propostas_comerciais FOR ALL USING (true);
-      </code>
-    </div>`;
-    return;
-  }
-  propostasGeradas = data || [];
-  if (!propostasGeradas.length) {
-    el.innerHTML = emptyState('file-description','Nenhuma proposta gerada ainda','Clique em "Nova Proposta" para começar');
-    return;
-  }
-  el.innerHTML = propostasGeradas.map(p => `
-    <div class="chart-card" style="margin-bottom:12px">
+  propostasGeradas = JSON.parse(localStorage.getItem('desiberne_propostas') || '[]');
+  if (!propostasGeradas.length) { el.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)"><i class="ti ti-file-description" style="font-size:40px;display:block;margin-bottom:12px"></i>Nenhuma proposta gerada ainda.<br><small>Clique em "Nova Proposta" para começar.</small></div>'; return; }
+  el.innerHTML = propostasGeradas.slice().reverse().map((p,ri) => {
+    const idx = propostasGeradas.length - 1 - ri;
+    return `<div class="chart-card" style="margin-bottom:12px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
         <div style="flex:1">
-          <div style="font-weight:700;font-size:14px">${p.empresa||'—'}</div>
-          <div style="font-size:11px;color:var(--muted)">${p.nicho||''} · ${p.data_geracao||''} · ${p.servicos||''}</div>
+          <div style="font-weight:700;font-size:14px">${p.empresa}</div>
+          <div style="font-size:11px;color:var(--muted)">${p.nicho||''} · ${p.data||''} · ${p.servicos||''}</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
-          <span style="font-size:13px;font-weight:700;color:var(--neon-light)">${p.valor_mensal||''}/mês</span>
-          <button class="add-btn" style="font-size:11px;padding:6px 10px;background:rgba(124,58,237,0.15)" onclick="openEditPropostaById('${p.id}')"><i class="ti ti-pencil"></i></button>
-          <button class="delete-btn" style="font-size:11px;padding:6px 10px" onclick="excluirPropostaById('${p.id}')"><i class="ti ti-trash"></i></button>
+          <span style="font-size:13px;font-weight:700;color:var(--neon-light)">${p.valorMensal||''}/mês</span>
+          <button class="add-btn" style="font-size:11px;padding:6px 10px;background:rgba(124,58,237,0.15)" onclick="openEditPropostaModal(${idx})"><i class="ti ti-pencil"></i></button>
+          <button class="delete-btn" style="font-size:11px;padding:6px 10px" onclick="excluirProposta(${idx})"><i class="ti ti-trash"></i></button>
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 async function gerarPropostaPDF() {
@@ -3828,15 +3725,11 @@ async function gerarPropostaPDF() {
   showToast('Gerando PDF...', 'success');
   html2pdf().set(opt).from(container).save().then(async () => {
     document.body.removeChild(container);
+    // Salvar no histórico local
     const raw = {empresa,nicho,resp,contato,situacao,dor,meta,servicos:servicos.map(s=>({'Marketing Digital':'marketing','Tráfego Pago':'trafego','Social Mídia':'social','Gestão Comercial':'gestao','Automação':'automacao','Agente de IA':'agente'}[s]||s)),plano:[1,2,3,4,5,6].map(i=>({mes:'Mês '+i,acao:document.getElementById('plan-m'+i)?.value||''})),kpis,valorMensal,vigencia,comissao,validade};
-    const propPayload = {empresa,nicho,servicos:servicos.join(', '),valor_mensal:valorMensal,vigencia,data_geracao:new Date().toISOString().split('T')[0],raw};
-    if(editingPropostaId){
-      await sb.from('propostas_comerciais').update(propPayload).eq('id',editingPropostaId);
-      editingPropostaId=null;
-    } else {
-      await sb.from('propostas_comerciais').insert(propPayload);
-    }
-    await renderPropostas();
+    if(editingPropostaIdx!==null){propostasGeradas[editingPropostaIdx]={empresa,nicho,data:hoje,servicos:servicos.join(', '),valorMensal,raw};editingPropostaIdx=null;}else{propostasGeradas.push({empresa,nicho,data:hoje,servicos:servicos.join(', '),valorMensal,raw});}
+    localStorage.setItem('desiberne_propostas', JSON.stringify(propostasGeradas));
+    renderPropostas();
     closeModal('propostaModal');
   });
 }
@@ -3845,19 +3738,6 @@ async function gerarPropostaPDF() {
 // MODO FOCO
 // ============================================================
 let focoAtivo = false;
-function toggleSidebarGroup(id, section) {
-  const grp = document.getElementById(id);
-  if (!grp) return;
-  const isCollapsed = grp.classList.contains('collapsed');
-  if (isCollapsed) {
-    grp.classList.remove('collapsed');
-    if(section) section.classList.remove('collapsed');
-  } else {
-    grp.classList.add('collapsed');
-    if(section) section.classList.add('collapsed');
-  }
-}
-
 function toggleFoco(){
   focoAtivo = !focoAtivo;
   const overlay = document.getElementById('modoFoco');
@@ -4075,7 +3955,7 @@ function exportPDF(){
         <p>Relatório Comercial & Financeiro — ${mesStr}</p>
       </div>
       <div class="date-info">
-        <div style="font-size:14px;font-weight:800;color:#111">CRM v17.0</div>
+        <div style="font-size:14px;font-weight:800;color:#111">CRM v16.0</div>
         <div>Gerado em ${dateStr}</div>
       </div>
     </div>
@@ -4144,7 +4024,7 @@ function exportPDF(){
     </div>
 
     <div class="footer">
-      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v17.0
+      Desiberne IA © ${d.getFullYear()} · Relatório gerado automaticamente pelo Desiberne CRM v16.0
     </div>
     </body>
     </html>
@@ -4178,26 +4058,17 @@ function switchMasterTab(tab){
     if(el) el.style.display = t===tab?'block':'none';
     const btn = document.getElementById('tab-'+t);
     if(btn){
-      if(t===tab){
-        btn.style.background='linear-gradient(135deg,#7c3aed,#06b6d4)';
-        btn.style.color='#fff';
-        btn.style.border='none';
-        btn.style.fontWeight='700';
-      } else {
-        btn.style.background='transparent';
-        btn.style.color='#6b6b9e';
-        btn.style.border='1px solid rgba(124,58,237,0.15)';
-        btn.style.fontWeight='600';
-      }
+      if(t===tab){btn.className='btn-primary';btn.style.cssText='flex:1;border-radius:9px;font-size:11px;min-width:100px';}
+      else{btn.className='btn-ghost';btn.style.cssText='flex:1;border-radius:9px;font-size:11px;border:none;min-width:100px';}
     }
   });
   if(tab==='usuarios') loadUsuarios();
   if(tab==='estrategico') renderMasterEstrategico();
   if(tab==='carrossel') loadSlidesAdmin();
+  if(tab==='integracoes') {} // static content
   if(tab==='auditlog') loadAuditLog();
   if(tab==='cases') loadCases();
   if(tab==='gatilhos') renderGatilhos();
-  if(tab==='integracoes') {} // static content
 }
 
 async function renderMasterEstrategico(){
@@ -5036,12 +4907,12 @@ async function deleteCase() {
 // ============================================================
 // PROPOSTAS — Editar + Excluir (F5)
 // ============================================================
-let editingPropostaId = null;
+let editingPropostaIdx = null;
 
 function openEditPropostaModal(idx) {
   const p = propostasGeradas[idx];
   if(!p) return;
-  editingPropostaId = idx;
+  editingPropostaIdx = idx;
   // Preencher campos do modal de proposta com dados salvos
   if(p.raw) {
     const r = p.raw;
@@ -5069,37 +4940,35 @@ function openEditPropostaModal(idx) {
   openModal('propostaModal');
 }
 
-async function excluirProposta(idx) {
-  // Compatibilidade — redireciona para excluir por ID
-  const p = propostasGeradas[idx];
-  if(p && p.id) await excluirPropostaById(p.id);
-}
-
-async function excluirPropostaById(id) {
+function excluirProposta(idx) {
   if(!confirm('Excluir esta proposta?')) return;
-  await sb.from('propostas_comerciais').delete().eq('id',id);
+  propostasGeradas.splice(idx,1);
+  localStorage.setItem('desiberne_propostas',JSON.stringify(propostasGeradas));
+  renderPropostas();
   showToast('Proposta excluída','success');
-  await renderPropostas();
 }
 
 // Versão atualizada
 
-function emptyState(icon,msg,sub=''){
-  return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center">
-    <div style="width:56px;height:56px;border-radius:16px;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:24px;color:#4a4a7a"><i class="ti ti-${icon}"></i></div>
-    <div style="font-size:14px;font-weight:700;color:#5050a0;margin-bottom:4px">${msg}</div>
-    ${sub?`<div style="font-size:12px;color:#3a3a5e">${sub}</div>`:''}
-  </div>`;
+
+function toggleUserMenu(){
+  const m=document.getElementById('user-menu');
+  if(m)m.style.display=m.style.display==='none'?'block':'none';
 }
-function animateCounter(el,target,prefix='',suffix=''){
-  if(!el||!target)return;
-  const steps=20,duration=600,step=duration/steps;
-  let i=0;
-  const interval=setInterval(()=>{
-    i++;const current=Math.round(target*(i/steps));
-    el.textContent=prefix+current.toLocaleString('pt-BR')+suffix;
-    if(i>=steps){clearInterval(interval);}
-  },step);
+document.addEventListener('click',function(e){
+  const menu=document.getElementById('user-menu');
+  const btn=document.getElementById('user-avatar-btn');
+  if(menu&&btn&&!menu.contains(e.target)&&!btn.contains(e.target))menu.style.display='none';
+});
+
+function setUserAvatar(email){
+  const av=document.getElementById('user-avatar-btn');
+  const em=document.getElementById('user-menu-email');
+  if(!email)return;
+  const parts=email.split('@')[0].split(/[._-]/);
+  const initials=((parts[0]?.[0]||'')+(parts[1]?.[0]||parts[0]?.[1]||'')).toUpperCase();
+  if(av)av.textContent=initials||'??';
+  if(em)em.textContent=email;
 }
 
 async function checkSystemStatus(){
@@ -5113,19 +4982,27 @@ async function checkSystemStatus(){
     const r=await sb.from('usuarios').select('id').limit(1);
     const ping=Math.round(performance.now()-t0);
     if(r.error)throw r.error;
-    dot.className='status-pulse';dot.style.background='#10b981';
-    txt.style.color='#10b981';txt.textContent='Supabase · Online';
-    ms.textContent=ping+'ms';chip.className='status-indicator';
+    dot.style.background='#10b981';txt.style.color='#10b981';
+    txt.textContent='Supabase · Online';ms.textContent=ping+'ms';
+    chip.style.borderColor='rgba(16,185,129,0.25)';
   }catch(e){
-    dot.className='status-pulse err';dot.style.background='#ef4444';
-    txt.style.color='#ef4444';txt.textContent='Supabase · Offline';
-    ms.textContent='';chip.className='status-indicator err';
+    dot.style.background='#ef4444';txt.style.color='#ef4444';
+    txt.textContent='Supabase · Offline';ms.textContent='';
+    chip.style.borderColor='rgba(239,68,68,0.3)';
   }
 }
 
 function startStatusChecker(){
   checkSystemStatus();
   setInterval(checkSystemStatus,30000);
+}
+
+function emptyState(icon,msg,sub=''){
+  return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center">
+    <div style="width:56px;height:56px;border-radius:16px;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:24px;color:#4a4a7a"><i class="ti ti-${icon}"></i></div>
+    <div style="font-size:14px;font-weight:700;color:#5050a0;margin-bottom:4px">${msg}</div>
+    ${sub?`<div style="font-size:12px;color:#3a3a5e">${sub}</div>`:''}
+  </div>`;
 }
 
 checkSession();
