@@ -439,7 +439,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
         <i class="ti ti-lock" style="font-size:10px;color:#3a3a5e;margin-left:3px"></i>
       </div>
       <button class="logout-btn" onclick="toggleFoco()" id="foco-btn" title="Modo Foco"><i class="ti ti-focus-2"></i></button>
-      <div id="user-avatar-btn" onclick="toggleUserMenu()" style="width:30px;height:30px;border-radius:50%;background:rgba(124,58,237,0.2);border:1px solid rgba(192,132,252,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#c084fc;cursor:pointer;font-family:'Syne',sans-serif">DR</div>
+      <div id="user-avatar-btn" onclick="toggleUserMenu()" title="Menu do usuário" style="width:32px;height:32px;border-radius:50%;background:rgba(124,58,237,0.15);border:1px solid rgba(192,132,252,0.25);display:flex;align-items:center;justify-content:center;font-size:16px;color:#c084fc;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(124,58,237,0.3)'" onmouseout="this.style.background='rgba(124,58,237,0.15)'"><i class="ti ti-settings"></i></div>
       <div id="user-menu" style="display:none;position:absolute;top:54px;right:20px;background:#0e0e1c;border:1px solid rgba(124,58,237,0.25);border-radius:10px;padding:6px;z-index:200;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.4)">
         <div id="user-menu-email" style="padding:8px 10px;font-size:11px;color:#5a5a85;border-bottom:1px solid #1a1a2e;margin-bottom:4px"></div>
         <div onclick="showView('master',null,null);toggleUserMenu()" style="padding:8px 10px;font-size:12px;color:#c084fc;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px" onmouseover="this.style.background='rgba(124,58,237,0.1)'" onmouseout="this.style.background='none'"><i class="ti ti-shield"></i> Painel Master</div>
@@ -470,7 +470,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
       <div class="sidebar-item" onclick="showView('vendas',null,this)"><i class="ti ti-shopping-cart"></i> Registro de Vendas</div>
       <div class="sidebar-section">Ferramentas</div>
       <div class="sidebar-item" onclick="showView('links',null,this)"><i class="ti ti-link"></i> Links Úteis</div>
-      <div class="sidebar-item" onclick="showView('vendas',null,this)"><i class="ti ti-shopping-cart"></i> Registro de Vendas</div>
       <div class="sidebar-item" onclick="showView('propostas',null,this)"><i class="ti ti-file-description"></i> Propostas</div>
       <div class="sidebar-item" onclick="showView('faturas',null,this)"><i class="ti ti-receipt"></i> Faturas</div>
       <div class="sidebar-section" id="master-section" style="display:none">Admin</div>
@@ -534,15 +533,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
             <div class="ativ-col" ondragover="allowTiDrop(event)" ondrop="dropTi(event,'pendente')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
               <div class="ativ-col-header"><div class="ativ-col-title"><span class="s-dot" style="background:var(--cold)"></span> Pendente</div><div class="ativ-count" id="ti-cnt-pendente">0</div></div>
-              <div id="ti-pendente"><div class="loading">Carregando...</div></div>
+              <div id="ti-pendente"><div style="text-align:center;padding:16px;color:var(--muted);font-size:11px">—</div></div>
             </div>
             <div class="ativ-col" ondragover="allowTiDrop(event)" ondrop="dropTi(event,'andamento')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
               <div class="ativ-col-header"><div class="ativ-col-title"><span class="s-dot" style="background:var(--warning)"></span> Em Andamento</div><div class="ativ-count" id="ti-cnt-andamento">0</div></div>
-              <div id="ti-andamento"><div class="loading">Carregando...</div></div>
+              <div id="ti-andamento"><div style="text-align:center;padding:16px;color:var(--muted);font-size:11px">—</div></div>
             </div>
             <div class="ativ-col" ondragover="allowTiDrop(event)" ondrop="dropTi(event,'entregue')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
               <div class="ativ-col-header"><div class="ativ-col-title"><span class="s-dot" style="background:var(--success)"></span> Entregue</div><div class="ativ-count" id="ti-cnt-entregue">0</div></div>
-              <div id="ti-entregue"><div class="loading">Carregando...</div></div>
+              <div id="ti-entregue"><div style="text-align:center;padding:16px;color:var(--muted);font-size:11px">—</div></div>
             </div>
           </div>
         </div>
@@ -1750,8 +1749,10 @@ function showLoginError(msg) {
 }
 
 function showApp() {
-  // isMaster: email master OU permissão master na tabela usuarios
-  isMaster = currentUser.email === MASTER_EMAIL;
+  isMaster = (currentUser.email || '').trim().toLowerCase() === MASTER_EMAIL.trim().toLowerCase();
+  if(isMaster) { // Ativar imediatamente antes de qualquer async
+    ['master-btn','master-section','master-sidebar'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=id==='master-btn'?'inline-flex':id==='master-sidebar'?'flex':'block';});
+  }
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = 'block';
   document.getElementById('user-email-display').textContent = currentUser.email;
@@ -1759,33 +1760,28 @@ function showApp() {
 
   function ativarMaster() {
     isMaster = true;
-    const mb = document.getElementById('master-btn');
-    const ms = document.getElementById('master-section');
-    const msi = document.getElementById('master-sidebar');
-    if(mb) mb.style.display = 'inline-flex';
-    if(ms) ms.style.display = 'block';
-    if(msi) msi.style.display = 'flex';
+    ['master-btn','master-section','master-sidebar'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.style.display = id === 'master-btn' ? 'inline-flex' : id === 'master-sidebar' ? 'flex' : 'block';
+    });
   }
 
-  if (isMaster) {
-    ativarMaster();
-  } else {
-    // Verificar também na tabela usuarios (case-insensitive)
-    sb.from('usuarios').select('permissao,email').eq('email', currentUser.email).limit(1)
-      .then(({data}) => {
-        if(data && data.length > 0 && (data[0].permissao === 'master' || data[0].permissao === 'admin')) {
-          ativarMaster();
-        }
-      }).catch(()=>{});
-  }
-  // Garantia extra: email do domínio desiberneia sempre é master
-  if(currentUser.email && currentUser.email.toLowerCase() === MASTER_EMAIL.toLowerCase()) {
+  // Ativar imediatamente se for o email master
+  if(isMaster) {
     ativarMaster();
   }
+
+  // Verificar também na tabela (para outros admins)
+  sb.from('usuarios').select('permissao').eq('email', (currentUser.email||'').toLowerCase()).limit(1)
+    .then(({data}) => {
+      if(data && data.length > 0 && ['master','admin'].includes(data[0].permissao)) {
+        ativarMaster();
+      }
+    }).catch(()=>{});
   loadLeads();
   loadFinanceiro();
   loadVendas();
-  loadTarefasInternas();
+  loadTarefasInternas().then(()=>renderTarefasInternas());
   loadAtividades();
   loadFaturas();
   setUserAvatar(currentUser?.email||'');
@@ -4991,13 +4987,9 @@ document.addEventListener('click',function(e){
 });
 
 function setUserAvatar(email){
-  const av=document.getElementById('user-avatar-btn');
+  // Mantém o ícone de engrenagem, só atualiza o email no menu
   const em=document.getElementById('user-menu-email');
-  if(!email)return;
-  const parts=email.split('@')[0].split(/[._-]/);
-  const initials=((parts[0]?.[0]||'')+(parts[1]?.[0]||parts[0]?.[1]||'')).toUpperCase();
-  if(av)av.textContent=initials||'??';
-  if(em)em.textContent=email;
+  if(em&&email)em.textContent=email;
 }
 
 async function checkSystemStatus(){
