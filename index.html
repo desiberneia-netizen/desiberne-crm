@@ -750,7 +750,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
       <!-- CONTRATOS -->
       <div id="view-contratos" class="view">
-        <div class="page-header"><div><div class="page-title">Contratos & Parceiros</div><div class="page-sub">Gestão de receita variável por cliente</div></div><button class="add-btn" onclick="openModal('contratoModal')"><i class="ti ti-plus"></i> Novo Contrato</button></div>
+        <div class="page-header"><div><div class="page-title">Contratos & Parceiros</div><div class="page-sub">Gestão de receita variável por cliente</div></div><button class="add-btn" onclick="openContratoModal()"><i class="ti ti-plus"></i> Novo Contrato</button></div>
         <div id="contratos-list"><div class="loading">Carregando...</div></div>
         <div style="margin-top:20px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
@@ -1796,9 +1796,15 @@ function showApp() {
   if(document.getElementById('user-email-display'))document.getElementById('user-email-display').textContent = currentUser.email;
   setUserAvatar(currentUser.email);
   if (isMaster) {
-    document.getElementById('master-btn').style.display = 'inline-flex';
-    document.getElementById('master-section').style.display = 'block';
-    document.getElementById('master-sidebar').style.display = 'flex';
+    const mb = document.getElementById('master-btn');
+    if(mb) mb.style.display = 'inline-flex';
+    const ms = document.getElementById('master-section');
+    if(ms) ms.style.display = 'block';
+    const msi = document.getElementById('master-sidebar');
+    if(msi) msi.style.display = 'flex';
+    // Expandir grupo admin na sidebar
+    const grpAdmin = document.getElementById('grp-admin');
+    if(grpAdmin) grpAdmin.style.maxHeight = '200px';
   }
   loadLeads();
   loadFinanceiro();
@@ -2225,12 +2231,22 @@ function closeModalOutside(e,id){if(e.target===document.getElementById(id))close
 
 function showView(name,topBtn,sideItem){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('view-'+name).classList.add('active');
+  const vEl=document.getElementById('view-'+name);
+  if(!vEl)return;
+  vEl.classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
   if(topBtn)topBtn.classList.add('active');
   if(sideItem)sideItem.classList.add('active');
-  if(name==='master')renderMaster();
+  if(name==='master') renderMaster();
+  if(name==='tarefas'||name==='home') loadTarefasInternas();
+  if(name==='vendas') loadVendas();
+  if(name==='faturas') loadFaturas();
+  if(name==='receitas'||name==='despesas'||name==='financeiro'||name==='contratos') loadFinanceiro();
+  if(name==='links') loadLinks();
+  if(name==='propostas') renderPropostas();
+  if(name==='agenda') renderAgenda();
+  if(name==='kanban'||name==='clientes'||name==='dashboard'||name==='equipe') loadLeads();
 }
 
 function showToast(msg,type){
@@ -2723,6 +2739,26 @@ async function deleteContrato() {
   showToast('Contrato excluído', 'success');
   closeModal('contratoModal');
   loadContratos();
+}
+
+function loadContratos() { loadFinanceiro(); }
+
+function openContratoModal() {
+  document.getElementById('con-edit-id').value='';
+  document.getElementById('con-delete-btn').style.display='none';
+  document.getElementById('contrato-modal-title').textContent='Novo Contrato / Parceiro';
+  ['con-nome','con-fixo1','con-fixo2','con-meta','con-obs'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('con-seg').value='Clínica / Saúde';
+  document.getElementById('con-status').value='ativo';
+  document.getElementById('con-fixo-meses').value='6';
+  document.getElementById('con-var-modelo').value='nenhum';
+  document.getElementById('con-var-pct').value='';
+  document.getElementById('con-var-pct2').value='';
+  const d=new Date();
+  document.getElementById('con-inicio').value=d.toISOString().split('T')[0];
+  openModal('contratoModal');
 }
 
 async function saveContrato(){
