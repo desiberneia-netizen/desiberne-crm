@@ -1778,16 +1778,25 @@ function showApp() {
         ativarMaster();
       }
     }).catch(()=>{});
-  loadLeads();
-  loadFinanceiro();
-  loadVendas();
-  loadTarefasInternas().then(()=>renderTarefasInternas());
-  loadAtividades();
-  loadFaturas();
   setUserAvatar(currentUser?.email||'');
   startStatusChecker();
-  renderAgenda();
   renderPropostas();
+
+  // Carregar tudo em paralelo e garantir renderização
+  Promise.all([
+    loadLeads(),
+    loadFinanceiro(),
+    loadVendas(),
+    loadTarefasInternas(),
+    loadAtividades(),
+    loadFaturas(),
+  ]).then(() => {
+    renderTarefasInternas();
+    renderAgenda();
+    updateHomeKPIs();
+    renderFeedVendas();
+  }).catch(e => console.error('Erro ao carregar dados:', e));
+
   setTimeout(verificarGatilhos, 5000);
 }
 
@@ -1816,6 +1825,49 @@ function renderAll() {
   renderTarefas();
   if (isMaster) renderEmpresas();
   updateHomeKPIs();
+  renderHomeWidgets();
+}
+
+function renderHomeWidgets() {
+  // Leads quentes na home
+  const quentes = allLeads.filter(l=>l.temperatura==='Quente'||l.temperatura==='quente').slice(0,5);
+  const elQ = document.getElementById('home-quentes-list');
+  if(elQ) {
+    elQ.innerHTML = quentes.length ? quentes.map(l=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-weight:700;font-size:12px">${l.razao_social||l.gestor||'—'}</div>
+          <div style="font-size:10px;color:var(--muted)">${l.responsavel||''}</div>
+        </div>
+        <span style="font-size:10px;font-weight:700;color:var(--hot)">🔥 Quente</span>
+      </div>`).join('') :
+      '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Nenhum lead quente</div>';
+  }
+
+  // Agendamentos na home — usar atividades do Supabase
+  const agora = new Date();
+  const agSrc = (atividades||[])
+    .filter(a=>a.data && new Date(a.data+'T'+(a.hora||'00:00')) >= agora)
+    .sort((a,b)=>new Date(a.data+'T'+(a.hora||'00:00'))-new Date(b.data+'T'+(b.hora||'00:00')))
+    .slice(0,4);
+  const elA = document.getElementById('home-agenda-list');
+  if(elA) {
+    elA.innerHTML = agSrc.length ? agSrc.map(a=>{
+      const dt = new Date(a.data+'T'+(a.hora||'00:00'));
+      const dia = dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+      const hora = a.hora||'';
+      return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+        <div style="background:rgba(124,58,237,0.08);border-radius:8px;padding:5px 10px;text-align:center;min-width:48px">
+          <div style="font-size:10px;font-weight:800;color:var(--purple-light)">${dia}</div>
+          ${hora?`<div style="font-size:9px;color:var(--muted)">${hora}</div>`:''}
+        </div>
+        <div style="flex:1"><div style="font-weight:600;font-size:12px">${a.titulo||a.lead||'Agendamento'}</div>
+          <div style="font-size:10px;color:var(--muted)">${a.tipo||a.responsavel||''}</div>
+        </div>
+      </div>`;
+    }).join('') :
+    '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Nenhum agendamento próximo</div>';
+  }
 }
 
 function updateHomeKPIs() {
@@ -2122,8 +2174,47 @@ async function saveLead() {
   const {error}=editId?await sb.from('leads').update(data).eq('id',editId):await sb.from('leads').insert(data);
   btn.disabled=false;btn.textContent='Salvar Lead';
   if(error){showToast('Erro: '+error.message,'error');return;}
-  showToast(editId?'Lead atualizado!':'Lead salvo!','success');
-  closeModal('leadModal');loadLeads();
+
+  // AUTO-CRIAR VENDA + RECEITA quando lead é salvo como Fechado
+  const temperatura = document.getElementById('f-temperatura').value;
+  const razaoSocial = document.getElementById('f-razao').value.trim();
+  const valorLead = parseFloat(document.getElementById('f-valor').value)||0;
+  if(temperatura === 'Fechado') {
+    // Verificar se já existe venda para esse lead
+    const {data: vendaExist} = await sb.from('vendas').select('id')
+      .eq('cliente', razaoSocial).eq('status','pendente').limit(1);
+    if(!vendaExist || vendaExist.length === 0) {
+      // Criar venda pendente
+      await sb.from('vendas').insert({
+        vertical: document.getElementById('f-vertical')?.value || 'Desiberne IA',
+        data: new Date().toISOString().split('T')[0],
+        cliente: razaoSocial,
+        descricao: 'Venda gerada automaticamente — Lead Fechado',
+        quantidade: 1,
+        valor_unitario: valorLead,
+        valor_total: valorLead,
+        pagamento: 'A definir',
+        status: 'pendente',
+        obs: 'Criado automaticamente ao salvar lead como Fechado'
+      });
+      // Criar receita pendente
+      await sb.from('financeiro_receitas').insert({
+        descricao: razaoSocial + ' — Contrato (pendente)',
+        cliente: razaoSocial,
+        categoria: 'Venda',
+        recorrencia: 'Mensal',
+        valor: valorLead,
+        data: new Date().toISOString().split('T')[0],
+        status: 'pendente'
+      });
+      showToast('✅ Lead fechado! Venda e receita criadas automaticamente.', 'success');
+    } else {
+      showToast(editId?'Lead atualizado!':'Lead salvo!','success');
+    }
+  } else {
+    showToast(editId?'Lead atualizado!':'Lead salvo!','success');
+  }
+  closeModal('leadModal');loadLeads();loadVendas();loadFinanceiro();
 }
 
 async function deleteLead() {
@@ -2763,7 +2854,7 @@ async function loadAtividades() {
   const { data } = await sb.from('atividades').select('*').eq('lead_id', currentLeadId).order('created_at', { ascending: true });
   atividades = data || [];
   renderAtividades();
-  checkLembretes();
+  checkLembretes();  renderHomeWidgets();
 }
 
 function renderAtividades() {
