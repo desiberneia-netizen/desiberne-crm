@@ -1749,55 +1749,48 @@ function showLoginError(msg) {
 }
 
 function showApp() {
-  isMaster = (currentUser.email || '').trim().toLowerCase() === MASTER_EMAIL.trim().toLowerCase();
-  if(isMaster) { // Ativar imediatamente antes de qualquer async
-    ['master-btn','master-section','master-sidebar'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=id==='master-btn'?'inline-flex':id==='master-sidebar'?'flex':'block';});
-  }
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app-screen').style.display = 'block';
-  document.getElementById('user-email-display').textContent = currentUser.email;
-  setUserAvatar(currentUser.email);
+  // 1. UI imediata
+  try {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'block';
+  } catch(e) {}
 
+  // 2. Master check
+  isMaster = (currentUser.email||'').trim().toLowerCase() === MASTER_EMAIL.trim().toLowerCase();
   function ativarMaster() {
     isMaster = true;
-    ['master-btn','master-section','master-sidebar'].forEach(id => {
-      const el = document.getElementById(id);
-      if(el) el.style.display = id === 'master-btn' ? 'inline-flex' : id === 'master-sidebar' ? 'flex' : 'block';
+    const ids = ['master-btn','master-section','master-sidebar'];
+    ids.forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.style.display = id==='master-btn'?'inline-flex':id==='master-sidebar'?'flex':'block';
     });
   }
+  if(isMaster) ativarMaster();
+  sb.from('usuarios').select('permissao').eq('email',(currentUser.email||'').toLowerCase()).limit(1)
+    .then(({data})=>{ if(data&&data.length>0&&['master','admin'].includes(data[0].permissao)) ativarMaster(); })
+    .catch(()=>{});
 
-  // Ativar imediatamente se for o email master
-  if(isMaster) {
-    ativarMaster();
+  // 3. Avatar e status
+  try { setUserAvatar(currentUser.email); } catch(e) {}
+  try { startStatusChecker(); } catch(e) {}
+
+  // 4. Carregar TODOS os dados e renderizar home
+  async function carregarTudo() {
+    try { await loadLeads(); } catch(e) { console.error('loadLeads:', e); }
+    try { await loadFinanceiro(); } catch(e) { console.error('loadFinanceiro:', e); }
+    try { await loadVendas(); } catch(e) { console.error('loadVendas:', e); }
+    try { await loadTarefasInternas(); } catch(e) { console.error('loadTarefas:', e); }
+    try { await loadAtividades(); } catch(e) { console.error('loadAtividades:', e); }
+    try { await loadFaturas(); } catch(e) { console.error('loadFaturas:', e); }
+    // Renderizar tudo após carregar
+    try { renderTarefasInternas(); } catch(e) {}
+    try { renderHomeWidgets(); } catch(e) {}
+    try { updateHomeKPIs(); } catch(e) {}
+    try { renderFeedVendas(); } catch(e) {}
+    try { renderPropostas(); } catch(e) {}
   }
-
-  // Verificar também na tabela (para outros admins)
-  sb.from('usuarios').select('permissao').eq('email', (currentUser.email||'').toLowerCase()).limit(1)
-    .then(({data}) => {
-      if(data && data.length > 0 && ['master','admin'].includes(data[0].permissao)) {
-        ativarMaster();
-      }
-    }).catch(()=>{});
-  setUserAvatar(currentUser?.email||'');
-  startStatusChecker();
-  renderPropostas();
-
-  // Carregar tudo em paralelo e garantir renderização
-  Promise.all([
-    loadLeads(),
-    loadFinanceiro(),
-    loadVendas(),
-    loadTarefasInternas(),
-    loadAtividades(),
-    loadFaturas(),
-  ]).then(() => {
-    renderTarefasInternas();
-    renderAgenda();
-    updateHomeKPIs();
-    renderFeedVendas();
-  }).catch(e => console.error('Erro ao carregar dados:', e));
-
-  setTimeout(verificarGatilhos, 5000);
+  carregarTudo();
+  setTimeout(verificarGatilhos, 6000);
 }
 
 async function doLogout() {
@@ -5078,9 +5071,10 @@ document.addEventListener('click',function(e){
 });
 
 function setUserAvatar(email){
-  // Mantém o ícone de engrenagem, só atualiza o email no menu
-  const em=document.getElementById('user-menu-email');
-  if(em&&email)em.textContent=email;
+  try {
+    const em=document.getElementById('user-menu-email');
+    if(em&&email)em.textContent=email;
+  } catch(e){}
 }
 
 async function checkSystemStatus(){
