@@ -450,10 +450,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
   <div class="main-body">
     <div class="sidebar">
-      <div class="sidebar-logo">
-        <img src="https://i.imgur.com/rrQxwkl.png" alt="D">
-        <div class="sidebar-logo-text">Desiberne IA</div>
-      </div>
       <div class="sidebar-section">Menu</div>
       <div class="sidebar-item active" onclick="showView('dashboard',null,this)"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
       <div class="sidebar-item" onclick="showView('kanban',null,this)"><i class="ti ti-columns"></i> Pipeline Kanban</div>
@@ -471,7 +467,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
       <div class="sidebar-section">Ferramentas</div>
       <div class="sidebar-item" onclick="showView('links',null,this)"><i class="ti ti-link"></i> Links Úteis</div>
       <div class="sidebar-item" onclick="showView('propostas',null,this)"><i class="ti ti-file-description"></i> Propostas</div>
-      <div class="sidebar-item" onclick="showView('faturas',null,this)"><i class="ti ti-receipt"></i> Faturas</div>
+      <div class="sidebar-item" id="faturas-sidebar" style="display:none" onclick="showView('faturas',null,this)"><i class="ti ti-receipt"></i> Faturas</div>
       <div class="sidebar-section" id="master-section" style="display:none">Admin</div>
       <div class="sidebar-item" id="master-sidebar" style="display:none" onclick="showView('master',null,this)"><i class="ti ti-shield"></i> Painel Master</div>
     </div>
@@ -888,7 +884,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
           <div class="chart-card" style="margin-bottom:16px"><div class="chart-title">Histórico — últimos 6 meses</div><div id="master-historico-chart"><div class="loading">Carregando...</div></div></div>
           <div class="chart-card"><div class="chart-title"><i class="ti ti-brain" style="color:var(--purple-light);margin-right:6px"></i>Análise Estratégica</div><div id="master-analise" style="font-size:13px;color:var(--muted);line-height:1.8;margin-top:4px">Carregando...</div></div>
 
-        <!-- CARROSSEL -->
+        <!-- AUDIT LOG -->
         <div id="master-tab-auditlog" style="display:none">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
             <div>
@@ -1474,7 +1470,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
     <div class="foco-title"><i class="ti ti-focus-2"></i> Modo Foco — Desiberne CRM</div>
     <div style="display:flex;align-items:center;gap:12px">
       <span id="foco-date" style="font-size:12px;color:var(--muted);font-weight:600"></span>
-      <button class="add-btn" onclick="exportPDF()"><i class="ti ti-file-download"></i> Exportar PDF</button>
+      <button class="add-btn" onclick="exportPDF()"><i class="ti ti-printer"></i> Imprimir Relatório</button>
       <button class="logout-btn" onclick="toggleFoco()"><i class="ti ti-x"></i> Fechar</button>
     </div>
   </div>
@@ -1486,6 +1482,114 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 <!-- NOTIF ANIVERSÁRIO -->
 <div id="aniv-container" style="position:fixed;bottom:20px;left:20px;z-index:150;max-width:340px;display:flex;flex-direction:column;gap:8px"></div>
 
+
+<!-- FATURA MODAL -->
+<div class="modal-overlay" id="faturaModal" onclick="closeModalOutside(event,'faturaModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="fatura-modal-title">Nova Fatura</div>
+      <button class="modal-close" onclick="closeModal('faturaModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <input type="hidden" id="fat-edit-id">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Número *</label><input class="form-input" id="fat-numero" placeholder="FAT-001"></div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-select" id="fat-status">
+          <option value="rascunho">Rascunho</option>
+          <option value="enviada">Enviada</option>
+          <option value="pago">Pago</option>
+          <option value="vencida">Vencida</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Cliente *</label><input class="form-input" id="fat-cliente" placeholder="Nome do cliente"></div>
+      <div class="form-group"><label class="form-label">E-mail do cliente</label><input class="form-input" id="fat-email" type="email" placeholder="cliente@empresa.com"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Data de emissão</label><input class="form-input" id="fat-data" type="date"></div>
+      <div class="form-group"><label class="form-label">Vencimento</label><input class="form-input" id="fat-vencimento" type="date"></div>
+    </div>
+    <div class="section-divider">Itens</div>
+    <div id="fat-itens-list"></div>
+    <button class="btn-ghost" style="width:100%;margin-bottom:12px" onclick="addFaturaItem()"><i class="ti ti-plus"></i> Adicionar item</button>
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-bottom:12px">
+      <span style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase">Total</span>
+      <span id="fat-total-display" style="font-size:18px;font-weight:900;color:var(--purple-light)">R$ 0,00</span>
+    </div>
+    <div class="form-group"><label class="form-label">Observações</label><textarea class="form-input" id="fat-obs" rows="2" style="resize:vertical"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-danger" id="fat-delete-btn" style="display:none;margin-right:auto" onclick="deleteFatura()"><i class="ti ti-trash"></i></button>
+      <button class="btn-ghost" onclick="gerarLinkPublico(document.getElementById('fat-edit-id').value)"><i class="ti ti-link"></i></button>
+      <button class="btn-ghost" onclick="enviarFaturaEmail()"><i class="ti ti-mail"></i> Enviar</button>
+      <button class="btn-ghost" onclick="closeModal('faturaModal')">Cancelar</button>
+      <button class="btn-primary" onclick="gerarFaturaPDF()"><i class="ti ti-file-download"></i> Salvar e gerar PDF</button>
+      <button class="btn-primary" onclick="salvarFatura()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- FATURA LINK MODAL -->
+<div class="modal-overlay" id="faturaLinkModal" onclick="closeModalOutside(event,'faturaLinkModal')">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title">Link público da fatura</div>
+      <button class="modal-close" onclick="closeModal('faturaLinkModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Link</label>
+      <input class="form-input" id="fat-link-publico" readonly>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('faturaLinkModal')">Fechar</button>
+      <button class="btn-primary" onclick="copiarLinkFatura()"><i class="ti ti-copy"></i> Copiar link</button>
+    </div>
+  </div>
+</div>
+
+<!-- CASE MODAL -->
+<div class="modal-overlay" id="caseModal" onclick="closeModalOutside(event,'caseModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="case-modal-title">Novo Case</div>
+      <button class="modal-close" onclick="closeModal('caseModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <input type="hidden" id="case-edit-id">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Cliente / Empresa *</label><input class="form-input" id="case-empresa" placeholder="Nome do cliente"></div>
+      <div class="form-group"><label class="form-label">Nicho</label>
+        <select class="form-select" id="case-nicho">
+          <option>Clínica / Saúde</option>
+          <option>Varejo</option>
+          <option>Serviços</option>
+          <option>Indústria</option>
+          <option>Educação</option>
+          <option>Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Desafio</label><textarea class="form-input" id="case-desafio" rows="2" style="resize:vertical"></textarea></div>
+    <div class="form-group"><label class="form-label">Solução aplicada</label><textarea class="form-input" id="case-solucao" rows="2" style="resize:vertical"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Faturamento (resultado)</label><input class="form-input" id="case-faturamento" placeholder="Ex: +30% em 3 meses"></div>
+      <div class="form-group"><label class="form-label">Leads</label><input class="form-input" id="case-leads" placeholder="Ex: 200 leads/mês"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Conversão</label><input class="form-input" id="case-conversao" placeholder="Ex: 18%"></div>
+      <div class="form-group"><label class="form-label">ROI</label><input class="form-input" id="case-roi" placeholder="Ex: 5x"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Visibilidade</label><input class="form-input" id="case-visibilidade" placeholder="Ex: público / privado"></div>
+      <div class="form-group"><label class="form-label">Prazo</label><input class="form-input" id="case-prazo" placeholder="Ex: 6 meses"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Depoimento</label><textarea class="form-input" id="case-depoimento" rows="2" placeholder="Frase do cliente sobre o resultado" style="resize:vertical"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-danger" id="case-delete-btn" style="display:none;margin-right:auto" onclick="deleteCase()"><i class="ti ti-trash"></i></button>
+      <button class="btn-ghost" onclick="closeModal('caseModal')">Cancelar</button>
+      <button class="btn-primary" onclick="saveCase()">Salvar Case</button>
+    </div>
+  </div>
+</div>
 
 <!-- USUARIO MODAL -->
 <div class="modal-overlay" id="usuarioModal" onclick="closeModalOutside(event,'usuarioModal')">
@@ -1759,10 +1863,10 @@ function showApp() {
   isMaster = (currentUser.email||'').trim().toLowerCase() === MASTER_EMAIL.trim().toLowerCase();
   function ativarMaster() {
     isMaster = true;
-    const ids = ['master-btn','master-section','master-sidebar'];
+    const ids = ['master-btn','master-section','master-sidebar','faturas-sidebar'];
     ids.forEach(id=>{
       const el=document.getElementById(id);
-      if(el) el.style.display = id==='master-btn'?'inline-flex':id==='master-sidebar'?'flex':'block';
+      if(el) el.style.display = id==='master-btn'?'inline-flex':(id==='master-sidebar'||id==='faturas-sidebar')?'flex':'block';
     });
   }
   if(isMaster) ativarMaster();
@@ -3861,6 +3965,20 @@ function toggleFoco(){
     btn.style.borderColor = '';
     btn.style.color = '';
   }
+}
+
+function calcScore(l){
+  const baseTemp = {Quente:60,Morno:35,Frio:15,Fechado:100}[l.temperatura] ?? 20;
+  const bonusValor = l.valor ? Math.min(20, Math.round(Number(l.valor)/500)) : 0;
+  const bonusProximoPasso = l.proximo_passo ? 10 : 0;
+  const dataRef = l.updated_at || l.created_at;
+  let bonusRecencia = 0;
+  if(dataRef){
+    const dias = (Date.now() - new Date(dataRef).getTime()) / 86400000;
+    if(dias <= 2) bonusRecencia = 10;
+    else if(dias <= 7) bonusRecencia = 5;
+  }
+  return Math.min(100, baseTemp + bonusValor + bonusProximoPasso + bonusRecencia);
 }
 
 function renderFoco(){
