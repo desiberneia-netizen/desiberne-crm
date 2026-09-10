@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Proposta Comercial — Desiberne IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#01010A; --ink:#FFFFFF; --gray:#E6E8EF; --muted:#8A8FA6;
+    --blue:#009FF7; --deep:#3245A9; --purple:#9945F4; --magenta:#D04BEA;
+    --grad:linear-gradient(120deg,#009FF7 0%,#3245A9 45%,#9945F4 100%);
+    --line:rgba(230,232,239,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--gray);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:0 24px}
+  .section{padding:64px 0;border-top:1px solid var(--line)}
+  .section:first-of-type{border-top:0}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--blue);margin-bottom:16px}
+  h1,h2,h3{color:var(--ink);font-weight:800;letter-spacing:-.02em;line-height:1.15}
+  h1{font-size:clamp(30px,5.5vw,52px)}
+  h2{font-size:clamp(22px,3.6vw,32px);margin-bottom:20px}
+  h3{font-size:18px;font-weight:700;margin-bottom:8px}
+  p{margin-bottom:14px;max-width:62ch}
+  p:last-child{margin-bottom:0}
+  .lead{font-size:clamp(17px,2.4vw,20px);color:var(--gray)}
+  .grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  a{color:var(--blue)}
+
+  /* header */
+  header{padding:28px 0;position:sticky;top:0;background:rgba(1,1,10,.82);backdrop-filter:blur(10px);z-index:10;border-bottom:1px solid var(--line)}
+  .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--grad)}
+  .brand b{font-weight:800}
+  .brand span{font-weight:500;color:var(--muted)}
+  .headmeta{font-size:13px;color:var(--muted);text-align:right}
+  .headmeta .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)}
+
+  /* hero */
+  .hero{padding:88px 0 64px}
+  .hero h1{margin-bottom:22px}
+  .hero .inst{margin-top:28px;padding-left:18px;border-left:2px solid var(--purple);color:var(--gray)}
+
+  /* deliverables */
+  .items{list-style:none;margin-top:8px}
+  .items li{padding:14px 0;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:flex-start}
+  .items li:last-child{border-bottom:0}
+  .items .mk{flex:0 0 auto;width:22px;height:22px;border-radius:6px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;margin-top:2px}
+
+  /* investment */
+  .invest{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:8px}
+  .invest > div{background:var(--bg);padding:22px 20px}
+  .invest .k{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .invest .v{font-size:22px;font-weight:800;color:var(--ink)}
+  .invest .v.big{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  @media(max-width:640px){.invest{grid-template-columns:1fr}}
+
+  /* analysis */
+  .opp{padding:18px 0;border-bottom:1px solid var(--line)}
+  .opp:last-child{border-bottom:0}
+  .opp .lab{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue)}
+
+  /* steps */
+  .steps{counter-reset:s;list-style:none;margin-top:8px}
+  .steps li{counter-increment:s;padding:16px 0;border-bottom:1px solid var(--line);display:flex;gap:16px;align-items:center}
+  .steps li:last-child{border-bottom:0}
+  .steps li::before{content:counter(s);flex:0 0 auto;width:34px;height:34px;border-radius:50%;border:1px solid var(--deep);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--blue)}
+  .steps b{color:var(--ink)}
+
+  /* cta */
+  .cta{text-align:center;padding:88px 0}
+  .cta h2{margin-bottom:8px}
+  .btn{display:inline-block;margin-top:22px;padding:16px 34px;border-radius:999px;background:var(--grad);color:#fff;font-weight:800;letter-spacing:.02em;border:0;cursor:pointer;font-size:15px}
+  .btn:active{transform:translateY(1px)}
+  .cta .note{margin-top:14px;font-size:13px;color:var(--muted)}
+
+  /* footer */
+  footer{padding:48px 0;border-top:1px solid var(--line);color:var(--muted);font-size:13px;text-align:center}
+  footer b{color:var(--gray);font-weight:700}
+
+  /* states */
+  .state{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px}
+  .state .dot{width:12px;height:12px;border-radius:50%;background:var(--grad);margin-bottom:20px}
+  .state h2{margin-bottom:8px}
+  .state p{color:var(--muted)}
+  .hidden{display:none!important}
+  .expbanner{background:rgba(208,75,234,.10);border:1px solid rgba(208,75,234,.3);color:var(--magenta);border-radius:12px;padding:14px 18px;font-weight:600;margin:24px 0}
+</style>
+</head>
+<body>
+
+<div id="loading" class="state">
+  <div class="dot"></div>
+  <p>Carregando proposta…</p>
+</div>
+
+<div id="notfound" class="state hidden">
+  <div class="dot"></div>
+  <h2>Proposta não encontrada</h2>
+  <p>O link pode estar incorreto ou não estar mais disponível.</p>
+</div>
+
+<div id="unavailable" class="state hidden">
+  <div class="dot"></div>
+  <h2>Esta proposta ainda não está disponível para visualização.</h2>
+  <p>Fale com seu contato na Desiberne IA.</p>
+</div>
+
+<div id="errorstate" class="state hidden">
+  <div class="dot"></div>
+  <h2>Não foi possível carregar a proposta</h2>
+  <p>Tente novamente em alguns instantes.</p>
+</div>
+
+<main id="doc" class="hidden">
+  <header>
+    <div class="wrap headrow">
+      <div class="brand"><span class="dot"></span> <b>Desiberne&nbsp;IA</b> <span>· Presença Digital</span></div>
+      <div class="headmeta">
+        <div class="tag">Proposta Comercial</div>
+        <div id="h-meta">—</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <section class="hero">
+      <div class="eyebrow">Proposta comercial</div>
+      <h1>Uma nova experiência digital<br>para <span class="grad-text" id="h-empresa">sua empresa</span></h1>
+      <p class="lead" id="h-headline"></p>
+      <p class="lead" id="h-subheadline" style="color:var(--muted)"></p>
+      <div class="inst">
+        Tire sua empresa do modo de hibernação digital.<br>
+        Desperte para um mundo de novas oportunidades.
+      </div>
+      <div id="expbanner" class="expbanner hidden">Esta proposta comercial expirou.</div>
+    </section>
+
+    <section class="section" id="sec-contexto">
+      <div class="eyebrow">Contexto</div>
+      <h2 id="t-contexto">A presença digital da empresa</h2>
+      <div id="c-contexto"></div>
+    </section>
+
+    <section class="section" id="sec-oportunidade">
+      <div class="eyebrow">Oportunidade</div>
+      <h2>O que identificamos</h2>
+      <div id="c-oportunidade"></div>
+    </section>
+
+    <section class="section" id="sec-solucao">
+      <div class="eyebrow">Solução</div>
+      <h2>Transformar presença digital em oportunidade</h2>
+      <p class="lead" id="c-produto" style="color:var(--ink);font-weight:700"></p>
+      <div id="c-solucao"></div>
+    </section>
+
+    <section class="section" id="sec-escopo">
+      <div class="eyebrow">Escopo</div>
+      <h2>O que está incluído</h2>
+      <div id="c-escopo-desc"></div>
+      <ul class="items" id="c-entregaveis"></ul>
+      <div id="c-limites" style="margin-top:18px;color:var(--muted)"></div>
+    </section>
+
+    <section class="section" id="sec-investimento">
+      <div class="eyebrow">Investimento</div>
+      <h2>Condições</h2>
+      <div class="invest">
+        <div><div class="k">Implementação</div><div class="v big" id="i-impl">—</div></div>
+        <div><div class="k">Recorrência</div><div class="v" id="i-rec">—</div></div>
+        <div><div class="k">Prazo de entrega</div><div class="v" id="i-prazo" style="font-size:16px">—</div></div>
+        <div><div class="k">Validade da proposta</div><div class="v" id="i-validade" style="font-size:16px">—</div></div>
+      </div>
+      <div id="i-forma" style="margin-top:16px;color:var(--muted)"></div>
+      <div id="i-cond" style="margin-top:8px"></div>
+    </section>
+
+    <section class="section hidden" id="sec-analise">
+      <div class="eyebrow">Análise digital aprovada</div>
+      <h2>Insights que fundamentam a proposta</h2>
+      <div id="c-analise"></div>
+      <div id="c-analise-rec" style="margin-top:14px"></div>
+    </section>
+
+    <section class="section" id="sec-passos">
+      <div class="eyebrow">Próximos passos</div>
+      <h2>Como avançamos</h2>
+      <ol class="steps">
+        <li><b>Aprovação</b> — você confirma a proposta</li>
+        <li><b>Pagamento</b> — condições combinadas</li>
+        <li><b>Onboarding</b> — coletamos conteúdo e acessos</li>
+        <li><b>Desenvolvimento</b> — construção do projeto</li>
+        <li><b>Publicação</b> — seu novo canal no ar</li>
+      </ol>
+    </section>
+
+    <section class="cta">
+      <h2>Vamos despertar sua empresa?</h2>
+      <p style="color:var(--muted)">Ao aprovar, iniciamos os próximos passos.</p>
+      <button class="btn" id="btn-aprovar" type="button">Aprovar proposta</button>
+      <div class="note" id="cta-note"></div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <div><b>Desiberne IA</b> — Projeto de Presença Digital</div>
+      <div id="f-resp" style="margin-top:6px"></div>
+      <div style="margin-top:6px">Tire sua empresa do modo de hibernação digital.</div>
+    </div>
+  </footer>
+</main>
+
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var token = (params.get('token') || '').trim();
+
+  var $ = function (id) { return document.getElementById(id); };
+  function show(id) {
+    ['loading', 'notfound', 'unavailable', 'errorstate', 'doc'].forEach(function (s) {
+      $(s).classList.toggle('hidden', s !== id);
+    });
+  }
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+  function paras(text, cls) {
+    var t = String(text || '').trim();
+    if (!t) return '';
+    return t.split(/\n{2,}|\n/).filter(Boolean)
+      .map(function (l) { return '<p' + (cls ? ' class="' + cls + '"' : '') + '>' + esc(l) + '</p>'; })
+      .join('');
+  }
+  function brl(v) {
+    if (v == null || v === '') return '—';
+    var n = Number(v);
+    if (!isFinite(n)) return '—';
+    return 'R$ ' + n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+  function dateBR(d) {
+    if (!d) return '—';
+    var dt = new Date(String(d).length <= 10 ? d + 'T00:00:00' : d);
+    if (isNaN(dt)) return '—';
+    return dt.toLocaleDateString('pt-BR');
+  }
+  var PER = { mensal: '/mês', trimestral: '/trimestre', semestral: '/semestre', anual: '/ano', unico: ' (único)' };
+
+  function toggleSec(id, hasContent) {
+    var el = $(id);
+    if (el) el.classList.toggle('hidden', !hasContent);
+  }
+
+  function render(data) {
+    var pr = data.proposal || {};
+    var c = data.content || {};
+    var nar = c.narrativa || {};
+    var esco = c.escopo || {};
+    var inv = c.investimento || {};
+    var cond = c.condicoes || {};
+
+    var empresa = pr.client_name || 'sua empresa';
+    $('h-empresa').textContent = empresa;
+    document.title = 'Proposta Comercial — ' + empresa;
+    $('h-meta').textContent = (pr.proposal_number || '') + (pr.data ? ' · ' + dateBR(pr.data) : '');
+
+    $('h-headline').textContent = nar.headline || '';
+    $('h-subheadline').textContent = nar.subheadline || '';
+    $('h-headline').classList.toggle('hidden', !String(nar.headline || '').trim());
+    $('h-subheadline').classList.toggle('hidden', !String(nar.subheadline || '').trim());
+
+    // contexto
+    $('t-contexto').textContent = 'A presença digital da ' + empresa;
+    $('c-contexto').innerHTML = paras(nar.contexto, 'lead');
+    toggleSec('sec-contexto', !!String(nar.contexto || '').trim());
+
+    // oportunidade
+    $('c-oportunidade').innerHTML = paras(nar.oportunidade, 'lead');
+    toggleSec('sec-oportunidade', !!String(nar.oportunidade || '').trim());
+
+    // solucao
+    $('c-produto').textContent = pr.product_name || '';
+    $('c-solucao').innerHTML = paras(nar.solucao || esco.descricao, 'lead');
+
+    // escopo
+    $('c-escopo-desc').innerHTML = paras(esco.descricao && nar.solucao ? esco.descricao : '', 'lead');
+    var entreg = String(esco.entregaveis || '').split(/\n+/).map(function (s) { return s.trim(); }).filter(Boolean);
+    $('c-entregaveis').innerHTML = entreg.map(function (it) {
+      return '<li><span class="mk">✓</span><span>' + esc(it) + '</span></li>';
+    }).join('');
+    $('c-limites').innerHTML = String(esco.limites || '').trim()
+      ? '<strong style="color:var(--gray)">Fora do escopo:</strong> ' + esc(esco.limites)
+      : '';
+    toggleSec('sec-escopo', !!(String(esco.descricao || '').trim() || entreg.length || String(esco.limites || '').trim()));
+
+    // investimento
+    $('i-impl').textContent = brl(inv.implementation_value);
+    $('i-rec').textContent = inv.recurring_value != null
+      ? brl(inv.recurring_value) + (PER[inv.recurring_period] || '/mês')
+      : '—';
+    $('i-prazo').textContent = cond.delivery_term || '—';
+    $('i-validade').textContent = dateBR(pr.valid_until);
+    $('i-forma').innerHTML = cond.payment_method
+      ? '<strong style="color:var(--gray)">Forma de pagamento:</strong> ' + esc(cond.payment_method) : '';
+    $('i-cond').innerHTML = paras(cond.commercial_notes);
+
+    // analise
+    var an = c.analise_aprovada;
+    if (an && ((an.oportunidades && an.oportunidades.length) || an.recomendacao)) {
+      $('c-analise').innerHTML = (an.oportunidades || []).map(function (o) {
+        return '<div class="opp">' +
+          (o.achado ? '<div class="lab">Achado</div><p>' + esc(o.achado) + '</p>' : '') +
+          (o.impacto ? '<div class="lab">Impacto</div><p>' + esc(o.impacto) + '</p>' : '') +
+          (o.oportunidade ? '<div class="lab">Oportunidade</div><p>' + esc(o.oportunidade) + '</p>' : '') +
+          '</div>';
+      }).join('');
+      $('c-analise-rec').innerHTML = an.recomendacao ? '<p class="lead">' + esc(an.recomendacao) + '</p>' : '';
+      $('sec-analise').classList.remove('hidden');
+    }
+
+    // responsavel
+    if (c.responsavel) $('f-resp').textContent = 'Responsável: ' + c.responsavel;
+
+    // expiração / CTA
+    if (data.state === 'expired') {
+      $('expbanner').classList.remove('hidden');
+      $('btn-aprovar').classList.add('hidden');
+      $('cta-note').textContent = 'Solicite uma nova proposta ao seu contato na Desiberne IA.';
+    } else {
+      $('btn-aprovar').addEventListener('click', function () {
+        $('cta-note').textContent = 'Em breve: aprovação online.';
+      });
+    }
+
+    show('doc');
+  }
+
+  if (!token) { show('notfound'); return; }
+
+  fetch('/api/proposta-publica?token=' + encodeURIComponent(token), { headers: { Accept: 'application/json' } })
+    .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, status: r.status, body: b }; }); })
+    .then(function (res) {
+      var b = res.body || {};
+      if (b.state === 'not_found') { show('notfound'); return; }
+      if (b.state === 'unavailable') { show('unavailable'); return; }
+      if (b.state === 'error' || (!res.ok && !b.state)) { show('errorstate'); return; }
+      if (b.state === 'ok' || b.state === 'expired') { render(b); return; }
+      show('errorstate');
+    })
+    .catch(function () { show('errorstate'); });
+})();
+</script>
+</body>
+</html>

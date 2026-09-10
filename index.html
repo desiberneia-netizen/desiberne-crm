@@ -1179,6 +1179,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
     <div class="section-divider">8. Versões consolidadas</div>
     <div id="lp-versoes-list" style="font-size:12px;color:var(--muted)">—</div>
 
+    <div class="section-divider">9. Link público</div>
+    <div id="lp-publico-box" style="font-size:12px;color:var(--muted)">—</div>
+
     <div class="modal-footer" style="flex-wrap:wrap;gap:8px">
       <button class="btn-ghost" onclick="closeModal('leadPropostaModal')">Voltar</button>
       <button class="btn-ghost" id="lp-preview-btn" onclick="lpPreview()"><i class="ti ti-eye"></i> Visualizar Proposta</button>
@@ -5571,6 +5574,7 @@ async function lpAbrirProposta(id, preloaded) {
   document.getElementById('lp-analise-box').innerHTML = '';
   await lpCarregarAnalise(p.id);
   await lpCarregarVersoes(p.id);
+  lpRenderPublico(p);
   openModal('leadPropostaModal');
 }
 
@@ -5695,6 +5699,70 @@ function lpVerVersao(versionId) {
     lead: snap.lead || null,
   };
   lpRenderPreview(d, 'Versão ' + v.version_number + ' — imutável (congelada em ' + lpDate(v.created_at) + ')');
+}
+
+// ---- Link público da proposta (BLOCO 05) --------------------------------
+function lpUrlPublica(token) {
+  return location.origin + '/proposta.html?token=' + token;
+}
+
+function lpRenderPublico(p) {
+  const box = document.getElementById('lp-publico-box');
+  if (!box) return;
+  const temVersao = Array.isArray(lpVersoes) && lpVersoes.length > 0;
+  const editavel = lpPodeEditar();
+  if (p.public_token) {
+    const url = lpUrlPublica(p.public_token);
+    box.innerHTML = `
+      <div>Link ativo (status: ${LP_STATUS_LABEL[p.status] || p.status}):</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px">
+        <a href="${url}" target="_blank" rel="noopener" style="word-break:break-all">${url}</a>
+        <button class="btn-ghost" style="padding:2px 8px;font-size:11px" onclick="navigator.clipboard.writeText('${url}').then(()=>showToast('Link copiado','success'))">Copiar</button>
+      </div>`;
+    return;
+  }
+  if (!temVersao) {
+    box.innerHTML = 'Publique uma versão consolidada primeiro (botão "Salvar Nova Versão"). Rascunho não pode ser publicado.';
+    return;
+  }
+  if (!editavel) { box.innerHTML = 'Nenhum link público gerado ainda.'; return; }
+  box.innerHTML = `<button class="btn-ghost" id="lp-publicar-btn" onclick="lpPublicarProposta()"><i class="ti ti-world"></i> Gerar link público</button>`;
+}
+
+async function lpPublicarProposta() {
+  if (!lpPodeEditar()) { showToast('Seu perfil não pode publicar propostas', 'error'); return; }
+  if (lpBusy) return;
+  const id = document.getElementById('lp-proposal-id').value;
+  if (!id) return;
+  if (!lpVersoes || !lpVersoes.length) { showToast('Consolide uma versão antes de publicar', 'error'); return; }
+  if (!confirm('Gerar link público desta proposta? O cliente verá a versão consolidada mais recente.')) return;
+  lpBusy = true;
+  const btn = document.getElementById('lp-publicar-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Gerando...'; }
+  try {
+    const p = lpProps.find(x => x.id === id) || {};
+    const token = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : null;
+    if (!token) { showToast('Navegador sem suporte a UUID — atualize o navegador', 'error'); return; }
+    const patch = { public_token: token, updated_at: new Date().toISOString() };
+    // só promove o status se ainda for rascunho/gerada — nunca rebaixa approved/paid
+    if (!p.status || p.status === 'draft' || p.status === 'generated') patch.status = 'sent';
+    const { error } = await sb.from('proposals').update(patch).eq('id', id);
+    if (error) { showToast('Erro ao publicar: ' + error.message, 'error'); console.error(error); return; }
+    await logAudit('PROPOSTA_PUBLICADA', 'proposals', id, 'link público gerado');
+    const { data: pAtual } = await sb.from('proposals').select('*').eq('id', id).single();
+    if (pAtual) {
+      const idx = lpProps.findIndex(x => x.id === id);
+      if (idx > -1) lpProps[idx] = pAtual;
+      lpRenderPropostas();
+      const stEl = document.getElementById('lp-status');
+      if (stEl) stEl.textContent = LP_STATUS_LABEL[pAtual.status] || pAtual.status;
+      lpRenderPublico(pAtual);
+    }
+    showToast('Link público gerado', 'success');
+  } finally {
+    lpBusy = false;
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-world"></i> Gerar link público'; }
+  }
 }
 
 async function lpSalvarNovaVersao() {
