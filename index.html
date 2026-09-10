@@ -1060,63 +1060,52 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
       <div><span style="color:var(--muted)">Atualizada</span><br><b id="lp-atualizada">—</b></div>
     </div>
 
-    <div class="section-divider">Identificação</div>
-    <div class="form-group">
-      <label class="form-label">Cliente (snapshot da proposta)</label>
-      <input class="form-input" id="lp-f-client-name" placeholder="Nome do cliente">
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">Pré-preenchido a partir do lead. Pode revisar antes de salvar.</div>
+    <div class="section-divider">1. Identificação</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Cliente (snapshot da proposta)</label>
+        <input class="form-input" id="lp-f-client-name" placeholder="Nome do cliente">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Pré-preenchido a partir do lead. Pode revisar antes de salvar.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Responsável comercial</label>
+        <select class="form-select" id="lp-f-responsavel"><option value="">—</option></select>
+      </div>
     </div>
 
-    <div class="section-divider">Produto / Projeto</div>
+    <div class="section-divider">2. Solução</div>
     <div class="form-group">
       <label class="form-label">Produto / Projeto</label>
       <select class="form-select" id="lp-f-product">
         <option value="site_presenca_digital">Site — Projeto de Presença Digital</option>
       </select>
     </div>
-
-    <div class="section-divider">Análise de Presença Digital</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Identifique oportunidades digitais da empresa antes de personalizar a proposta.</div>
-    <button type="button" class="btn-ghost" id="lp-analise-btn" onclick="lpExecutarAnalise()"><i class="ti ti-radar"></i> Executar Análise</button>
-    <div id="lp-analise-box" style="margin-top:10px;font-size:12px;color:var(--muted)"></div>
-
-    <div class="section-divider">Contexto da Negociação</div>
     <div class="form-group">
-      <label class="form-label">Interesse demonstrado</label>
-      <textarea class="form-input" id="lp-f-interesse" rows="2" style="resize:vertical"></textarea>
+      <label class="form-label">Headline (título comercial)</label>
+      <input class="form-input" id="lp-f-headline" placeholder="Ex: Tire sua empresa do modo de hibernação digital">
     </div>
     <div class="form-group">
-      <label class="form-label">Necessidades mencionadas</label>
-      <textarea class="form-input" id="lp-f-necessidades" rows="2" style="resize:vertical"></textarea>
+      <label class="form-label">Subheadline</label>
+      <input class="form-input" id="lp-f-subheadline" placeholder="Ex: Desperte para um mundo de novas oportunidades">
     </div>
     <div class="form-group">
-      <label class="form-label">Observações comerciais</label>
-      <textarea class="form-input" id="lp-f-obs-negociacao" rows="2" style="resize:vertical"></textarea>
-    </div>
-    <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin-bottom:6px">
-      <input type="checkbox" id="lp-f-usar-negociacao" style="accent-color:var(--neon)">
-      Utilizar informações registradas na negociação para personalizar a proposta
-    </label>
-
-    <div class="section-divider">Condições Comerciais</div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Valor de implementação</label><input class="form-input" id="lp-f-impl" placeholder="R$ 0,00" onblur="lpFmtMoney(this)"></div>
-      <div class="form-group"><label class="form-label">Valor recorrente mensal</label><input class="form-input" id="lp-f-rec" placeholder="R$ 0,00" onblur="lpFmtMoney(this)"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Prazo de entrega</label><input class="form-input" id="lp-f-prazo" placeholder="Ex: 15 dias úteis"></div>
-      <div class="form-group"><label class="form-label">Forma de pagamento</label><input class="form-input" id="lp-f-forma-pgto" placeholder="Ex: Pix / Cartão"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Link de pagamento</label><input class="form-input" id="lp-f-link-pgto" placeholder="https://..."></div>
-      <div class="form-group"><label class="form-label">Validade da proposta</label><input class="form-input" id="lp-f-validade" type="date"></div>
+      <label class="form-label">Contexto (para o cliente)</label>
+      <textarea class="form-input" id="lp-f-contexto-cliente" rows="2" style="resize:vertical" placeholder="Situação atual da presença digital da empresa"></textarea>
     </div>
     <div class="form-group">
-      <label class="form-label">Observações comerciais</label>
-      <textarea class="form-input" id="lp-f-cond-obs" rows="2" style="resize:vertical"></textarea>
+      <label class="form-label">Oportunidade</label>
+      <textarea class="form-input" id="lp-f-oportunidade" rows="2" style="resize:vertical" placeholder="Por que um Projeto de Presença Digital faz sentido agora"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Solução proposta</label>
+      <textarea class="form-input" id="lp-f-solucao" rows="3" style="resize:vertical" placeholder="O que será entregue e como resolve"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Próximos passos</label>
+      <textarea class="form-input" id="lp-f-proximos" rows="2" style="resize:vertical"></textarea>
     </div>
 
-    <div class="section-divider">Escopo da Proposta</div>
+    <div class="section-divider">3. Escopo</div>
     <div class="form-group">
       <label class="form-label">Descrição do projeto</label>
       <textarea class="form-input" id="lp-f-escopo-desc" rows="3" style="resize:vertical"></textarea>
@@ -1134,7 +1123,60 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
       <textarea class="form-input" id="lp-f-escopo-obs" rows="2" style="resize:vertical"></textarea>
     </div>
 
-    <div class="section-divider">Versões consolidadas</div>
+    <div class="section-divider">4. Investimento</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Valor de implementação</label><input class="form-input" id="lp-f-impl" placeholder="R$ 0,00" onblur="lpFmtMoney(this)"></div>
+      <div class="form-group"><label class="form-label">Valor recorrente</label><input class="form-input" id="lp-f-rec" placeholder="R$ 0,00" onblur="lpFmtMoney(this)"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Periodicidade do recorrente</label>
+      <select class="form-select" id="lp-f-periodicidade">
+        <option value="mensal">Mensal</option>
+        <option value="trimestral">Trimestral</option>
+        <option value="semestral">Semestral</option>
+        <option value="anual">Anual</option>
+        <option value="unico">Pagamento único</option>
+      </select>
+    </div>
+
+    <div class="section-divider">5. Condições Comerciais</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Prazo de entrega</label><input class="form-input" id="lp-f-prazo" placeholder="Ex: 15 dias úteis"></div>
+      <div class="form-group"><label class="form-label">Forma de pagamento</label><input class="form-input" id="lp-f-forma-pgto" placeholder="Ex: Pix / Cartão"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Link de pagamento</label><input class="form-input" id="lp-f-link-pgto" placeholder="https://..."></div>
+      <div class="form-group"><label class="form-label">Validade da proposta</label><input class="form-input" id="lp-f-validade" type="date"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observações comerciais (para o cliente)</label>
+      <textarea class="form-input" id="lp-f-cond-obs" rows="2" style="resize:vertical"></textarea>
+    </div>
+
+    <div class="section-divider">6. Contexto / Negociação <span style="font-weight:400;color:var(--muted);font-size:11px">— interno, não entra na proposta do cliente</span></div>
+    <div class="form-group">
+      <label class="form-label">Interesse demonstrado</label>
+      <textarea class="form-input" id="lp-f-interesse" rows="2" style="resize:vertical"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Necessidades mencionadas</label>
+      <textarea class="form-input" id="lp-f-necessidades" rows="2" style="resize:vertical"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observações internas</label>
+      <textarea class="form-input" id="lp-f-obs-negociacao" rows="2" style="resize:vertical"></textarea>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin-bottom:6px">
+      <input type="checkbox" id="lp-f-usar-negociacao" style="accent-color:var(--neon)">
+      Utilizar informações registradas na negociação para personalizar a proposta
+    </label>
+
+    <div class="section-divider">7. Análise Digital</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Somente uma análise <b>aprovada</b> pode alimentar a proposta comercial.</div>
+    <button type="button" class="btn-ghost" id="lp-analise-btn" onclick="lpExecutarAnalise()"><i class="ti ti-radar"></i> Executar Análise</button>
+    <div id="lp-analise-box" style="margin-top:10px;font-size:12px;color:var(--muted)"></div>
+
+    <div class="section-divider">8. Versões consolidadas</div>
     <div id="lp-versoes-list" style="font-size:12px;color:var(--muted)">—</div>
 
     <div class="modal-footer" style="flex-wrap:wrap;gap:8px">
@@ -5449,6 +5491,7 @@ async function lpNovaProposta() {
       product_code: 'site_presenca_digital',
       status: 'draft',
       created_by: currentUser?.id || null,
+      responsavel_id: currentUser?.id || null,
     };
     const { data, error } = await sb.from('proposals').insert(payload).select().single();
     if (error) { showToast('Erro ao criar proposta: ' + error.message, 'error'); console.error(error); return; }
@@ -5478,6 +5521,19 @@ async function lpAbrirProposta(id, preloaded) {
   document.getElementById('lp-f-client-name').value = p.client_name || '';
   document.getElementById('lp-f-product').value = p.product_code || 'site_presenca_digital';
 
+  await lpCarregarResponsaveis();
+  document.getElementById('lp-f-responsavel').value = p.responsavel_id || currentUser?.id || '';
+
+  const cc = p.commercial_content || {};
+  document.getElementById('lp-f-headline').value = cc.headline || '';
+  document.getElementById('lp-f-subheadline').value = cc.subheadline || '';
+  document.getElementById('lp-f-contexto-cliente').value = cc.contexto || '';
+  document.getElementById('lp-f-oportunidade').value = cc.oportunidade || '';
+  document.getElementById('lp-f-solucao').value = cc.solucao || '';
+  document.getElementById('lp-f-proximos').value = cc.proximos_passos || '';
+
+  document.getElementById('lp-f-periodicidade').value = p.recurring_period || 'mensal';
+
   const nc = p.negotiation_context || {};
   document.getElementById('lp-f-interesse').value = nc.interesse || '';
   document.getElementById('lp-f-necessidades').value = nc.necessidades || '';
@@ -5502,7 +5558,9 @@ async function lpAbrirProposta(id, preloaded) {
   document.getElementById('lp-f-escopo-obs').value = sc.observacoes || '';
 
   const editavel = lpPodeEditar();
-  ['lp-f-client-name','lp-f-product','lp-f-interesse','lp-f-necessidades','lp-f-obs-negociacao',
+  ['lp-f-client-name','lp-f-product','lp-f-responsavel','lp-f-headline','lp-f-subheadline',
+   'lp-f-contexto-cliente','lp-f-oportunidade','lp-f-solucao','lp-f-proximos','lp-f-periodicidade',
+   'lp-f-interesse','lp-f-necessidades','lp-f-obs-negociacao',
    'lp-f-usar-negociacao','lp-f-impl','lp-f-rec','lp-f-prazo','lp-f-forma-pgto','lp-f-link-pgto',
    'lp-f-validade','lp-f-cond-obs','lp-f-escopo-desc','lp-f-escopo-entregaveis','lp-f-escopo-limites','lp-f-escopo-obs']
     .forEach(fid => { const e = document.getElementById(fid); if (e) e.disabled = !editavel; });
@@ -5520,19 +5578,31 @@ function lpColetarModal() {
   return {
     client_name: document.getElementById('lp-f-client-name').value.trim(),
     product_code: document.getElementById('lp-f-product').value,
+    responsavel_id: document.getElementById('lp-f-responsavel').value || null,
     implementation_value: moneyToNum(document.getElementById('lp-f-impl').value) || null,
     recurring_value: moneyToNum(document.getElementById('lp-f-rec').value) || null,
+    recurring_period: document.getElementById('lp-f-periodicidade').value || 'mensal',
     delivery_term: document.getElementById('lp-f-prazo').value.trim() || null,
     payment_method: document.getElementById('lp-f-forma-pgto').value.trim() || null,
     payment_link: document.getElementById('lp-f-link-pgto').value.trim() || null,
     valid_until: document.getElementById('lp-f-validade').value || null,
     commercial_notes: document.getElementById('lp-f-cond-obs').value.trim() || null,
+    // conteúdo voltado ao CLIENTE
+    commercial_content: {
+      headline: document.getElementById('lp-f-headline').value.trim(),
+      subheadline: document.getElementById('lp-f-subheadline').value.trim(),
+      contexto: document.getElementById('lp-f-contexto-cliente').value.trim(),
+      oportunidade: document.getElementById('lp-f-oportunidade').value.trim(),
+      solucao: document.getElementById('lp-f-solucao').value.trim(),
+      proximos_passos: document.getElementById('lp-f-proximos').value.trim(),
+    },
     scope: {
       descricao: document.getElementById('lp-f-escopo-desc').value.trim(),
       entregaveis: document.getElementById('lp-f-escopo-entregaveis').value.trim(),
       limites: document.getElementById('lp-f-escopo-limites').value.trim(),
       observacoes: document.getElementById('lp-f-escopo-obs').value.trim(),
     },
+    // conteúdo INTERNO — nunca entra em content_snapshot / preview / PDF futuro
     negotiation_context: {
       interesse: document.getElementById('lp-f-interesse').value.trim(),
       necessidades: document.getElementById('lp-f-necessidades').value.trim(),
@@ -5540,6 +5610,22 @@ function lpColetarModal() {
       usar_negociacao: document.getElementById('lp-f-usar-negociacao').checked,
     },
   };
+}
+
+let lpResponsaveisCarregados = false;
+async function lpCarregarResponsaveis() {
+  const sel = document.getElementById('lp-f-responsavel');
+  if (lpResponsaveisCarregados || !sel) return;
+  try {
+    const { data } = await sb.from('usuarios').select('nome,email,auth_id').not('auth_id', 'is', null).order('nome');
+    (data || []).forEach(u => {
+      const o = document.createElement('option');
+      o.value = u.auth_id;
+      o.textContent = u.nome || u.email;
+      sel.appendChild(o);
+    });
+    lpResponsaveisCarregados = true;
+  } catch (e) { console.error(e); }
 }
 
 async function lpSalvarRascunho() {
@@ -5587,7 +5673,28 @@ function lpVerVersao(versionId) {
   const v = lpVersoes.find(x => x.id === versionId);
   if (!v) return;
   const snap = v.content_snapshot || {};
-  lpRenderPreview(snap, 'Versão ' + v.version_number + ' — imutável');
+  const inv = snap.investimento || {};
+  const cond = snap.condicoes || {};
+  // adapta o snapshot congelado (shape BLOCO 04) para o render do preview
+  const d = {
+    proposal_number: null,
+    client_name: snap.client_name,
+    product_name: snap.product_name,
+    status: null,
+    commercial_content: snap.narrativa || {},
+    scope: snap.escopo || {},
+    implementation_value: inv.implementation_value,
+    recurring_value: inv.recurring_value,
+    recurring_period: inv.recurring_period,
+    delivery_term: cond.delivery_term,
+    payment_method: cond.payment_method,
+    payment_link: cond.payment_link,
+    valid_until: cond.valid_until,
+    commercial_notes: cond.commercial_notes,
+    analiseAprovada: snap.analise_aprovada || null,
+    lead: snap.lead || null,
+  };
+  lpRenderPreview(d, 'Versão ' + v.version_number + ' — imutável (congelada em ' + lpDate(v.created_at) + ')');
 }
 
 async function lpSalvarNovaVersao() {
@@ -5611,24 +5718,48 @@ async function lpSalvarNovaVersao() {
     if (e2) { showToast('Erro ao ler versões: ' + e2.message, 'error'); console.error(e2); return; }
     const prox = (ult?.[0]?.version_number || 0) + 1;
 
+    // 3) analise APROVADA (unica fonte validada — completed/under_review/rejected NAO contam)
+    const { data: apr } = await sb.from('digital_analyses')
+      .select('id,confidence_score,opportunities,recommendations,approved_at,reviewed_at')
+      .eq('proposal_id', id).eq('analysis_status', 'approved')
+      .order('approved_at', { ascending: false }).limit(1);
+    const analiseAprovada = apr?.[0]
+      ? {
+          analysis_id: apr[0].id,
+          approved_at: apr[0].approved_at,
+          confidence_score: apr[0].confidence_score,
+          opportunities: Array.isArray(apr[0].opportunities) ? apr[0].opportunities : [],
+          recommendations: apr[0].recommendations || null,
+        }
+      : null;
+
     const prodNome = LP_PRODUTOS[dados.product_code]?.nome || dados.product_code;
+    // content_snapshot = APENAS conteudo voltado ao cliente + origem da analise aprovada.
+    // NUNCA inclui negotiation_context (interno).
     const snapshot = {
       proposal_id: id,
       version_number: prox,
+      generated_at: new Date().toISOString(),
+      responsavel_id: dados.responsavel_id,
       client_name: dados.client_name,
       product_code: dados.product_code,
       product_name: prodNome,
-      implementation_value: dados.implementation_value,
-      recurring_value: dados.recurring_value,
-      delivery_term: dados.delivery_term,
-      payment_method: dados.payment_method,
-      payment_link: dados.payment_link,
-      valid_until: dados.valid_until,
-      commercial_notes: dados.commercial_notes,
-      scope: dados.scope,
-      negotiation_context: dados.negotiation_context,
+      narrativa: dados.commercial_content,
+      escopo: dados.scope,
+      investimento: {
+        implementation_value: dados.implementation_value,
+        recurring_value: dados.recurring_value,
+        recurring_period: dados.recurring_period,
+      },
+      condicoes: {
+        delivery_term: dados.delivery_term,
+        payment_method: dados.payment_method,
+        payment_link: dados.payment_link,
+        valid_until: dados.valid_until,
+        commercial_notes: dados.commercial_notes,
+      },
+      analise_aprovada: analiseAprovada,
       lead: lpCurrentLead ? { id: lpCurrentLead.id, razao_social: lpCurrentLead.razao_social, segmento: lpCurrentLead.segmento } : null,
-      generated_at: new Date().toISOString(),
     };
 
     const { data: nova, error: e3 } = await sb.from('proposal_versions').insert({
@@ -5640,13 +5771,15 @@ async function lpSalvarNovaVersao() {
       conditions: {
         delivery_term: dados.delivery_term, payment_method: dados.payment_method,
         payment_link: dados.payment_link, valid_until: dados.valid_until, commercial_notes: dados.commercial_notes,
+        recurring_period: dados.recurring_period,
       },
       content_snapshot: snapshot,
       created_by: currentUser?.id || null,
     }).select().single();
     if (e3) { showToast('Erro ao criar versão: ' + e3.message, 'error'); console.error(e3); return; }
 
-    await logAudit('criar_versao_proposta', 'proposal_versions', nova.id, 'v' + prox + ' proposta ' + id);
+    await logAudit('criar_versao_proposta', 'proposal_versions', nova.id,
+      'v' + prox + ' proposta ' + id + (analiseAprovada ? ' · análise aprovada ' + analiseAprovada.analysis_id : ' · sem análise aprovada'));
     showToast('Versão ' + prox + ' consolidada', 'success');
     await lpCarregarVersoes(id);
     const { data: pAtual } = await sb.from('proposals').select('*').eq('id', id).single();
@@ -5679,7 +5812,7 @@ async function lpCarregarAnalise(proposalId) {
   const { data, error } = await sb.from('digital_analyses').select('*').eq('proposal_id', proposalId)
     .order('created_at', { ascending: false }).limit(1);
   if (error) { console.error(error); box.innerHTML = ''; return; }
-  if (!data || !data.length) { box.innerHTML = lpAnaliseMsg('Nenhuma análise executada para esta proposta.'); return; }
+  if (!data || !data.length) { box.innerHTML = lpAnaliseMsg('Análise digital ainda não realizada.'); return; }
   lpRenderAnalise(data[0]);
 }
 
@@ -5745,6 +5878,9 @@ function lpRenderAnalise(a) {
       ${a.reviewed_at ? `<div style="color:var(--muted)">Revisão: ${lpDate(a.reviewed_at)}${revisorResolvido ? ' · ' + revisorResolvido : ''}</div>` : ''}
       ${a.review_notes ? `<div style="margin-top:4px"><b>Observação:</b> ${a.review_notes}</div>` : ''}`;
 
+  if (a.analysis_status === 'completed') {
+    painelRevisao += `<div style="margin-top:6px;color:var(--muted)">Análise concluída, aguardando aprovação. "Concluída" não significa aprovada para uso comercial.</div>`;
+  }
   if (a.analysis_status === 'under_review') {
     painelRevisao += `<div style="margin-top:6px;color:var(--warning)"><i class="ti ti-alert-triangle"></i> Esta análise exige revisão humana antes de ser usada (identificação da empresa não confirmada ou sinalizada pelo agente).</div>`;
   }
@@ -5883,24 +6019,36 @@ function lpPollAnalise(analysisId, startedAt) {
   lpAnalisePollTimer = setInterval(step, 5000);
 }
 
-function lpPreview() {
+async function lpPreview() {
   const dados = lpColetarModal();
-  const p = lpProps.find(x => x.id === document.getElementById('lp-proposal-id').value) || {};
+  const propId = document.getElementById('lp-proposal-id').value;
+  const p = lpProps.find(x => x.id === propId) || {};
   const prodNome = LP_PRODUTOS[dados.product_code]?.nome || dados.product_code;
+  let analiseAprovada = null;
+  try {
+    const { data } = await sb.from('digital_analyses')
+      .select('opportunities,recommendations,confidence_score,approved_at')
+      .eq('proposal_id', propId).eq('analysis_status', 'approved')
+      .order('approved_at', { ascending: false }).limit(1);
+    if (data && data[0]) analiseAprovada = data[0];
+  } catch (e) { /* preview segue sem análise */ }
   lpRenderPreview({
     ...dados, product_name: prodNome, proposal_number: p.proposal_number, status: p.status,
+    analiseAprovada,
     lead: lpCurrentLead ? { razao_social: lpCurrentLead.razao_social, segmento: lpCurrentLead.segmento } : null,
   }, 'Rascunho atual — ainda não consolidado');
 }
 
 function lpRenderPreview(d, legenda) {
-  const nc = d.negotiation_context || {};
+  const cc = d.commercial_content || {};
   const sc = d.scope || {};
   const money = v => (v != null && v !== '') ? numToMoney(v) : '—';
+  const per = { mensal: '/mês', trimestral: '/trimestre', semestral: '/semestre', anual: '/ano', unico: ' (único)' }[d.recurring_period || 'mensal'] || '';
+  const ops = d.analiseAprovada && Array.isArray(d.analiseAprovada.opportunities) ? d.analiseAprovada.opportunities : [];
   document.getElementById('lp-preview-body').innerHTML = `
     <div style="text-align:center;margin-bottom:16px">
-      <div style="font-size:18px;font-weight:800;color:var(--neon-light)">Desiberne IA</div>
-      <div style="font-size:11px;color:var(--muted)">Tire sua empresa do modo de hibernação digital.</div>
+      <div style="font-size:18px;font-weight:800;color:var(--neon-light)">${cc.headline || 'Desiberne IA'}</div>
+      <div style="font-size:11px;color:var(--muted)">${cc.subheadline || 'Tire sua empresa do modo de hibernação digital.'}</div>
     </div>
     ${legenda ? `<div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:14px">${legenda}</div>` : ''}
     <div style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:12px">
@@ -5909,30 +6057,31 @@ function lpRenderPreview(d, legenda) {
       <div><b>Produto:</b> ${d.product_name || '—'}</div>
       <div><b>Status:</b> ${LP_STATUS_LABEL[d.status] || d.status || '—'}</div>
     </div>
+    ${cc.contexto ? `<div style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">Contexto</div><div>${cc.contexto.replace(/\n/g, '<br>')}</div></div>` : ''}
+    ${cc.oportunidade ? `<div style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">Oportunidade</div><div>${cc.oportunidade.replace(/\n/g, '<br>')}</div></div>` : ''}
     <div style="margin-bottom:12px">
-      <div style="font-weight:700;margin-bottom:4px">Contexto</div>
-      <div>Interesse: ${nc.interesse || '—'}</div>
-      <div>Necessidades: ${nc.necessidades || '—'}</div>
-      <div>Observações: ${nc.observacoes || '—'}</div>
-    </div>
-    <div style="margin-bottom:12px">
-      <div style="font-weight:700;margin-bottom:4px">Solução / Escopo</div>
-      <div>${sc.descricao || '—'}</div>
+      <div style="font-weight:700;margin-bottom:4px">Solução</div>
+      <div>${(cc.solucao || sc.descricao || '—').replace(/\n/g, '<br>')}</div>
       ${sc.entregaveis ? `<div style="margin-top:4px"><b>Entregáveis:</b><br>${sc.entregaveis.replace(/\n/g, '<br>')}</div>` : ''}
       ${sc.limites ? `<div style="margin-top:4px"><b>Fora do escopo:</b><br>${sc.limites.replace(/\n/g, '<br>')}</div>` : ''}
     </div>
     <div style="margin-bottom:12px">
       <div style="font-weight:700;margin-bottom:4px">Investimento</div>
       <div>Implementação: ${money(d.implementation_value)}</div>
-      <div>Recorrência mensal: ${money(d.recurring_value)}</div>
+      <div>Recorrência: ${money(d.recurring_value)}${d.recurring_value != null ? per : ''}</div>
       <div>Prazo de entrega: ${d.delivery_term || '—'}</div>
       <div>Forma de pagamento: ${d.payment_method || '—'}</div>
       <div>Validade: ${d.valid_until ? lpDate(d.valid_until) : '—'}</div>
-      ${d.commercial_notes ? `<div style="margin-top:4px">${d.commercial_notes}</div>` : ''}
+      ${d.commercial_notes ? `<div style="margin-top:4px">${d.commercial_notes.replace(/\n/g, '<br>')}</div>` : ''}
     </div>
+    ${ops.length ? `<div style="margin-bottom:12px">
+      <div style="font-weight:700;margin-bottom:4px">Análise digital (aprovada)</div>
+      ${ops.map(o => `<div style="border-left:2px solid var(--purple);padding-left:8px;margin-bottom:6px"><div><b>${o.finding || '—'}</b></div><div style="color:var(--muted)">${o.opportunity || ''}</div></div>`).join('')}
+      ${d.analiseAprovada && d.analiseAprovada.recommendations ? `<div style="margin-top:4px">${d.analiseAprovada.recommendations}</div>` : ''}
+    </div>` : '<div style="margin-bottom:12px;color:var(--muted)">Análise digital não aprovada — não incluída nesta proposta.</div>'}
     <div>
       <div style="font-weight:700;margin-bottom:4px">Próximos passos</div>
-      <div style="color:var(--muted)">Revisão da proposta com o cliente. Aprovação e pagamento serão tratados nas próximas etapas.</div>
+      <div>${(cc.proximos_passos || 'Revisão da proposta com o cliente. Aprovação e pagamento serão tratados nas próximas etapas.').replace(/\n/g, '<br>')}</div>
     </div>`;
   openModal('leadPropostaPreviewModal');
 }
