@@ -39,7 +39,7 @@ export default async function handler(req, res) {
   try {
     // 1) proposta pelo public_token — só as colunas que precisamos
     const pResp = await fetch(
-      `${supabaseUrl}/rest/v1/proposals?select=id,proposal_number,client_name,product_code,status,valid_until,created_at,responsavel_id&public_token=eq.${token}&limit=1`,
+      `${supabaseUrl}/rest/v1/proposals?select=id,proposal_number,client_name,product_code,status,valid_until,created_at,responsavel_id,approved_at,approved_version_number&public_token=eq.${token}&limit=1`,
       { headers: h },
     )
     if (!pResp.ok) {
@@ -59,11 +59,15 @@ export default async function handler(req, res) {
       return
     }
 
-    // 3) versão comercial consolidada mais recente
-    const vResp = await fetch(
-      `${supabaseUrl}/rest/v1/proposal_versions?select=version_number,content_snapshot,created_at&proposal_id=eq.${p.id}&order=version_number.desc&limit=1`,
-      { headers: h },
-    )
+    const aprovada = p.status === 'approved' || p.status === 'paid'
+
+    // 3) qual versão exibir:
+    //    - aprovada -> PINADA na versão que o cliente aprovou (approved_version_number)
+    //    - senão    -> a versão consolidada mais recente
+    const vQuery = aprovada && p.approved_version_number != null
+      ? `${supabaseUrl}/rest/v1/proposal_versions?select=version_number,content_snapshot,created_at&proposal_id=eq.${p.id}&version_number=eq.${p.approved_version_number}&limit=1`
+      : `${supabaseUrl}/rest/v1/proposal_versions?select=version_number,content_snapshot,created_at&proposal_id=eq.${p.id}&order=version_number.desc&limit=1`
+    const vResp = await fetch(vQuery, { headers: h })
     if (!vResp.ok) {
       jsonNoStore(res, 502, { state: 'error', message: 'Serviço indisponível.' })
       return
@@ -129,6 +133,8 @@ export default async function handler(req, res) {
         version: v.version_number,
         data: v.created_at || snap.generated_at || p.created_at || null,
         valid_until: validade,
+        approved: aprovada,
+        approved_at: aprovada ? (p.approved_at || null) : null,
       },
       content: {
         narrativa: {

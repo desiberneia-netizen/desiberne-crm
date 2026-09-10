@@ -5560,7 +5560,9 @@ async function lpAbrirProposta(id, preloaded) {
   document.getElementById('lp-f-escopo-limites').value = sc.limites || '';
   document.getElementById('lp-f-escopo-obs').value = sc.observacoes || '';
 
-  const editavel = lpPodeEditar();
+  // Proposta aprovada/paga pelo cliente: trava edição e novas versões (BLOCO 06 §32).
+  const travadaAprovada = p.status === 'approved' || p.status === 'paid';
+  const editavel = lpPodeEditar() && !travadaAprovada;
   ['lp-f-client-name','lp-f-product','lp-f-responsavel','lp-f-headline','lp-f-subheadline',
    'lp-f-contexto-cliente','lp-f-oportunidade','lp-f-solucao','lp-f-proximos','lp-f-periodicidade',
    'lp-f-interesse','lp-f-necessidades','lp-f-obs-negociacao',
@@ -5570,6 +5572,10 @@ async function lpAbrirProposta(id, preloaded) {
   document.getElementById('lp-salvar-btn').style.display = editavel ? 'inline-flex' : 'none';
   document.getElementById('lp-nova-versao-btn').style.display = editavel ? 'inline-flex' : 'none';
   document.getElementById('lp-analise-btn').style.display = editavel ? 'inline-flex' : 'none';
+  if (travadaAprovada) {
+    const vb = document.getElementById('lp-versoes-list');
+    if (vb) vb.insertAdjacentHTML('afterbegin', '<div style="color:var(--warning);margin-bottom:6px"><i class="ti ti-lock"></i> Proposta aprovada pelo cliente — edição e novas versões bloqueadas.</div>');
+  }
 
   document.getElementById('lp-analise-box').innerHTML = '';
   await lpCarregarAnalise(p.id);
@@ -5632,8 +5638,14 @@ async function lpCarregarResponsaveis() {
   } catch (e) { console.error(e); }
 }
 
+function lpPropostaTravada() {
+  const p = lpProps.find(x => x.id === document.getElementById('lp-proposal-id').value);
+  return p && (p.status === 'approved' || p.status === 'paid');
+}
+
 async function lpSalvarRascunho() {
   if (!lpPodeEditar()) { showToast('Seu perfil não pode editar propostas', 'error'); return; }
+  if (lpPropostaTravada()) { showToast('Proposta aprovada pelo cliente — não pode ser editada', 'error'); return; }
   if (lpBusy) return;
   const id = document.getElementById('lp-proposal-id').value;
   if (!id) return;
@@ -5767,6 +5779,7 @@ async function lpPublicarProposta() {
 
 async function lpSalvarNovaVersao() {
   if (!lpPodeEditar()) { showToast('Seu perfil não pode gerar versões', 'error'); return; }
+  if (lpPropostaTravada()) { showToast('Proposta aprovada pelo cliente — não é possível criar nova versão', 'error'); return; }
   if (lpBusy) return;
   const id = document.getElementById('lp-proposal-id').value;
   if (!id) return;

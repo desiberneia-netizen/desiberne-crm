@@ -205,11 +205,44 @@
       </ol>
     </section>
 
-    <section class="cta">
+    <section class="cta" id="sec-cta">
       <h2>Vamos despertar sua empresa?</h2>
       <p style="color:var(--muted)">Ao aprovar, iniciamos os próximos passos.</p>
       <button class="btn" id="btn-aprovar" type="button">Aprovar proposta</button>
       <div class="note" id="cta-note"></div>
+
+      <!-- painel de confirmação (aparece ao clicar em Aprovar) -->
+      <div id="confirm-box" class="hidden" style="max-width:520px;margin:26px auto 0;text-align:left;background:rgba(230,232,239,.04);border:1px solid var(--line);border-radius:14px;padding:22px">
+        <div style="font-weight:800;color:var(--ink);margin-bottom:10px">Você está prestes a aprovar esta proposta comercial.</div>
+        <ul style="list-style:none;font-size:14px;line-height:1.9;margin-bottom:14px">
+          <li><span style="color:var(--muted)">Empresa:</span> <b id="cf-empresa">—</b></li>
+          <li><span style="color:var(--muted)">Proposta:</span> <b id="cf-num">—</b> · versão <b id="cf-ver">—</b></li>
+          <li><span style="color:var(--muted)">Implementação:</span> <b id="cf-impl">—</b></li>
+          <li><span style="color:var(--muted)">Recorrência:</span> <b id="cf-rec">—</b></li>
+          <li><span style="color:var(--muted)">Validade:</span> <b id="cf-val">—</b></li>
+        </ul>
+        <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer;margin-bottom:16px">
+          <input type="checkbox" id="cf-check" style="margin-top:3px;accent-color:var(--purple)">
+          <span>Li e concordo com esta proposta comercial.</span>
+        </label>
+        <button class="btn" id="btn-confirmar" type="button" disabled style="opacity:.5">Confirmar aprovação</button>
+        <div class="note" id="confirm-note" style="text-align:left"></div>
+      </div>
+
+      <!-- estado aprovado -->
+      <div id="approved-box" class="hidden" style="max-width:560px;margin:0 auto;text-align:center">
+        <div style="font-size:44px;line-height:1">✓</div>
+        <h2 style="margin-top:10px">Proposta aprovada</h2>
+        <p style="color:var(--gray)">Recebemos sua aprovação.</p>
+        <p style="color:var(--muted)" id="ap-meta">—</p>
+        <div style="margin-top:26px;padding-top:22px;border-top:1px solid var(--line)">
+          <div class="eyebrow" style="text-align:center">Próximo passo</div>
+          <h3 style="margin-top:6px">Pagamento</h3>
+          <p style="color:var(--muted)">O próximo passo é concluir o pagamento para iniciarmos o onboarding.</p>
+          <button class="btn" id="btn-pagamento" type="button" style="opacity:.6">Ir para pagamento</button>
+          <div class="note" id="pay-note">Pagamento será disponibilizado em seguida pelo seu contato na Desiberne IA.</div>
+        </div>
+      </div>
     </section>
   </div>
 
@@ -334,14 +367,84 @@
     // responsavel
     if (c.responsavel) $('f-resp').textContent = 'Responsável: ' + c.responsavel;
 
-    // expiração / CTA
+    // ---- CTA / aprovação -------------------------------------------------
+    var moneyRec = inv.recurring_value != null
+      ? brl(inv.recurring_value) + (PER[inv.recurring_period] || '/mês') : '—';
+
+    function mostrarAprovada(quando, versao) {
+      $('btn-aprovar').classList.add('hidden');
+      $('confirm-box').classList.add('hidden');
+      $('cta-note').textContent = '';
+      $('sec-cta').querySelector('h2').classList.add('hidden');
+      $('sec-cta').querySelectorAll('p')[0] && $('sec-cta').querySelectorAll('p')[0].classList.add('hidden');
+      $('ap-meta').textContent = 'Aprovada em ' + dateBR(quando) + ' · versão ' + (versao != null ? versao : (pr.version || '—'));
+      $('approved-box').classList.remove('hidden');
+    }
+
     if (data.state === 'expired') {
       $('expbanner').classList.remove('hidden');
       $('btn-aprovar').classList.add('hidden');
       $('cta-note').textContent = 'Solicite uma nova proposta ao seu contato na Desiberne IA.';
+    } else if (pr.approved) {
+      mostrarAprovada(pr.approved_at, pr.version);
     } else {
+      // preenche o painel de confirmação
+      $('cf-empresa').textContent = empresa;
+      $('cf-num').textContent = pr.proposal_number || '—';
+      $('cf-ver').textContent = pr.version != null ? pr.version : '—';
+      $('cf-impl').textContent = brl(inv.implementation_value);
+      $('cf-rec').textContent = moneyRec;
+      $('cf-val').textContent = dateBR(pr.valid_until);
+
       $('btn-aprovar').addEventListener('click', function () {
-        $('cta-note').textContent = 'Em breve: aprovação online.';
+        $('confirm-box').classList.remove('hidden');
+        $('confirm-box').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+      $('cf-check').addEventListener('change', function () {
+        var on = $('cf-check').checked;
+        $('btn-confirmar').disabled = !on;
+        $('btn-confirmar').style.opacity = on ? '1' : '.5';
+      });
+
+      var enviando = false;
+      $('btn-confirmar').addEventListener('click', function () {
+        if (enviando || !$('cf-check').checked) return;
+        enviando = true;
+        $('btn-confirmar').disabled = true;
+        $('btn-confirmar').textContent = 'Processando aprovação…';
+        $('confirm-note').textContent = '';
+        fetch('/api/proposta-aprovar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ token: token, confirmation: true })
+        })
+          .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
+          .then(function (res) {
+            var b = res.body || {};
+            if (b.state === 'approved' || b.state === 'already_approved') {
+              var pp = b.proposal || {};
+              mostrarAprovada(pp.approved_at || new Date().toISOString(), pp.version);
+              return;
+            }
+            enviando = false;
+            $('btn-confirmar').disabled = false;
+            $('btn-confirmar').textContent = 'Confirmar aprovação';
+            if (b.state === 'expired') { $('confirm-note').textContent = 'Esta proposta expirou e não pode mais ser aprovada.'; }
+            else if (b.state === 'not_found') { $('confirm-note').textContent = 'Proposta não encontrada.'; }
+            else if (b.state === 'unavailable') { $('confirm-note').textContent = 'Esta proposta não está disponível para aprovação.'; }
+            else if (b.state === 'confirmation_required') { $('confirm-note').textContent = 'Marque a confirmação antes de aprovar.'; }
+            else { $('confirm-note').textContent = 'Não foi possível registrar a aprovação. Tente novamente em instantes.'; }
+          })
+          .catch(function () {
+            enviando = false;
+            $('btn-confirmar').disabled = false;
+            $('btn-confirmar').textContent = 'Confirmar aprovação';
+            $('confirm-note').textContent = 'Erro de conexão. Tente novamente.';
+          });
+      });
+
+      $('btn-pagamento').addEventListener('click', function () {
+        $('pay-note').textContent = 'Pagamento será disponibilizado em seguida pelo seu contato na Desiberne IA.';
       });
     }
 
@@ -356,7 +459,6 @@
       var b = res.body || {};
       if (b.state === 'not_found') { show('notfound'); return; }
       if (b.state === 'unavailable') { show('unavailable'); return; }
-      if (b.state === 'error' || (!res.ok && !b.state)) { show('errorstate'); return; }
       if (b.state === 'ok' || b.state === 'expired') { render(b); return; }
       show('errorstate');
     })
