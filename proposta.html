@@ -125,7 +125,10 @@
 <main id="doc" class="hidden">
   <header>
     <div class="wrap headrow">
-      <div class="brand"><span class="dot"></span> <b>Desiberne&nbsp;IA</b> <span>· Presença Digital</span></div>
+      <div class="brand">
+        <img src="https://i.imgur.com/rrQxwkl.png" alt="Desiberne IA" style="width:26px;height:26px;border-radius:50%;object-fit:cover">
+        <b>Desiberne&nbsp;IA</b> <span>· Presença Digital</span>
+      </div>
       <div class="headmeta">
         <div class="tag">Proposta Comercial</div>
         <div id="h-meta">—</div>
@@ -139,6 +142,7 @@
       <h1>Uma nova experiência digital<br>para <span class="grad-text" id="h-empresa">sua empresa</span></h1>
       <p class="lead" id="h-headline"></p>
       <p class="lead" id="h-subheadline" style="color:var(--muted)"></p>
+      <img id="hero-img" alt="" style="display:none;width:100%;border-radius:16px;margin-top:24px;border:1px solid var(--line)">
       <div class="inst">
         Tire sua empresa do modo de hibernação digital.<br>
         Desperte para um mundo de novas oportunidades.
@@ -210,6 +214,21 @@
       <p style="color:var(--muted)">Ao aprovar, iniciamos os próximos passos.</p>
       <button class="btn" id="btn-aprovar" type="button">Aprovar proposta</button>
       <div class="note" id="cta-note"></div>
+      <div id="resp-actions" style="margin-top:14px;font-size:13px">
+        <a href="#" id="lnk-ajustes" style="color:var(--muted)">Pedir ajustes</a>
+        <span style="color:var(--line)"> · </span>
+        <a href="#" id="lnk-recusar" style="color:var(--muted)">Recusar proposta</a>
+      </div>
+      <div id="resp-box" class="hidden" style="max-width:520px;margin:16px auto 0;text-align:left;background:rgba(230,232,239,.04);border:1px solid var(--line);border-radius:14px;padding:18px">
+        <div id="resp-title" style="font-weight:700;color:var(--ink);margin-bottom:8px"></div>
+        <textarea id="resp-note" rows="3" placeholder="Conte o motivo (opcional) — ajuda a Desiberne a te atender melhor" style="width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--gray);padding:10px;font:inherit;resize:vertical"></textarea>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn" id="btn-resp-enviar" type="button">Enviar</button>
+          <button class="btn" id="btn-resp-cancelar" type="button" style="background:none;border:1px solid var(--line);color:var(--muted)">Cancelar</button>
+        </div>
+        <div class="note" id="resp-msg" style="text-align:left"></div>
+      </div>
+      <div id="resp-status" class="hidden" style="margin-top:14px;font-size:13px;color:var(--magenta)"></div>
 
       <!-- painel de confirmação (aparece ao clicar em Aprovar) -->
       <div id="confirm-box" class="hidden" style="max-width:520px;margin:26px auto 0;text-align:left;background:rgba(230,232,239,.04);border:1px solid var(--line);border-radius:14px;padding:22px">
@@ -315,6 +334,9 @@
     $('h-headline').classList.toggle('hidden', !String(nar.headline || '').trim());
     $('h-subheadline').classList.toggle('hidden', !String(nar.subheadline || '').trim());
 
+    // imagem de destaque
+    if (pr.hero_image) { var hi = $('hero-img'); hi.src = pr.hero_image; hi.style.display = 'block'; hi.alt = 'Proposta ' + empresa; }
+
     // contexto
     $('t-contexto').textContent = 'A presença digital da ' + empresa;
     $('c-contexto').innerHTML = paras(nar.contexto, 'lead');
@@ -399,6 +421,9 @@
     function mostrarAprovada(quando, versao, pay) {
       $('btn-aprovar').classList.add('hidden');
       $('confirm-box').classList.add('hidden');
+      $('resp-actions').classList.add('hidden');
+      $('resp-box').classList.add('hidden');
+      $('resp-status').classList.add('hidden');
       $('cta-note').textContent = '';
       $('sec-cta').querySelector('h2').classList.add('hidden');
       $('sec-cta').querySelectorAll('p')[0] && $('sec-cta').querySelectorAll('p')[0].classList.add('hidden');
@@ -410,10 +435,70 @@
     if (data.state === 'expired') {
       $('expbanner').classList.remove('hidden');
       $('btn-aprovar').classList.add('hidden');
+      $('resp-actions').classList.add('hidden');
       $('cta-note').textContent = 'Solicite uma nova proposta ao seu contato na Desiberne IA.';
     } else if (pr.approved) {
       mostrarAprovada(pr.approved_at, pr.version, data.payment);
     } else {
+      // resposta anterior do cliente (recusa / pedido de ajuste)
+      if (data.client_response === 'declined' || data.client_response === 'changes_requested') {
+        $('resp-status').textContent = data.client_response === 'declined'
+          ? 'Você recusou esta proposta. Se mudar de ideia, ainda pode aprovar acima.'
+          : 'Você pediu ajustes — seu contato na Desiberne IA vai retornar. Você ainda pode aprovar acima.';
+        $('resp-status').classList.remove('hidden');
+      }
+
+      var respAction = null;
+      function abrirResp(acao) {
+        respAction = acao;
+        $('resp-title').textContent = acao === 'decline' ? 'Recusar esta proposta' : 'Pedir ajustes na proposta';
+        $('resp-msg').textContent = '';
+        $('resp-note').value = '';
+        $('resp-box').classList.remove('hidden');
+        $('resp-box').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      $('lnk-recusar').addEventListener('click', function (e) { e.preventDefault(); abrirResp('decline'); });
+      $('lnk-ajustes').addEventListener('click', function (e) { e.preventDefault(); abrirResp('changes'); });
+      $('btn-resp-cancelar').addEventListener('click', function () { $('resp-box').classList.add('hidden'); });
+      var respEnviando = false;
+      $('btn-resp-enviar').addEventListener('click', function () {
+        if (respEnviando || !respAction) return;
+        respEnviando = true;
+        $('btn-resp-enviar').disabled = true;
+        $('btn-resp-enviar').textContent = 'Enviando…';
+        fetch('/api/proposta-responder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ token: token, action: respAction, note: $('resp-note').value || '' })
+        })
+          .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
+          .then(function (res) {
+            var b = res.body || {};
+            respEnviando = false;
+            $('btn-resp-enviar').disabled = false;
+            $('btn-resp-enviar').textContent = 'Enviar';
+            if (b.state === 'recorded') {
+              $('resp-box').classList.add('hidden');
+              $('resp-status').textContent = b.response === 'declined'
+                ? 'Recebemos sua recusa. Obrigado pelo retorno — seu contato na Desiberne IA pode falar com você.'
+                : 'Recebemos seu pedido de ajustes. Seu contato na Desiberne IA vai retornar em breve.';
+              $('resp-status').classList.remove('hidden');
+            } else if (b.state === 'unavailable') {
+              $('resp-msg').textContent = 'Esta proposta não aceita mais esse tipo de resposta.';
+            } else if (b.state === 'not_found') {
+              $('resp-msg').textContent = 'Proposta não encontrada.';
+            } else {
+              $('resp-msg').textContent = 'Não foi possível registrar. Tente novamente em instantes.';
+            }
+          })
+          .catch(function () {
+            respEnviando = false;
+            $('btn-resp-enviar').disabled = false;
+            $('btn-resp-enviar').textContent = 'Enviar';
+            $('resp-msg').textContent = 'Erro de conexão. Tente novamente.';
+          });
+      });
+
       // preenche o painel de confirmação
       $('cf-empresa').textContent = empresa;
       $('cf-num').textContent = pr.proposal_number || '—';

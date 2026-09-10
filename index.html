@@ -1059,6 +1059,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
       <div><span style="color:var(--muted)">Criada em</span><br><b id="lp-criada">—</b></div>
       <div><span style="color:var(--muted)">Atualizada</span><br><b id="lp-atualizada">—</b></div>
     </div>
+    <div id="lp-client-resp" style="margin-bottom:12px"></div>
 
     <div class="section-divider">1. Identificação</div>
     <div class="form-row">
@@ -1079,6 +1080,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
       <select class="form-select" id="lp-f-product">
         <option value="site_presenca_digital">Site — Projeto de Presença Digital</option>
       </select>
+    </div>
+    <button type="button" class="btn-ghost" id="lp-ia-texto-btn" onclick="lpGerarTextoIA()" style="margin-bottom:8px"><i class="ti ti-sparkles"></i> Gerar texto com IA</button>
+    <div class="form-group">
+      <label class="form-label">Imagem de destaque (URL) — aparece no topo da proposta pública</label>
+      <input class="form-input" id="lp-f-hero" placeholder="https://... (opcional)">
     </div>
     <div class="form-group">
       <label class="form-label">Headline (título comercial)</label>
@@ -5571,6 +5577,7 @@ function lpRenderPropostas() {
         <div style="font-weight:700;font-size:13px">${p.proposal_number} · ${prod}</div>
         <div style="font-size:11px;color:var(--muted)">${impl} + ${rec} · ${LP_STATUS_LABEL[p.status] || p.status} · criada ${lpDate(p.created_at)} · atualizada ${lpDate(p.updated_at)}</div>
         ${p.status === 'paid' ? `<div style="font-size:11px;margin-top:2px">Onboarding: ${p.id in lpOnboardings ? (OB_STATUS_LABEL[lpOnboardings[p.id]] || lpOnboardings[p.id]) : '⚪ não iniciado'}</div>` : ''}
+        ${lpClientRespBanner(p)}
       </div>
       <button class="btn-ghost" style="flex-shrink:0" onclick="lpAbrirProposta('${p.id}')">Abrir</button>
     </div>`;
@@ -5618,6 +5625,11 @@ async function lpAbrirProposta(id, preloaded) {
   document.getElementById('lp-status').textContent = LP_STATUS_LABEL[p.status] || p.status;
   document.getElementById('lp-criada').textContent = lpDate(p.created_at);
   document.getElementById('lp-atualizada').textContent = lpDate(p.updated_at);
+  document.getElementById('lp-client-resp').innerHTML = (p.client_response === 'declined' || p.client_response === 'changes_requested')
+    ? `<div style="background:${p.client_response === 'declined' ? 'rgba(239,68,68,.1)' : 'rgba(245,158,11,.1)'};border-radius:8px;padding:8px 12px;font-size:12px;color:${p.client_response === 'declined' ? 'var(--danger)' : 'var(--warning)'}">
+        <b>${p.client_response === 'declined' ? '🔴 Cliente recusou a proposta' : '🟠 Cliente pediu ajustes'}</b>${p.client_response_at ? ' · ' + lpDate(p.client_response_at) : ''}
+        ${p.client_response_note ? '<div style="margin-top:4px;color:var(--text)">' + p.client_response_note + '</div>' : ''}
+      </div>` : '';
 
   document.getElementById('lp-f-client-name').value = p.client_name || '';
   document.getElementById('lp-f-product').value = p.product_code || 'site_presenca_digital';
@@ -5626,6 +5638,7 @@ async function lpAbrirProposta(id, preloaded) {
   document.getElementById('lp-f-responsavel').value = p.responsavel_id || currentUser?.id || '';
 
   const cc = p.commercial_content || {};
+  document.getElementById('lp-f-hero').value = p.hero_image_url || '';
   document.getElementById('lp-f-headline').value = cc.headline || '';
   document.getElementById('lp-f-subheadline').value = cc.subheadline || '';
   document.getElementById('lp-f-contexto-cliente').value = cc.contexto || '';
@@ -5662,7 +5675,7 @@ async function lpAbrirProposta(id, preloaded) {
   const travadaAprovada = p.status === 'approved' || p.status === 'paid';
   const editavel = lpPodeEditar() && !travadaAprovada;
   ['lp-f-client-name','lp-f-product','lp-f-responsavel','lp-f-headline','lp-f-subheadline',
-   'lp-f-contexto-cliente','lp-f-oportunidade','lp-f-solucao','lp-f-proximos','lp-f-periodicidade',
+   'lp-f-hero','lp-f-contexto-cliente','lp-f-oportunidade','lp-f-solucao','lp-f-proximos','lp-f-periodicidade',
    'lp-f-interesse','lp-f-necessidades','lp-f-obs-negociacao',
    'lp-f-usar-negociacao','lp-f-impl','lp-f-rec','lp-f-prazo','lp-f-forma-pgto','lp-f-link-pgto',
    'lp-f-validade','lp-f-cond-obs','lp-f-escopo-desc','lp-f-escopo-entregaveis','lp-f-escopo-limites','lp-f-escopo-obs']
@@ -5692,6 +5705,7 @@ function lpColetarModal() {
     client_name: document.getElementById('lp-f-client-name').value.trim(),
     product_code: document.getElementById('lp-f-product').value,
     responsavel_id: document.getElementById('lp-f-responsavel').value || null,
+    hero_image_url: document.getElementById('lp-f-hero').value.trim() || null,
     implementation_value: moneyToNum(document.getElementById('lp-f-impl').value) || null,
     recurring_value: moneyToNum(document.getElementById('lp-f-rec').value) || null,
     recurring_period: document.getElementById('lp-f-periodicidade').value || 'mensal',
@@ -5739,6 +5753,44 @@ async function lpCarregarResponsaveis() {
     });
     lpResponsaveisCarregados = true;
   } catch (e) { console.error(e); }
+}
+
+// ✨ Gera a narrativa comercial com IA (BLOCO 09)
+async function lpGerarTextoIA() {
+  if (!lpPodeEditar()) { showToast('Sem permissão', 'error'); return; }
+  const id = document.getElementById('lp-proposal-id').value;
+  if (!id) { showToast('Salve a proposta primeiro', 'error'); return; }
+  const btn = document.getElementById('lp-ia-texto-btn');
+  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> Gerando...';
+  try {
+    const { data: s } = await sb.auth.getSession();
+    const resp = await fetch('/api/gerar-texto-proposta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${s.session.access_token}` },
+      body: JSON.stringify({ proposal_id: id }),
+    });
+    const out = await resp.json();
+    if (!resp.ok) { showToast(out.error || 'Falha ao gerar texto', 'error'); return; }
+    const t = out.texto || {};
+    const setar = (fid, v) => { const e = document.getElementById(fid); if (e && v) e.value = v; };
+    setar('lp-f-headline', t.headline);
+    setar('lp-f-subheadline', t.subheadline);
+    setar('lp-f-contexto-cliente', t.contexto);
+    setar('lp-f-oportunidade', t.oportunidade);
+    setar('lp-f-solucao', t.solucao);
+    setar('lp-f-proximos', t.proximos_passos);
+    showToast('Texto gerado — revise e salve o rascunho', 'success');
+  } catch (e) {
+    showToast('Erro de rede ao gerar texto', 'error');
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<i class="ti ti-sparkles"></i> Gerar texto com IA';
+  }
+}
+
+function lpClientRespBanner(p) {
+  if (p.client_response === 'declined') return '<div style="color:var(--danger);font-size:11px;margin-top:2px"><i class="ti ti-alert-circle"></i> Cliente RECUSOU' + (p.client_response_note ? ' — ' + p.client_response_note : '') + '</div>';
+  if (p.client_response === 'changes_requested') return '<div style="color:var(--warning);font-size:11px;margin-top:2px"><i class="ti ti-message-circle"></i> Cliente pediu AJUSTES' + (p.client_response_note ? ' — ' + p.client_response_note : '') + '</div>';
+  return '';
 }
 
 function lpPropostaTravada() {
@@ -6248,6 +6300,7 @@ async function lpSalvarNovaVersao() {
       client_name: dados.client_name,
       product_code: dados.product_code,
       product_name: prodNome,
+      hero_image_url: dados.hero_image_url,
       narrativa: dados.commercial_content,
       escopo: dados.scope,
       investimento: {

@@ -39,7 +39,7 @@ export default async function handler(req, res) {
   try {
     // 1) proposta pelo public_token — só as colunas que precisamos
     const pResp = await fetch(
-      `${supabaseUrl}/rest/v1/proposals?select=id,proposal_number,client_name,product_code,status,valid_until,created_at,responsavel_id,approved_at,approved_version_number,payment_link&public_token=eq.${token}&limit=1`,
+      `${supabaseUrl}/rest/v1/proposals?select=id,proposal_number,client_name,product_code,status,valid_until,created_at,responsavel_id,approved_at,approved_version_number,payment_link,hero_image_url,client_response&public_token=eq.${token}&limit=1`,
       { headers: h },
     )
     if (!pResp.ok) {
@@ -135,6 +135,7 @@ export default async function handler(req, res) {
         valid_until: validade,
         approved: aprovada,
         approved_at: aprovada ? (p.approved_at || null) : null,
+        hero_image: snap.hero_image_url || p.hero_image_url || null,
       },
       // pagamento (fase manual): link só é exposto quando a proposta está aprovada
       // e ainda não paga; estado 'paid' vem do status da proposta.
@@ -142,6 +143,7 @@ export default async function handler(req, res) {
         state: p.status === 'paid' ? 'paid' : 'pending',
         link: (p.status === 'approved' && p.payment_link) ? p.payment_link : null,
       },
+      client_response: p.client_response || null,
       content: {
         narrativa: {
           headline: nar.headline || '',
