@@ -746,6 +746,19 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
           </div>
           <div id="det-obs" style="font-size:12px;color:var(--muted);font-style:italic"></div>
         </div>
+
+        <!-- PROPOSTAS COMERCIAIS (BLOCO 02 — vinculadas ao Lead + Supabase) -->
+        <div class="cliente-detail" style="margin-top:16px">
+          <div class="cliente-detail-header">
+            <div>
+              <div class="cliente-detail-nome" style="font-size:16px">Propostas Comerciais</div>
+              <div class="cliente-detail-sub">Propostas comerciais deste lead</div>
+            </div>
+            <button class="add-btn" id="lp-nova-btn" onclick="lpNovaProposta()"><i class="ti ti-plus"></i> Gerar Nova Proposta</button>
+          </div>
+          <div id="lead-propostas-list"><div class="loading">Carregando...</div></div>
+        </div>
+
         <div style="font-size:14px;font-weight:700;margin-bottom:4px">Atividades & Tarefas</div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Arraste os cards entre as etapas</div>
         <div class="ativ-kanban">
@@ -1027,6 +1040,122 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
       <button class="btn-danger" id="delete-btn" style="display:none;margin-right:auto" onclick="deleteLead()"><i class="ti ti-trash"></i> Excluir</button>
       <button class="btn-ghost" onclick="closeModal('leadModal')">Cancelar</button>
       <button class="btn-primary" id="save-lead-btn" onclick="saveLead()">Salvar Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEAD PROPOSTA MODAL (BLOCO 02) -->
+<div class="modal-overlay" id="leadPropostaModal" onclick="closeModalOutside(event,'leadPropostaModal')">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-header">
+      <div class="modal-title" id="lp-modal-title">Nova Proposta</div>
+      <button class="modal-close" onclick="closeModal('leadPropostaModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <input type="hidden" id="lp-proposal-id">
+
+    <div style="display:flex;gap:18px;flex-wrap:wrap;background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px">
+      <div><span style="color:var(--muted)">Número</span><br><b id="lp-num">—</b></div>
+      <div><span style="color:var(--muted)">Status</span><br><b id="lp-status">—</b></div>
+      <div><span style="color:var(--muted)">Criada em</span><br><b id="lp-criada">—</b></div>
+      <div><span style="color:var(--muted)">Atualizada</span><br><b id="lp-atualizada">—</b></div>
+    </div>
+
+    <div class="section-divider">Identificação</div>
+    <div class="form-group">
+      <label class="form-label">Cliente (snapshot da proposta)</label>
+      <input class="form-input" id="lp-f-client-name" placeholder="Nome do cliente">
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Pré-preenchido a partir do lead. Pode revisar antes de salvar.</div>
+    </div>
+
+    <div class="section-divider">Produto / Projeto</div>
+    <div class="form-group">
+      <label class="form-label">Produto / Projeto</label>
+      <select class="form-select" id="lp-f-product">
+        <option value="site_presenca_digital">Site — Projeto de Presença Digital</option>
+      </select>
+    </div>
+
+    <div class="section-divider">Análise de Presença Digital</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Identifique oportunidades digitais da empresa antes de personalizar a proposta.</div>
+    <button type="button" class="btn-ghost" id="lp-analise-btn" onclick="lpExecutarAnalise()"><i class="ti ti-radar"></i> Executar Análise</button>
+    <div id="lp-analise-box" style="margin-top:10px;font-size:12px;color:var(--muted)"></div>
+
+    <div class="section-divider">Contexto da Negociação</div>
+    <div class="form-group">
+      <label class="form-label">Interesse demonstrado</label>
+      <textarea class="form-input" id="lp-f-interesse" rows="2" style="resize:vertical"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Necessidades mencionadas</label>
+      <textarea class="form-input" id="lp-f-necessidades" rows="2" style="resize:vertical"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observações comerciais</label>
+      <textarea class="form-input" id="lp-f-obs-negociacao" rows="2" style="resize:vertical"></textarea>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin-bottom:6px">
+      <input type="checkbox" id="lp-f-usar-negociacao" style="accent-color:var(--neon)">
+      Utilizar informações registradas na negociação para personalizar a proposta
+    </label>
+
+    <div class="section-divider">Condições Comerciais</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Valor de implementação</label><input class="form-input" id="lp-f-impl" placeholder="R$ 0,00" onblur="lpFmtMoney(this)"></div>
+      <div class="form-group"><label class="form-label">Valor recorrente mensal</label><input class="form-input" id="lp-f-rec" placeholder="R$ 0,00" onblur="lpFmtMoney(this)"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Prazo de entrega</label><input class="form-input" id="lp-f-prazo" placeholder="Ex: 15 dias úteis"></div>
+      <div class="form-group"><label class="form-label">Forma de pagamento</label><input class="form-input" id="lp-f-forma-pgto" placeholder="Ex: Pix / Cartão"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Link de pagamento</label><input class="form-input" id="lp-f-link-pgto" placeholder="https://..."></div>
+      <div class="form-group"><label class="form-label">Validade da proposta</label><input class="form-input" id="lp-f-validade" type="date"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observações comerciais</label>
+      <textarea class="form-input" id="lp-f-cond-obs" rows="2" style="resize:vertical"></textarea>
+    </div>
+
+    <div class="section-divider">Escopo da Proposta</div>
+    <div class="form-group">
+      <label class="form-label">Descrição do projeto</label>
+      <textarea class="form-input" id="lp-f-escopo-desc" rows="3" style="resize:vertical"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Entregáveis</label>
+      <textarea class="form-input" id="lp-f-escopo-entregaveis" rows="3" style="resize:vertical"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Limites do escopo</label>
+      <textarea class="form-input" id="lp-f-escopo-limites" rows="2" style="resize:vertical"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observações do escopo</label>
+      <textarea class="form-input" id="lp-f-escopo-obs" rows="2" style="resize:vertical"></textarea>
+    </div>
+
+    <div class="section-divider">Versões consolidadas</div>
+    <div id="lp-versoes-list" style="font-size:12px;color:var(--muted)">—</div>
+
+    <div class="modal-footer" style="flex-wrap:wrap;gap:8px">
+      <button class="btn-ghost" onclick="closeModal('leadPropostaModal')">Voltar</button>
+      <button class="btn-ghost" id="lp-preview-btn" onclick="lpPreview()"><i class="ti ti-eye"></i> Visualizar Proposta</button>
+      <button class="btn-ghost" id="lp-nova-versao-btn" onclick="lpSalvarNovaVersao()"><i class="ti ti-git-branch"></i> Salvar Nova Versão</button>
+      <button class="btn-primary" id="lp-salvar-btn" onclick="lpSalvarRascunho()">Salvar Rascunho</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEAD PROPOSTA PREVIEW MODAL (BLOCO 02 — HTML, sem PDF) -->
+<div class="modal-overlay" id="leadPropostaPreviewModal" onclick="closeModalOutside(event,'leadPropostaPreviewModal')">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-header">
+      <div class="modal-title">Pré-visualização da Proposta</div>
+      <button class="modal-close" onclick="closeModal('leadPropostaPreviewModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="lp-preview-body" style="font-size:13px;line-height:1.6"></div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('leadPropostaPreviewModal')">Fechar</button>
     </div>
   </div>
 </div>
@@ -2946,6 +3075,7 @@ async function openClienteDetalhe(id) {
   tempEl.className = 'tag-temp ' + ({Frio:'badge-cold',Morno:'badge-warm',Quente:'badge-hot',Fechado:'badge-done'}[l.temperatura] || '');
   showView('cliente-detalhe');
   await loadAtividades();
+  lpCarregarPropostas(id);
 }
 
 async function loadAtividades() {
@@ -5229,6 +5359,377 @@ function emptyState(icon,msg,sub=''){
     <div style="font-size:14px;font-weight:700;color:#5050a0;margin-bottom:4px">${msg}</div>
     ${sub?`<div style="font-size:12px;color:#3a3a5e">${sub}</div>`:''}
   </div>`;
+}
+
+// ============================================================================
+// BLOCO 02 — PROPOSTAS COMERCIAIS DENTRO DO LEAD (Supabase)
+// Coexiste com a feature antiga (localStorage / #propostaModal / gerarPropostaPDF).
+// Prefixo lp* / IDs lp-* / #lead-propostas-list — sem colisao com a antiga.
+// ============================================================================
+
+// Sugestoes iniciais de valores por produto. UI apenas — sem default no banco.
+const LP_PRODUTOS = {
+  site_presenca_digital: { nome: 'Site — Projeto de Presença Digital', implementacao: 600.00, recorrencia: 49.99 },
+};
+const LP_STATUS_LABEL = {
+  draft: 'Rascunho', generated: 'Gerada', sent: 'Enviada', viewed: 'Visualizada',
+  approved: 'Aprovada', paid: 'Paga', expired: 'Expirada', cancelled: 'Cancelada',
+};
+
+let lpProps = [];
+let lpVersoes = [];
+let lpCurrentLead = null;
+let lpBusy = false;
+let papelAtual = null; // master | admin | vendedor | visualizador | null(desconhecido)
+
+async function lpEnsurePapel() {
+  if (papelAtual !== null) return papelAtual;
+  try {
+    const email = (currentUser?.email || '').toLowerCase();
+    if (!email) return null;
+    const { data } = await sb.from('usuarios').select('permissao').eq('email', email).maybeSingle();
+    papelAtual = data?.permissao || 'desconhecido';
+  } catch (e) { papelAtual = 'desconhecido'; }
+  return papelAtual;
+}
+function lpPodeEditar() { return papelAtual !== 'visualizador'; }
+
+function lpMoneyToNum(v) { return moneyToNum(v); }
+function lpFmtMoney(el) { const n = moneyToNum(el.value); el.value = n ? numToMoney(n) : ''; }
+function lpDate(d) { return d ? new Date(d).toLocaleDateString('pt-BR') : '—'; }
+
+async function lpCarregarPropostas(leadId) {
+  const el = document.getElementById('lead-propostas-list');
+  if (!el) return;
+  lpCurrentLead = allLeads.find(x => x.id === leadId) || null;
+  await lpEnsurePapel();
+  const novaBtn = document.getElementById('lp-nova-btn');
+  if (novaBtn) novaBtn.style.display = lpPodeEditar() ? 'inline-flex' : 'none';
+
+  el.innerHTML = '<div class="loading">Carregando...</div>';
+  const { data, error } = await sb.from('proposals').select('*').eq('lead_id', leadId).order('created_at', { ascending: false });
+  if (error) { el.innerHTML = '<div style="color:var(--danger);font-size:12px">Erro ao carregar propostas: ' + error.message + '</div>'; console.error(error); return; }
+  lpProps = data || [];
+  lpRenderPropostas();
+}
+
+function lpRenderPropostas() {
+  const el = document.getElementById('lead-propostas-list');
+  if (!el) return;
+  if (!lpProps.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:12px 0">Este lead ainda não possui propostas comerciais.</div>';
+    return;
+  }
+  el.innerHTML = lpProps.map(p => {
+    const prod = LP_PRODUTOS[p.product_code]?.nome || p.product_code || '—';
+    const impl = p.implementation_value != null ? numToMoney(p.implementation_value) : '—';
+    const rec = p.recurring_value != null ? numToMoney(p.recurring_value) + '/mês' : '—';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:8px">
+      <div style="min-width:0">
+        <div style="font-weight:700;font-size:13px">${p.proposal_number} · ${prod}</div>
+        <div style="font-size:11px;color:var(--muted)">${impl} + ${rec} · ${LP_STATUS_LABEL[p.status] || p.status} · criada ${lpDate(p.created_at)} · atualizada ${lpDate(p.updated_at)}</div>
+      </div>
+      <button class="btn-ghost" style="flex-shrink:0" onclick="lpAbrirProposta('${p.id}')">Abrir</button>
+    </div>`;
+  }).join('');
+}
+
+async function lpNovaProposta() {
+  if (!lpPodeEditar()) { showToast('Seu perfil não pode criar propostas', 'error'); return; }
+  if (lpBusy) return;
+  if (!currentLeadId) { showToast('Abra um lead primeiro', 'error'); return; }
+  lpBusy = true;
+  const btn = document.getElementById('lp-nova-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Gerando...'; }
+  try {
+    const lead = allLeads.find(x => x.id === currentLeadId);
+    const payload = {
+      lead_id: currentLeadId,
+      client_name: lead?.razao_social || '',
+      product_code: 'site_presenca_digital',
+      status: 'draft',
+      created_by: currentUser?.id || null,
+    };
+    const { data, error } = await sb.from('proposals').insert(payload).select().single();
+    if (error) { showToast('Erro ao criar proposta: ' + error.message, 'error'); console.error(error); return; }
+    await logAudit('criar_proposta', 'proposals', data.id, 'lead ' + currentLeadId);
+    await lpCarregarPropostas(currentLeadId);
+    lpAbrirProposta(data.id, data);
+  } finally {
+    lpBusy = false;
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-plus"></i> Gerar Nova Proposta'; }
+  }
+}
+
+async function lpAbrirProposta(id, preloaded) {
+  let p = preloaded || lpProps.find(x => x.id === id);
+  if (!p) {
+    const { data, error } = await sb.from('proposals').select('*').eq('id', id).single();
+    if (error) { showToast('Erro ao abrir proposta', 'error'); console.error(error); return; }
+    p = data;
+  }
+  document.getElementById('lp-proposal-id').value = p.id;
+  document.getElementById('lp-modal-title').textContent = p.proposal_number || 'Proposta';
+  document.getElementById('lp-num').textContent = p.proposal_number || '—';
+  document.getElementById('lp-status').textContent = LP_STATUS_LABEL[p.status] || p.status;
+  document.getElementById('lp-criada').textContent = lpDate(p.created_at);
+  document.getElementById('lp-atualizada').textContent = lpDate(p.updated_at);
+
+  document.getElementById('lp-f-client-name').value = p.client_name || '';
+  document.getElementById('lp-f-product').value = p.product_code || 'site_presenca_digital';
+
+  const nc = p.negotiation_context || {};
+  document.getElementById('lp-f-interesse').value = nc.interesse || '';
+  document.getElementById('lp-f-necessidades').value = nc.necessidades || '';
+  document.getElementById('lp-f-obs-negociacao').value = nc.observacoes || '';
+  document.getElementById('lp-f-usar-negociacao').checked = !!nc.usar_negociacao;
+
+  const sug = LP_PRODUTOS[p.product_code] || {};
+  document.getElementById('lp-f-impl').value = p.implementation_value != null ? numToMoney(p.implementation_value)
+    : (sug.implementacao != null ? numToMoney(sug.implementacao) : '');
+  document.getElementById('lp-f-rec').value = p.recurring_value != null ? numToMoney(p.recurring_value)
+    : (sug.recorrencia != null ? numToMoney(sug.recorrencia) : '');
+  document.getElementById('lp-f-prazo').value = p.delivery_term || '';
+  document.getElementById('lp-f-forma-pgto').value = p.payment_method || '';
+  document.getElementById('lp-f-link-pgto').value = p.payment_link || '';
+  document.getElementById('lp-f-validade').value = p.valid_until || '';
+  document.getElementById('lp-f-cond-obs').value = p.commercial_notes || '';
+
+  const sc = p.scope || {};
+  document.getElementById('lp-f-escopo-desc').value = sc.descricao || '';
+  document.getElementById('lp-f-escopo-entregaveis').value = sc.entregaveis || '';
+  document.getElementById('lp-f-escopo-limites').value = sc.limites || '';
+  document.getElementById('lp-f-escopo-obs').value = sc.observacoes || '';
+
+  const editavel = lpPodeEditar();
+  ['lp-f-client-name','lp-f-product','lp-f-interesse','lp-f-necessidades','lp-f-obs-negociacao',
+   'lp-f-usar-negociacao','lp-f-impl','lp-f-rec','lp-f-prazo','lp-f-forma-pgto','lp-f-link-pgto',
+   'lp-f-validade','lp-f-cond-obs','lp-f-escopo-desc','lp-f-escopo-entregaveis','lp-f-escopo-limites','lp-f-escopo-obs']
+    .forEach(fid => { const e = document.getElementById(fid); if (e) e.disabled = !editavel; });
+  document.getElementById('lp-salvar-btn').style.display = editavel ? 'inline-flex' : 'none';
+  document.getElementById('lp-nova-versao-btn').style.display = editavel ? 'inline-flex' : 'none';
+  document.getElementById('lp-analise-btn').style.display = editavel ? 'inline-flex' : 'none';
+
+  document.getElementById('lp-analise-box').innerHTML = '';
+  await lpCarregarAnalise(p.id);
+  await lpCarregarVersoes(p.id);
+  openModal('leadPropostaModal');
+}
+
+function lpColetarModal() {
+  return {
+    client_name: document.getElementById('lp-f-client-name').value.trim(),
+    product_code: document.getElementById('lp-f-product').value,
+    implementation_value: moneyToNum(document.getElementById('lp-f-impl').value) || null,
+    recurring_value: moneyToNum(document.getElementById('lp-f-rec').value) || null,
+    delivery_term: document.getElementById('lp-f-prazo').value.trim() || null,
+    payment_method: document.getElementById('lp-f-forma-pgto').value.trim() || null,
+    payment_link: document.getElementById('lp-f-link-pgto').value.trim() || null,
+    valid_until: document.getElementById('lp-f-validade').value || null,
+    commercial_notes: document.getElementById('lp-f-cond-obs').value.trim() || null,
+    scope: {
+      descricao: document.getElementById('lp-f-escopo-desc').value.trim(),
+      entregaveis: document.getElementById('lp-f-escopo-entregaveis').value.trim(),
+      limites: document.getElementById('lp-f-escopo-limites').value.trim(),
+      observacoes: document.getElementById('lp-f-escopo-obs').value.trim(),
+    },
+    negotiation_context: {
+      interesse: document.getElementById('lp-f-interesse').value.trim(),
+      necessidades: document.getElementById('lp-f-necessidades').value.trim(),
+      observacoes: document.getElementById('lp-f-obs-negociacao').value.trim(),
+      usar_negociacao: document.getElementById('lp-f-usar-negociacao').checked,
+    },
+  };
+}
+
+async function lpSalvarRascunho() {
+  if (!lpPodeEditar()) { showToast('Seu perfil não pode editar propostas', 'error'); return; }
+  if (lpBusy) return;
+  const id = document.getElementById('lp-proposal-id').value;
+  if (!id) return;
+  lpBusy = true;
+  const btn = document.getElementById('lp-salvar-btn');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    const patch = { ...lpColetarModal(), updated_at: new Date().toISOString() };
+    const { error } = await sb.from('proposals').update(patch).eq('id', id);
+    if (error) { showToast('Erro ao salvar: ' + error.message, 'error'); console.error(error); return; }
+    await logAudit('atualizar_rascunho_proposta', 'proposals', id, null);
+    showToast('Rascunho salvo', 'success');
+    const { data } = await sb.from('proposals').select('*').eq('id', id).single();
+    if (data) {
+      document.getElementById('lp-atualizada').textContent = lpDate(data.updated_at);
+      const idx = lpProps.findIndex(x => x.id === id);
+      if (idx > -1) lpProps[idx] = data;
+      lpRenderPropostas();
+    }
+  } finally {
+    lpBusy = false;
+    btn.disabled = false; btn.textContent = 'Salvar Rascunho';
+  }
+}
+
+async function lpCarregarVersoes(proposalId) {
+  const el = document.getElementById('lp-versoes-list');
+  const { data, error } = await sb.from('proposal_versions').select('*').eq('proposal_id', proposalId).order('version_number', { ascending: false });
+  if (error) { el.textContent = 'Erro ao carregar versões'; console.error(error); return; }
+  lpVersoes = data || [];
+  if (!lpVersoes.length) { el.innerHTML = 'Nenhuma versão consolidada ainda. Use "Salvar Nova Versão" para congelar um snapshot.'; return; }
+  el.innerHTML = lpVersoes.map(v =>
+    `<div style="padding:6px 0;border-bottom:1px solid var(--border)">
+      <b>Versão ${v.version_number}</b> — ${lpDate(v.created_at)}
+      · ${v.implementation_value != null ? numToMoney(v.implementation_value) : '—'} + ${v.recurring_value != null ? numToMoney(v.recurring_value) + '/mês' : '—'}
+      <button class="btn-ghost" style="padding:2px 8px;font-size:11px;margin-left:6px" onclick="lpVerVersao('${v.id}')">Ver</button>
+    </div>`).join('');
+}
+
+function lpVerVersao(versionId) {
+  const v = lpVersoes.find(x => x.id === versionId);
+  if (!v) return;
+  const snap = v.content_snapshot || {};
+  lpRenderPreview(snap, 'Versão ' + v.version_number + ' — imutável');
+}
+
+async function lpSalvarNovaVersao() {
+  if (!lpPodeEditar()) { showToast('Seu perfil não pode gerar versões', 'error'); return; }
+  if (lpBusy) return;
+  const id = document.getElementById('lp-proposal-id').value;
+  if (!id) return;
+  if (!confirm('Consolidar uma nova versão imutável com os dados atuais da proposta?')) return;
+  lpBusy = true;
+  const btn = document.getElementById('lp-nova-versao-btn');
+  btn.disabled = true; btn.textContent = 'Gerando...';
+  try {
+    // 1) persistir o rascunho atual em proposals
+    const dados = lpColetarModal();
+    const { error: e1 } = await sb.from('proposals').update({ ...dados, updated_at: new Date().toISOString() }).eq('id', id);
+    if (e1) { showToast('Erro ao salvar antes de versionar: ' + e1.message, 'error'); console.error(e1); return; }
+
+    // 2) proximo version_number
+    const { data: ult, error: e2 } = await sb.from('proposal_versions')
+      .select('version_number').eq('proposal_id', id).order('version_number', { ascending: false }).limit(1);
+    if (e2) { showToast('Erro ao ler versões: ' + e2.message, 'error'); console.error(e2); return; }
+    const prox = (ult?.[0]?.version_number || 0) + 1;
+
+    const prodNome = LP_PRODUTOS[dados.product_code]?.nome || dados.product_code;
+    const snapshot = {
+      proposal_id: id,
+      version_number: prox,
+      client_name: dados.client_name,
+      product_code: dados.product_code,
+      product_name: prodNome,
+      implementation_value: dados.implementation_value,
+      recurring_value: dados.recurring_value,
+      delivery_term: dados.delivery_term,
+      payment_method: dados.payment_method,
+      payment_link: dados.payment_link,
+      valid_until: dados.valid_until,
+      commercial_notes: dados.commercial_notes,
+      scope: dados.scope,
+      negotiation_context: dados.negotiation_context,
+      lead: lpCurrentLead ? { id: lpCurrentLead.id, razao_social: lpCurrentLead.razao_social, segmento: lpCurrentLead.segmento } : null,
+      generated_at: new Date().toISOString(),
+    };
+
+    const { data: nova, error: e3 } = await sb.from('proposal_versions').insert({
+      proposal_id: id,
+      version_number: prox,
+      implementation_value: dados.implementation_value,
+      recurring_value: dados.recurring_value,
+      scope: dados.scope,
+      conditions: {
+        delivery_term: dados.delivery_term, payment_method: dados.payment_method,
+        payment_link: dados.payment_link, valid_until: dados.valid_until, commercial_notes: dados.commercial_notes,
+      },
+      content_snapshot: snapshot,
+      created_by: currentUser?.id || null,
+    }).select().single();
+    if (e3) { showToast('Erro ao criar versão: ' + e3.message, 'error'); console.error(e3); return; }
+
+    await logAudit('criar_versao_proposta', 'proposal_versions', nova.id, 'v' + prox + ' proposta ' + id);
+    showToast('Versão ' + prox + ' consolidada', 'success');
+    await lpCarregarVersoes(id);
+    const { data: pAtual } = await sb.from('proposals').select('*').eq('id', id).single();
+    if (pAtual) { const idx = lpProps.findIndex(x => x.id === id); if (idx > -1) lpProps[idx] = pAtual; lpRenderPropostas(); }
+  } finally {
+    lpBusy = false;
+    btn.disabled = false; btn.innerHTML = '<i class="ti ti-git-branch"></i> Salvar Nova Versão';
+  }
+}
+
+async function lpCarregarAnalise(proposalId) {
+  const box = document.getElementById('lp-analise-box');
+  const { data, error } = await sb.from('digital_analyses').select('*').eq('proposal_id', proposalId)
+    .order('created_at', { ascending: false }).limit(1);
+  if (error) { console.error(error); return; }
+  if (!data || !data.length) { box.innerHTML = 'Nenhuma análise executada para esta proposta.'; return; }
+  const a = data[0];
+  box.innerHTML = `<div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+    <b>Análise mais recente</b> — status: ${a.analysis_status} · ${lpDate(a.created_at)}
+    ${a.recommendations ? '<div style="margin-top:6px;white-space:pre-wrap">' + JSON.stringify(a.recommendations, null, 2) + '</div>' : ''}
+  </div>`;
+}
+
+function lpExecutarAnalise() {
+  // BLOCO 02: sem IA, sem pesquisa, sem dados falsos. Apenas o ponto de integração.
+  const box = document.getElementById('lp-analise-box');
+  box.innerHTML = '<div style="background:var(--bg);border-radius:8px;padding:10px 12px;color:var(--muted)">' +
+    'Análise automática de presença digital será executada nesta etapa. ' +
+    'A integração com o agente de análise entra em bloco posterior.</div>';
+}
+
+function lpPreview() {
+  const dados = lpColetarModal();
+  const p = lpProps.find(x => x.id === document.getElementById('lp-proposal-id').value) || {};
+  const prodNome = LP_PRODUTOS[dados.product_code]?.nome || dados.product_code;
+  lpRenderPreview({
+    ...dados, product_name: prodNome, proposal_number: p.proposal_number, status: p.status,
+    lead: lpCurrentLead ? { razao_social: lpCurrentLead.razao_social, segmento: lpCurrentLead.segmento } : null,
+  }, 'Rascunho atual — ainda não consolidado');
+}
+
+function lpRenderPreview(d, legenda) {
+  const nc = d.negotiation_context || {};
+  const sc = d.scope || {};
+  const money = v => (v != null && v !== '') ? numToMoney(v) : '—';
+  document.getElementById('lp-preview-body').innerHTML = `
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:18px;font-weight:800;color:var(--neon-light)">Desiberne IA</div>
+      <div style="font-size:11px;color:var(--muted)">Tire sua empresa do modo de hibernação digital.</div>
+    </div>
+    ${legenda ? `<div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:14px">${legenda}</div>` : ''}
+    <div style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div><b>Proposta:</b> ${d.proposal_number || '—'}</div>
+      <div><b>Cliente:</b> ${d.client_name || (d.lead && d.lead.razao_social) || '—'}</div>
+      <div><b>Produto:</b> ${d.product_name || '—'}</div>
+      <div><b>Status:</b> ${LP_STATUS_LABEL[d.status] || d.status || '—'}</div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-weight:700;margin-bottom:4px">Contexto</div>
+      <div>Interesse: ${nc.interesse || '—'}</div>
+      <div>Necessidades: ${nc.necessidades || '—'}</div>
+      <div>Observações: ${nc.observacoes || '—'}</div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-weight:700;margin-bottom:4px">Solução / Escopo</div>
+      <div>${sc.descricao || '—'}</div>
+      ${sc.entregaveis ? `<div style="margin-top:4px"><b>Entregáveis:</b><br>${sc.entregaveis.replace(/\n/g, '<br>')}</div>` : ''}
+      ${sc.limites ? `<div style="margin-top:4px"><b>Fora do escopo:</b><br>${sc.limites.replace(/\n/g, '<br>')}</div>` : ''}
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-weight:700;margin-bottom:4px">Investimento</div>
+      <div>Implementação: ${money(d.implementation_value)}</div>
+      <div>Recorrência mensal: ${money(d.recurring_value)}</div>
+      <div>Prazo de entrega: ${d.delivery_term || '—'}</div>
+      <div>Forma de pagamento: ${d.payment_method || '—'}</div>
+      <div>Validade: ${d.valid_until ? lpDate(d.valid_until) : '—'}</div>
+      ${d.commercial_notes ? `<div style="margin-top:4px">${d.commercial_notes}</div>` : ''}
+    </div>
+    <div>
+      <div style="font-weight:700;margin-bottom:4px">Próximos passos</div>
+      <div style="color:var(--muted)">Revisão da proposta com o cliente. Aprovação e pagamento serão tratados nas próximas etapas.</div>
+    </div>`;
+  openModal('leadPropostaPreviewModal');
 }
 
 checkSession();
