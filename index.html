@@ -1185,6 +1185,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
     <div class="section-divider">10. Pagamento</div>
     <div id="lp-pagamento-box" style="font-size:12px;color:var(--muted)">—</div>
 
+    <div class="section-divider">11. Onboarding</div>
+    <div id="lp-onboarding-box" style="font-size:12px;color:var(--muted)">—</div>
+
     <div class="modal-footer" style="flex-wrap:wrap;gap:8px">
       <button class="btn-ghost" onclick="closeModal('leadPropostaModal')">Voltar</button>
       <button class="btn-ghost" id="lp-preview-btn" onclick="lpPreview()"><i class="ti ti-eye"></i> Visualizar Proposta</button>
@@ -1204,6 +1207,87 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
     <div id="lp-preview-body" style="font-size:13px;line-height:1.6"></div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal('leadPropostaPreviewModal')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING MODAL (BLOCO 08) -->
+<div class="modal-overlay" id="onboardingModal" onclick="closeModalOutside(event,'onboardingModal')">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-header">
+      <div class="modal-title" id="ob-title">Onboarding</div>
+      <button class="modal-close" onclick="closeModal('onboardingModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <input type="hidden" id="ob-id">
+    <div id="ob-header" style="background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px"></div>
+
+    <details open><summary style="cursor:pointer;font-weight:700;padding:8px 0">1. Empresa</summary>
+      <div class="form-row"><div class="form-group"><label class="form-label">Razão social</label><input class="form-input ob-f" id="ob-razao_social"></div>
+      <div class="form-group"><label class="form-label">Nome comercial *</label><input class="form-input ob-f" id="ob-nome_comercial"></div></div>
+      <div class="form-group"><label class="form-label">Segmento *</label><input class="form-input ob-f" id="ob-segmento"></div>
+      <div class="form-group"><label class="form-label">Descrição do negócio *</label><textarea class="form-input ob-f" id="ob-descricao" rows="2" style="resize:vertical"></textarea></div>
+    </details>
+
+    <details><summary style="cursor:pointer;font-weight:700;padding:8px 0">2. Contato</summary>
+      <div class="form-row"><div class="form-group"><label class="form-label">Responsável *</label><input class="form-input ob-f" id="ob-responsavel"></div>
+      <div class="form-group"><label class="form-label">Telefone / WhatsApp *</label><input class="form-input ob-f" id="ob-telefone"></div></div>
+      <div class="form-group"><label class="form-label">E-mail</label><input class="form-input ob-f" id="ob-email"></div>
+    </details>
+
+    <details><summary style="cursor:pointer;font-weight:700;padding:8px 0">3. Presença digital</summary>
+      <div class="form-row"><div class="form-group"><label class="form-label">Instagram</label><input class="form-input ob-f" id="ob-instagram"></div>
+      <div class="form-group"><label class="form-label">Facebook</label><input class="form-input ob-f" id="ob-facebook"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Google / Maps</label><input class="form-input ob-f" id="ob-google_maps"></div>
+      <div class="form-group"><label class="form-label">Site atual</label><input class="form-input ob-f" id="ob-site_atual"></div></div>
+      <div class="form-group"><label class="form-label">Outros links</label><textarea class="form-input ob-f" id="ob-outros_links" rows="2" style="resize:vertical"></textarea></div>
+    </details>
+
+    <details><summary style="cursor:pointer;font-weight:700;padding:8px 0">4. Projeto</summary>
+      <div class="form-group"><label class="form-label">Objetivo principal do site *</label><textarea class="form-input ob-f" id="ob-objetivo" rows="2" style="resize:vertical"></textarea></div>
+      <div class="form-group"><label class="form-label">Serviços / produtos principais *</label><textarea class="form-input ob-f" id="ob-servicos" rows="2" style="resize:vertical"></textarea></div>
+      <div class="form-group"><label class="form-label">Público-alvo *</label><textarea class="form-input ob-f" id="ob-publico_alvo" rows="2" style="resize:vertical"></textarea></div>
+      <div class="form-group"><label class="form-label">Diferenciais</label><textarea class="form-input ob-f" id="ob-diferenciais" rows="2" style="resize:vertical"></textarea></div>
+      <div class="form-group"><label class="form-label">Regiões atendidas</label><input class="form-input ob-f" id="ob-regioes"></div>
+    </details>
+
+    <details><summary style="cursor:pointer;font-weight:700;padding:8px 0">5. Marca</summary>
+      <div class="form-group"><label class="form-label">Logo (link ou descrição)</label><input class="form-input ob-f" id="ob-logo"></div>
+      <div class="form-group"><label class="form-label">Cores da marca</label><input class="form-input ob-f" id="ob-cores"></div>
+      <div class="form-group"><label class="form-label">Referências visuais</label><textarea class="form-input ob-f" id="ob-ref_visuais" rows="2" style="resize:vertical"></textarea></div>
+      <div class="form-group"><label class="form-label">Estilo desejado</label><input class="form-input ob-f" id="ob-estilo"></div>
+    </details>
+
+    <details><summary style="cursor:pointer;font-weight:700;padding:8px 0">6. Conteúdo</summary>
+      <div class="form-group"><label class="form-label">Descrição da empresa (para o site)</label><textarea class="form-input ob-f" id="ob-c_descricao" rows="2" style="resize:vertical"></textarea></div>
+      <div class="form-group"><label class="form-label">Serviços (para o site)</label><textarea class="form-input ob-f" id="ob-c_servicos" rows="2" style="resize:vertical"></textarea></div>
+      <div class="form-group"><label class="form-label">Diferenciais (para o site)</label><textarea class="form-input ob-f" id="ob-c_diferenciais" rows="2" style="resize:vertical"></textarea></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Endereço</label><input class="form-input ob-f" id="ob-endereco"></div>
+      <div class="form-group"><label class="form-label">Horário de funcionamento</label><input class="form-input ob-f" id="ob-horario"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">CTA principal *</label><input class="form-input ob-f" id="ob-cta" placeholder="Ex: Agende pelo WhatsApp"></div>
+      <div class="form-group"><label class="form-label">WhatsApp comercial</label><input class="form-input ob-f" id="ob-whatsapp_comercial"></div></div>
+    </details>
+
+    <details><summary style="cursor:pointer;font-weight:700;padding:8px 0">7. Domínio</summary>
+      <div class="form-row"><div class="form-group"><label class="form-label">Possui domínio?</label>
+        <select class="form-select ob-f" id="ob-d_possui"><option value="">—</option><option value="sim">Sim</option><option value="nao">Não</option></select></div>
+      <div class="form-group"><label class="form-label">Domínio</label><input class="form-input ob-f" id="ob-d_dominio"></div></div>
+      <div class="form-row"><div class="form-group"><label class="form-label">Provedor atual</label><input class="form-input ob-f" id="ob-d_provedor"></div>
+      <div class="form-group"><label class="form-label">Situação</label><input class="form-input ob-f" id="ob-d_situacao"></div></div>
+    </details>
+
+    <details><summary style="cursor:pointer;font-weight:700;padding:8px 0">8. Referências</summary>
+      <div class="form-group"><label class="form-label">Sites que gosta</label><textarea class="form-input ob-f" id="ob-r_gosta" rows="2" style="resize:vertical"></textarea></div>
+      <div class="form-group"><label class="form-label">Sites que não gosta</label><textarea class="form-input ob-f" id="ob-r_nao_gosta" rows="2" style="resize:vertical"></textarea></div>
+      <div class="form-group"><label class="form-label">Observações</label><textarea class="form-input ob-f" id="ob-r_obs" rows="2" style="resize:vertical"></textarea></div>
+    </details>
+
+    <div id="ob-faltando" style="color:var(--warning);font-size:12px;margin:10px 0"></div>
+
+    <div class="modal-footer" style="flex-wrap:wrap;gap:8px">
+      <button class="btn-ghost" onclick="closeModal('onboardingModal')">Fechar</button>
+      <button class="btn-ghost" id="ob-reabrir-btn" style="display:none" onclick="obReabrir()"><i class="ti ti-lock-open"></i> Reabrir</button>
+      <button class="btn-ghost" id="ob-concluir-btn" onclick="obConcluir()"><i class="ti ti-check"></i> Concluir onboarding</button>
+      <button class="btn-primary" id="ob-salvar-btn" onclick="obSalvar()">Salvar</button>
     </div>
   </div>
 </div>
@@ -5458,8 +5542,18 @@ async function lpCarregarPropostas(leadId) {
   const { data, error } = await sb.from('proposals').select('*').eq('lead_id', leadId).order('created_at', { ascending: false });
   if (error) { el.innerHTML = '<div style="color:var(--danger);font-size:12px">Erro ao carregar propostas: ' + error.message + '</div>'; console.error(error); return; }
   lpProps = data || [];
+  // onboardings das propostas pagas (BLOCO 08 §14) — mapa proposal_id -> status
+  lpOnboardings = {};
+  const pagas = lpProps.filter(p => p.status === 'paid').map(p => p.id);
+  if (pagas.length) {
+    try {
+      const { data: obs } = await sb.from('onboardings').select('proposal_id,status').in('proposal_id', pagas);
+      (obs || []).forEach(o => { lpOnboardings[o.proposal_id] = o.status; });
+    } catch (e) { /* segue sem badge */ }
+  }
   lpRenderPropostas();
 }
+let lpOnboardings = {};
 
 function lpRenderPropostas() {
   const el = document.getElementById('lead-propostas-list');
@@ -5476,6 +5570,7 @@ function lpRenderPropostas() {
       <div style="min-width:0">
         <div style="font-weight:700;font-size:13px">${p.proposal_number} · ${prod}</div>
         <div style="font-size:11px;color:var(--muted)">${impl} + ${rec} · ${LP_STATUS_LABEL[p.status] || p.status} · criada ${lpDate(p.created_at)} · atualizada ${lpDate(p.updated_at)}</div>
+        ${p.status === 'paid' ? `<div style="font-size:11px;margin-top:2px">Onboarding: ${p.id in lpOnboardings ? (OB_STATUS_LABEL[lpOnboardings[p.id]] || lpOnboardings[p.id]) : '⚪ não iniciado'}</div>` : ''}
       </div>
       <button class="btn-ghost" style="flex-shrink:0" onclick="lpAbrirProposta('${p.id}')">Abrir</button>
     </div>`;
@@ -5890,10 +5985,221 @@ async function lpConfirmarPagamento() {
       const stEl = document.getElementById('lp-status');
       if (stEl) stEl.textContent = LP_STATUS_LABEL[pAtual.status] || pAtual.status;
       await lpRenderPagamento(pAtual);
+      await lpRenderOnboarding(pAtual);
     }
   } finally {
     lpBusy = false;
   }
+}
+
+// ---- Onboarding pós-pagamento (BLOCO 08) --------------------------------
+const OB_STATUS_LABEL = { pending: '🟡 Pendente', in_progress: '🔵 Em andamento', completed: '🟢 Concluído', cancelled: 'Cancelado' };
+const OB_SECOES = ['empresa', 'contato', 'presenca', 'projeto', 'marca', 'conteudo', 'dominio', 'referencias'];
+// campos mínimos para concluir (id do input : rótulo)
+const OB_MINIMOS = [
+  ['ob-nome_comercial', 'Nome comercial'],
+  ['ob-segmento', 'Segmento'],
+  ['ob-descricao', 'Descrição do negócio'],
+  ['ob-responsavel', 'Responsável'],
+  ['ob-telefone', 'Telefone / WhatsApp'],
+  ['ob-objetivo', 'Objetivo do site'],
+  ['ob-servicos', 'Serviços / produtos'],
+  ['ob-publico_alvo', 'Público-alvo'],
+  ['ob-cta', 'CTA principal'],
+];
+let obAtual = null;
+
+function obVal(id) { const e = document.getElementById(id); return e ? (e.value || '').trim() : ''; }
+function obSet(id, v) { const e = document.getElementById(id); if (e) e.value = v == null ? '' : v; }
+
+function obPrefill(p) {
+  const lead = lpCurrentLead || {};
+  const cc = p.commercial_content || {};
+  const sc = p.scope || {};
+  return {
+    empresa: { razao_social: lead.razao_social || p.client_name || '', nome_comercial: p.client_name || lead.razao_social || '', segmento: lead.segmento || lead.vertical || '', descricao: cc.contexto || sc.descricao || lead.observacoes || '' },
+    contato: { responsavel: lead.gestor || '', telefone: lead.celular || '', email: lead.email || '' },
+    presenca: { instagram: '', facebook: '', google_maps: '', site_atual: '', outros_links: '' },
+    projeto: { objetivo: cc.oportunidade || '', servicos: sc.entregaveis || '', publico_alvo: '', diferenciais: '', regioes: lead.cidade || '' },
+    marca: { logo: '', cores: '', ref_visuais: '', estilo: '' },
+    conteudo: { c_descricao: cc.solucao || sc.descricao || '', c_servicos: sc.entregaveis || '', c_diferenciais: '', endereco: [lead.logradouro, lead.bairro, lead.cidade].filter(Boolean).join(', '), horario: '', cta: '', whatsapp_comercial: lead.celular || '' },
+    dominio: { d_possui: '', d_dominio: '', d_provedor: '', d_situacao: '' },
+    referencias: { r_gosta: '', r_nao_gosta: '', r_obs: '' },
+  };
+}
+
+function obColetar() {
+  return {
+    empresa: { razao_social: obVal('ob-razao_social'), nome_comercial: obVal('ob-nome_comercial'), segmento: obVal('ob-segmento'), descricao: obVal('ob-descricao') },
+    contato: { responsavel: obVal('ob-responsavel'), telefone: obVal('ob-telefone'), email: obVal('ob-email') },
+    presenca: { instagram: obVal('ob-instagram'), facebook: obVal('ob-facebook'), google_maps: obVal('ob-google_maps'), site_atual: obVal('ob-site_atual'), outros_links: obVal('ob-outros_links') },
+    projeto: { objetivo: obVal('ob-objetivo'), servicos: obVal('ob-servicos'), publico_alvo: obVal('ob-publico_alvo'), diferenciais: obVal('ob-diferenciais'), regioes: obVal('ob-regioes') },
+    marca: { logo: obVal('ob-logo'), cores: obVal('ob-cores'), ref_visuais: obVal('ob-ref_visuais'), estilo: obVal('ob-estilo') },
+    conteudo: { c_descricao: obVal('ob-c_descricao'), c_servicos: obVal('ob-c_servicos'), c_diferenciais: obVal('ob-c_diferenciais'), endereco: obVal('ob-endereco'), horario: obVal('ob-horario'), cta: obVal('ob-cta'), whatsapp_comercial: obVal('ob-whatsapp_comercial') },
+    dominio: { d_possui: obVal('ob-d_possui'), d_dominio: obVal('ob-d_dominio'), d_provedor: obVal('ob-d_provedor'), d_situacao: obVal('ob-d_situacao') },
+    referencias: { r_gosta: obVal('ob-r_gosta'), r_nao_gosta: obVal('ob-r_nao_gosta'), r_obs: obVal('ob-r_obs') },
+  };
+}
+
+function obPreencherForm(data) {
+  const d = data || {};
+  const g = (s, k) => (d[s] && d[s][k]) || '';
+  obSet('ob-razao_social', g('empresa', 'razao_social')); obSet('ob-nome_comercial', g('empresa', 'nome_comercial'));
+  obSet('ob-segmento', g('empresa', 'segmento')); obSet('ob-descricao', g('empresa', 'descricao'));
+  obSet('ob-responsavel', g('contato', 'responsavel')); obSet('ob-telefone', g('contato', 'telefone')); obSet('ob-email', g('contato', 'email'));
+  obSet('ob-instagram', g('presenca', 'instagram')); obSet('ob-facebook', g('presenca', 'facebook'));
+  obSet('ob-google_maps', g('presenca', 'google_maps')); obSet('ob-site_atual', g('presenca', 'site_atual')); obSet('ob-outros_links', g('presenca', 'outros_links'));
+  obSet('ob-objetivo', g('projeto', 'objetivo')); obSet('ob-servicos', g('projeto', 'servicos')); obSet('ob-publico_alvo', g('projeto', 'publico_alvo'));
+  obSet('ob-diferenciais', g('projeto', 'diferenciais')); obSet('ob-regioes', g('projeto', 'regioes'));
+  obSet('ob-logo', g('marca', 'logo')); obSet('ob-cores', g('marca', 'cores')); obSet('ob-ref_visuais', g('marca', 'ref_visuais')); obSet('ob-estilo', g('marca', 'estilo'));
+  obSet('ob-c_descricao', g('conteudo', 'c_descricao')); obSet('ob-c_servicos', g('conteudo', 'c_servicos')); obSet('ob-c_diferenciais', g('conteudo', 'c_diferenciais'));
+  obSet('ob-endereco', g('conteudo', 'endereco')); obSet('ob-horario', g('conteudo', 'horario')); obSet('ob-cta', g('conteudo', 'cta')); obSet('ob-whatsapp_comercial', g('conteudo', 'whatsapp_comercial'));
+  obSet('ob-d_possui', g('dominio', 'd_possui')); obSet('ob-d_dominio', g('dominio', 'd_dominio')); obSet('ob-d_provedor', g('dominio', 'd_provedor')); obSet('ob-d_situacao', g('dominio', 'd_situacao'));
+  obSet('ob-r_gosta', g('referencias', 'r_gosta')); obSet('ob-r_nao_gosta', g('referencias', 'r_nao_gosta')); obSet('ob-r_obs', g('referencias', 'r_obs'));
+}
+
+function obProgresso(data) {
+  const d = data || {};
+  let n = 0;
+  OB_SECOES.forEach(s => { if (d[s] && Object.values(d[s]).some(v => String(v || '').trim())) n++; });
+  return n;
+}
+function obFaltando() {
+  return OB_MINIMOS.filter(([id]) => !obVal(id)).map(([, lbl]) => lbl);
+}
+
+async function lpRenderOnboarding(p) {
+  const box = document.getElementById('lp-onboarding-box');
+  if (!box) return;
+  if (p.status !== 'paid') { box.innerHTML = 'Disponível depois que a proposta for paga.'; return; }
+  const podeAgir = lpPodeEditar();
+  let ob = null;
+  try {
+    const { data } = await sb.from('onboardings').select('*').eq('proposal_id', p.id).limit(1);
+    ob = data && data[0];
+  } catch (e) { box.innerHTML = 'Erro ao carregar onboarding.'; return; }
+
+  if (!ob) {
+    box.innerHTML = podeAgir
+      ? `<button class="btn-primary" id="ob-iniciar-btn" onclick="obCriar('${p.id}')"><i class="ti ti-clipboard-list"></i> Iniciar Onboarding</button>`
+      : 'Onboarding ainda não iniciado.';
+    return;
+  }
+  const prog = obProgresso(ob.data);
+  box.innerHTML = `
+    <div><b>Status:</b> ${OB_STATUS_LABEL[ob.status] || ob.status} · ${prog} de 8 seções preenchidas</div>
+    ${ob.status === 'completed' ? '<div style="color:var(--success);margin-top:4px"><i class="ti ti-circle-check"></i> Pronto para execução.</div>' : ''}
+    <div style="margin-top:8px"><button class="btn-ghost" onclick="obAbrir('${ob.id}')">
+      ${ob.status === 'completed' ? '<i class="ti ti-eye"></i> Ver onboarding' : (podeAgir ? '<i class="ti ti-edit"></i> Continuar onboarding' : '<i class="ti ti-eye"></i> Ver onboarding')}
+    </button></div>`;
+}
+
+async function obCriar(proposalId) {
+  if (!lpPodeEditar()) { showToast('Sem permissão', 'error'); return; }
+  const p = lpProps.find(x => x.id === proposalId);
+  if (!p || p.status !== 'paid') { showToast('Onboarding só para proposta paga', 'error'); return; }
+  // idempotente: se já existe, só abre
+  try {
+    const { data: ex } = await sb.from('onboardings').select('id').eq('proposal_id', proposalId).limit(1);
+    if (ex && ex[0]) { obAbrir(ex[0].id); return; }
+  } catch (e) {}
+  const { data: novo, error } = await sb.from('onboardings').insert({
+    proposal_id: proposalId,
+    lead_id: lpCurrentLead?.id || p.lead_id || null,
+    client_name: p.client_name || lpCurrentLead?.razao_social || null,
+    status: 'pending',
+    created_by: currentUser?.id || null,
+    data: obPrefill(p),
+  }).select().single();
+  if (error) {
+    if (error.code === '23505') { const { data: ex } = await sb.from('onboardings').select('id').eq('proposal_id', proposalId).limit(1); if (ex && ex[0]) { obAbrir(ex[0].id); return; } }
+    showToast('Erro ao criar onboarding: ' + error.message, 'error'); return;
+  }
+  await logAudit('ONBOARDING_CRIADO', 'onboardings', novo.id, 'proposta ' + proposalId);
+  showToast('Onboarding criado', 'success');
+  await lpRenderOnboarding(p);
+  obAbrir(novo.id);
+}
+
+async function obAbrir(id) {
+  const { data, error } = await sb.from('onboardings').select('*').eq('id', id).single();
+  if (error) { showToast('Erro ao abrir onboarding', 'error'); return; }
+  obAtual = data;
+  document.getElementById('ob-id').value = data.id;
+  document.getElementById('ob-title').textContent = 'Onboarding — ' + (data.client_name || '');
+  obPreencherForm(data.data);
+  const editavel = lpPodeEditar() && data.status !== 'completed';
+  document.querySelectorAll('.ob-f').forEach(e => { e.disabled = !editavel; });
+  document.getElementById('ob-salvar-btn').style.display = editavel ? 'inline-flex' : 'none';
+  document.getElementById('ob-concluir-btn').style.display = editavel ? 'inline-flex' : 'none';
+  document.getElementById('ob-reabrir-btn').style.display = (data.status === 'completed' && lpPodeEditar()) ? 'inline-flex' : 'none';
+  document.getElementById('ob-header').innerHTML =
+    `<b>${OB_STATUS_LABEL[data.status] || data.status}</b> · criado ${lpDate(data.created_at)}`
+    + (data.started_at ? ` · iniciado ${lpDate(data.started_at)}` : '')
+    + (data.completed_at ? ` · concluído ${lpDate(data.completed_at)}` : '');
+  document.getElementById('ob-faltando').textContent = '';
+  openModal('onboardingModal');
+}
+
+async function obSalvar() {
+  if (!lpPodeEditar()) { showToast('Sem permissão', 'error'); return; }
+  const id = document.getElementById('ob-id').value;
+  if (!id || !obAtual) return;
+  if (obAtual.status === 'completed') { showToast('Onboarding concluído — use Reabrir para editar', 'error'); return; }
+  const data = obColetar();
+  const patch = { data, updated_at: new Date().toISOString() };
+  let virouAndamento = false;
+  if (obAtual.status === 'pending' && obProgresso(data) > 0) {
+    patch.status = 'in_progress';
+    patch.started_at = new Date().toISOString();
+    virouAndamento = true;
+  }
+  const { error } = await sb.from('onboardings').update(patch).eq('id', id);
+  if (error) { showToast('Erro ao salvar: ' + error.message, 'error'); return; }
+  Object.assign(obAtual, patch);
+  if (virouAndamento) await logAudit('ONBOARDING_INICIADO', 'onboardings', id, null);
+  document.getElementById('ob-header').innerHTML =
+    `<b>${OB_STATUS_LABEL[obAtual.status]}</b> · criado ${lpDate(obAtual.created_at)}`
+    + (obAtual.started_at ? ` · iniciado ${lpDate(obAtual.started_at)}` : '');
+  showToast('Onboarding salvo', 'success');
+  const p = lpProps.find(x => x.id === obAtual.proposal_id);
+  if (p) await lpRenderOnboarding(p);
+}
+
+async function obConcluir() {
+  if (!lpPodeEditar()) { showToast('Sem permissão', 'error'); return; }
+  const id = document.getElementById('ob-id').value;
+  if (!id || !obAtual) return;
+  const faltam = obFaltando();
+  if (faltam.length) {
+    document.getElementById('ob-faltando').textContent = 'Falta preencher: ' + faltam.join(', ');
+    showToast('Preencha os campos mínimos para concluir', 'error');
+    return;
+  }
+  // salva o estado atual antes de concluir
+  await obSalvar();
+  const agora = new Date().toISOString();
+  const { error } = await sb.from('onboardings').update({ status: 'completed', completed_at: agora, updated_at: agora }).eq('id', id);
+  if (error) { showToast('Erro ao concluir: ' + error.message, 'error'); return; }
+  obAtual.status = 'completed'; obAtual.completed_at = agora;
+  await logAudit('ONBOARDING_CONCLUIDO', 'onboardings', id, null);
+  showToast('Onboarding concluído — pronto para execução', 'success');
+  obAbrir(id);
+  const p = lpProps.find(x => x.id === obAtual.proposal_id);
+  if (p) await lpRenderOnboarding(p);
+}
+
+async function obReabrir() {
+  if (!lpPodeEditar()) { showToast('Sem permissão', 'error'); return; }
+  const id = document.getElementById('ob-id').value;
+  if (!id || !obAtual || obAtual.status !== 'completed') return;
+  if (!confirm('Reabrir o onboarding para edição?')) return;
+  const { error } = await sb.from('onboardings').update({ status: 'in_progress', completed_at: null, updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) { showToast('Erro ao reabrir: ' + error.message, 'error'); return; }
+  await logAudit('ONBOARDING_REABERTO', 'onboardings', id, null);
+  obAbrir(id);
+  const p = lpProps.find(x => x.id === obAtual.proposal_id);
+  if (p) await lpRenderOnboarding(p);
 }
 
 async function lpSalvarNovaVersao() {
