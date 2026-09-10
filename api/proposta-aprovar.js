@@ -47,7 +47,7 @@ export default async function handler(req, res) {
   try {
     // 1) proposta pelo public_token — só o que precisamos
     const pResp = await fetch(
-      `${supabaseUrl}/rest/v1/proposals?select=id,proposal_number,status,valid_until,approved_at,approved_version_number&public_token=eq.${token}&limit=1`,
+      `${supabaseUrl}/rest/v1/proposals?select=id,proposal_number,status,valid_until,approved_at,approved_version_number,payment_link&public_token=eq.${token}&limit=1`,
       { headers: h },
     )
     if (!pResp.ok) { noStore(res, 502, { state: 'error' }); return }
@@ -63,6 +63,10 @@ export default async function handler(req, res) {
           proposal_number: p.proposal_number || null,
           version: p.approved_version_number ?? null,
           approved_at: p.approved_at || null,
+        },
+        payment: {
+          state: p.status === 'paid' ? 'paid' : 'pending',
+          link: (p.status === 'approved' && p.payment_link) ? p.payment_link : null,
         },
       })
       return
@@ -156,6 +160,7 @@ export default async function handler(req, res) {
         version: versao,
         approved_at: approvedAt,
       },
+      payment: { state: 'pending', link: p.payment_link || null },
     })
   } catch (err) {
     noStore(res, 500, { state: 'error' })

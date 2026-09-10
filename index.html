@@ -1182,6 +1182,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
     <div class="section-divider">9. Link público</div>
     <div id="lp-publico-box" style="font-size:12px;color:var(--muted)">—</div>
 
+    <div class="section-divider">10. Pagamento</div>
+    <div id="lp-pagamento-box" style="font-size:12px;color:var(--muted)">—</div>
+
     <div class="modal-footer" style="flex-wrap:wrap;gap:8px">
       <button class="btn-ghost" onclick="closeModal('leadPropostaModal')">Voltar</button>
       <button class="btn-ghost" id="lp-preview-btn" onclick="lpPreview()"><i class="ti ti-eye"></i> Visualizar Proposta</button>
@@ -5569,18 +5572,23 @@ async function lpAbrirProposta(id, preloaded) {
    'lp-f-usar-negociacao','lp-f-impl','lp-f-rec','lp-f-prazo','lp-f-forma-pgto','lp-f-link-pgto',
    'lp-f-validade','lp-f-cond-obs','lp-f-escopo-desc','lp-f-escopo-entregaveis','lp-f-escopo-limites','lp-f-escopo-obs']
     .forEach(fid => { const e = document.getElementById(fid); if (e) e.disabled = !editavel; });
+  // aprovada (não paga): só o link de pagamento continua editável, pra você colar/ajustar
+  const linkPgtoEditavel = lpPodeEditar() && p.status === 'approved';
+  const elLink = document.getElementById('lp-f-link-pgto');
+  if (elLink && linkPgtoEditavel) elLink.disabled = false;
   document.getElementById('lp-salvar-btn').style.display = editavel ? 'inline-flex' : 'none';
   document.getElementById('lp-nova-versao-btn').style.display = editavel ? 'inline-flex' : 'none';
   document.getElementById('lp-analise-btn').style.display = editavel ? 'inline-flex' : 'none';
   if (travadaAprovada) {
     const vb = document.getElementById('lp-versoes-list');
-    if (vb) vb.insertAdjacentHTML('afterbegin', '<div style="color:var(--warning);margin-bottom:6px"><i class="ti ti-lock"></i> Proposta aprovada pelo cliente — edição e novas versões bloqueadas.</div>');
+    if (vb) vb.insertAdjacentHTML('afterbegin', '<div style="color:var(--warning);margin-bottom:6px"><i class="ti ti-lock"></i> Proposta ' + (p.status === 'paid' ? 'paga' : 'aprovada pelo cliente') + ' — edição e novas versões bloqueadas.</div>');
   }
 
   document.getElementById('lp-analise-box').innerHTML = '';
   await lpCarregarAnalise(p.id);
   await lpCarregarVersoes(p.id);
   await lpRenderPublico(p);
+  await lpRenderPagamento(p);
   openModal('leadPropostaModal');
 }
 
@@ -5779,6 +5787,112 @@ async function lpPublicarProposta() {
   } finally {
     lpBusy = false;
     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-world"></i> Gerar link público'; }
+  }
+}
+
+// ---- Pagamento (BLOCO 07 — fase manual) --------------------------------
+async function lpRenderPagamento(p) {
+  const box = document.getElementById('lp-pagamento-box');
+  if (!box) return;
+  const podeAgir = lpPodeEditar();
+
+  if (p.status === 'paid') {
+    let pg = null;
+    try {
+      const { data } = await sb.from('payments').select('amount,paid_at,payment_method,proposal_version_number')
+        .eq('proposal_id', p.id).eq('status', 'paid').order('paid_at', { ascending: false }).limit(1);
+      pg = data && data[0];
+    } catch (e) { /* segue sem detalhe */ }
+    box.innerHTML = `<div style="color:var(--success)"><i class="ti ti-cash"></i> <b>Pago</b>`
+      + (pg ? ` — ${numToMoney(pg.amount)} em ${lpDate(pg.paid_at)}` + (pg.proposal_version_number != null ? ` · versão ${pg.proposal_version_number}` : '') : '')
+      + `</div><div style="color:var(--muted);margin-top:4px">Proposta encerrada. Onboarding é o próximo passo (bloco futuro).</div>`;
+    return;
+  }
+
+  if (p.status !== 'approved') {
+    box.innerHTML = 'Disponível depois que o cliente aprovar a proposta.';
+    return;
+  }
+
+  const linkAtual = p.payment_link || '';
+  box.innerHTML = `
+    <div>Cole aqui o link de pagamento (Asaas / Mercado Pago / Nubank etc.). O cliente vê "Pagar agora" na página pública assim que aprovar.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+      <input id="lp-f-pagto-link" class="form-input" style="flex:1;min-width:220px" placeholder="https://..." value="${linkAtual.replace(/"/g, '&quot;')}" ${podeAgir ? '' : 'disabled'}>
+      ${podeAgir ? `<button class="btn-ghost" onclick="lpSalvarLinkPagamento()">Salvar link</button>` : ''}
+    </div>
+    ${podeAgir ? `<div style="margin-top:10px"><button class="btn-primary" onclick="lpConfirmarPagamento()"><i class="ti ti-check"></i> Confirmar pagamento recebido</button>
+      <div style="color:var(--muted);margin-top:4px">Use quando o valor cair na sua conta. Isso marca a proposta como <b>paga</b> e trava tudo.</div></div>` : ''}`;
+}
+
+async function lpSalvarLinkPagamento() {
+  if (!lpPodeEditar()) { showToast('Sem permissão', 'error'); return; }
+  const id = document.getElementById('lp-proposal-id').value;
+  const p = lpProps.find(x => x.id === id);
+  if (!id || !p || p.status !== 'approved') { showToast('Só é possível com a proposta aprovada', 'error'); return; }
+  const link = (document.getElementById('lp-f-pagto-link').value || '').trim() || null;
+  const { error } = await sb.from('proposals').update({ payment_link: link, updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) { showToast('Erro: ' + error.message, 'error'); return; }
+  p.payment_link = link;
+  const elLink = document.getElementById('lp-f-link-pgto'); if (elLink) elLink.value = link || '';
+  await logAudit('PROPOSTA_LINK_PAGAMENTO', 'proposals', id, link ? 'link definido' : 'link removido');
+  showToast('Link de pagamento salvo', 'success');
+}
+
+async function lpConfirmarPagamento() {
+  if (!lpPodeEditar()) { showToast('Sem permissão', 'error'); return; }
+  if (lpBusy) return;
+  const id = document.getElementById('lp-proposal-id').value;
+  const p = lpProps.find(x => x.id === id);
+  if (!id || !p) return;
+  if (p.status === 'paid') { showToast('Proposta já está paga', 'error'); return; }
+  if (p.status !== 'approved') { showToast('Só é possível confirmar pagamento de proposta aprovada', 'error'); return; }
+  const versao = p.approved_version_number;
+  // valor SEMPRE do banco: implementation_value da versão aprovada
+  const { data: vRows, error: eV } = await sb.from('proposal_versions')
+    .select('implementation_value').eq('proposal_id', id).eq('version_number', versao).limit(1);
+  if (eV) { showToast('Erro ao ler a versão aprovada', 'error'); return; }
+  const valor = vRows && vRows[0] ? vRows[0].implementation_value : null;
+  if (valor == null) { showToast('Versão aprovada sem valor de implementação — não dá pra registrar pagamento', 'error'); return; }
+  if (!confirm(`Confirmar recebimento de ${numToMoney(valor)} (versão ${versao})? Isso marca a proposta como PAGA e trava tudo.`)) return;
+
+  lpBusy = true;
+  try {
+    // 1) registra o pagamento (unique parcial garante 1 pago por proposta)
+    const { data: pay, error: eP } = await sb.from('payments').insert({
+      proposal_id: id,
+      lead_id: lpCurrentLead?.id || p.lead_id || null,
+      provider: 'manual',
+      amount: valor,
+      payment_method: 'link manual',
+      status: 'paid',
+      paid_at: new Date().toISOString(),
+      confirmed_by: currentUser?.id || null,
+      proposal_version_number: versao,
+    }).select().single();
+    if (eP) {
+      showToast(eP.code === '23505' ? 'Já existe um pagamento pago para esta proposta' : 'Erro ao registrar pagamento: ' + eP.message, 'error');
+      return;
+    }
+    // 2) proposta -> paid (só se ainda estiver approved)
+    const { data: upd, error: eU } = await sb.from('proposals')
+      .update({ status: 'paid', updated_at: new Date().toISOString() })
+      .eq('id', id).eq('status', 'approved').select();
+    if (eU) { showToast('Pagamento registrado, mas falhou ao mudar status: ' + eU.message, 'error'); return; }
+    await logAudit('PAGAMENTO_APROVADO', 'proposals', id, `confirmação manual · ${numToMoney(valor)} · versão ${versao} · payment ${pay.id}`);
+    showToast('Pagamento confirmado — proposta marcada como paga', 'success');
+
+    const { data: pAtual } = await sb.from('proposals').select('*').eq('id', id).single();
+    if (pAtual) {
+      const idx = lpProps.findIndex(x => x.id === id);
+      if (idx > -1) lpProps[idx] = pAtual;
+      lpRenderPropostas();
+      const stEl = document.getElementById('lp-status');
+      if (stEl) stEl.textContent = LP_STATUS_LABEL[pAtual.status] || pAtual.status;
+      await lpRenderPagamento(pAtual);
+    }
+  } finally {
+    lpBusy = false;
   }
 }
 

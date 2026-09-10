@@ -236,10 +236,10 @@
         <p style="color:var(--gray)">Recebemos sua aprovação.</p>
         <p style="color:var(--muted)" id="ap-meta">—</p>
         <div style="margin-top:26px;padding-top:22px;border-top:1px solid var(--line)">
-          <div class="eyebrow" style="text-align:center">Próximo passo</div>
-          <h3 style="margin-top:6px">Pagamento</h3>
-          <p style="color:var(--muted)">O próximo passo é concluir o pagamento para iniciarmos o onboarding.</p>
-          <button class="btn" id="btn-pagamento" type="button" style="opacity:.6">Ir para pagamento</button>
+          <div class="eyebrow" style="text-align:center" id="pay-eyebrow">Próximo passo</div>
+          <h3 style="margin-top:6px" id="pay-title">Pagamento</h3>
+          <p style="color:var(--muted)" id="pay-desc">O próximo passo é concluir o pagamento para iniciarmos o onboarding.</p>
+          <a class="btn" id="btn-pagar" href="#" target="_blank" rel="noopener" style="display:none">Pagar agora</a>
           <div class="note" id="pay-note">Pagamento será disponibilizado em seguida pelo seu contato na Desiberne IA.</div>
         </div>
       </div>
@@ -371,13 +371,39 @@
     var moneyRec = inv.recurring_value != null
       ? brl(inv.recurring_value) + (PER[inv.recurring_period] || '/mês') : '—';
 
-    function mostrarAprovada(quando, versao) {
+    function renderPagamento(pay) {
+      pay = pay || {};
+      var btn = $('btn-pagar');
+      if (pay.state === 'paid') {
+        $('pay-eyebrow').textContent = 'Pagamento';
+        $('pay-title').textContent = '✓ Pagamento confirmado';
+        $('pay-desc').textContent = 'Recebemos o pagamento da sua proposta.';
+        btn.style.display = 'none';
+        $('pay-note').textContent = 'Seu contato na Desiberne IA dará sequência aos próximos passos.';
+      } else if (pay.link) {
+        $('pay-eyebrow').textContent = 'Próximo passo';
+        $('pay-title').textContent = 'Pagamento';
+        $('pay-desc').textContent = 'Conclua o pagamento para iniciarmos o projeto. Pix ou cartão na próxima tela.';
+        btn.href = pay.link;
+        btn.style.display = 'inline-block';
+        $('pay-note').textContent = '';
+      } else {
+        $('pay-eyebrow').textContent = 'Próximo passo';
+        $('pay-title').textContent = 'Pagamento';
+        $('pay-desc').textContent = 'O próximo passo é concluir o pagamento.';
+        btn.style.display = 'none';
+        $('pay-note').textContent = 'O link de pagamento será disponibilizado em instantes pelo seu contato na Desiberne IA.';
+      }
+    }
+
+    function mostrarAprovada(quando, versao, pay) {
       $('btn-aprovar').classList.add('hidden');
       $('confirm-box').classList.add('hidden');
       $('cta-note').textContent = '';
       $('sec-cta').querySelector('h2').classList.add('hidden');
       $('sec-cta').querySelectorAll('p')[0] && $('sec-cta').querySelectorAll('p')[0].classList.add('hidden');
       $('ap-meta').textContent = 'Aprovada em ' + dateBR(quando) + ' · versão ' + (versao != null ? versao : (pr.version || '—'));
+      renderPagamento(pay);
       $('approved-box').classList.remove('hidden');
     }
 
@@ -386,7 +412,7 @@
       $('btn-aprovar').classList.add('hidden');
       $('cta-note').textContent = 'Solicite uma nova proposta ao seu contato na Desiberne IA.';
     } else if (pr.approved) {
-      mostrarAprovada(pr.approved_at, pr.version);
+      mostrarAprovada(pr.approved_at, pr.version, data.payment);
     } else {
       // preenche o painel de confirmação
       $('cf-empresa').textContent = empresa;
@@ -423,7 +449,7 @@
             var b = res.body || {};
             if (b.state === 'approved' || b.state === 'already_approved') {
               var pp = b.proposal || {};
-              mostrarAprovada(pp.approved_at || new Date().toISOString(), pp.version);
+              mostrarAprovada(pp.approved_at || new Date().toISOString(), pp.version, b.payment);
               return;
             }
             enviando = false;
@@ -443,9 +469,6 @@
           });
       });
 
-      $('btn-pagamento').addEventListener('click', function () {
-        $('pay-note').textContent = 'Pagamento será disponibilizado em seguida pelo seu contato na Desiberne IA.';
-      });
     }
 
     show('doc');
