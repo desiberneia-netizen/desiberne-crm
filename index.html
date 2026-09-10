@@ -5580,7 +5580,7 @@ async function lpAbrirProposta(id, preloaded) {
   document.getElementById('lp-analise-box').innerHTML = '';
   await lpCarregarAnalise(p.id);
   await lpCarregarVersoes(p.id);
-  lpRenderPublico(p);
+  await lpRenderPublico(p);
   openModal('leadPropostaModal');
 }
 
@@ -5718,11 +5718,9 @@ function lpUrlPublica(token) {
   return location.origin + '/proposta.html?token=' + token;
 }
 
-function lpRenderPublico(p) {
+async function lpRenderPublico(p) {
   const box = document.getElementById('lp-publico-box');
   if (!box) return;
-  const temVersao = Array.isArray(lpVersoes) && lpVersoes.length > 0;
-  const editavel = lpPodeEditar();
   if (p.public_token) {
     const url = lpUrlPublica(p.public_token);
     box.innerHTML = `
@@ -5733,11 +5731,18 @@ function lpRenderPublico(p) {
       </div>`;
     return;
   }
-  if (!temVersao) {
+  // conta as versões direto no banco (não depende do estado de lpVersoes)
+  let nVersoes = Array.isArray(lpVersoes) ? lpVersoes.length : 0;
+  try {
+    const { count } = await sb.from('proposal_versions')
+      .select('id', { count: 'exact', head: true }).eq('proposal_id', p.id);
+    if (typeof count === 'number') nVersoes = count;
+  } catch (e) { /* usa lpVersoes como fallback */ }
+  if (nVersoes < 1) {
     box.innerHTML = 'Publique uma versão consolidada primeiro (botão "Salvar Nova Versão"). Rascunho não pode ser publicado.';
     return;
   }
-  if (!editavel) { box.innerHTML = 'Nenhum link público gerado ainda.'; return; }
+  if (!lpPodeEditar()) { box.innerHTML = 'Nenhum link público gerado ainda.'; return; }
   box.innerHTML = `<button class="btn-ghost" id="lp-publicar-btn" onclick="lpPublicarProposta()"><i class="ti ti-world"></i> Gerar link público</button>`;
 }
 
@@ -5768,7 +5773,7 @@ async function lpPublicarProposta() {
       lpRenderPropostas();
       const stEl = document.getElementById('lp-status');
       if (stEl) stEl.textContent = LP_STATUS_LABEL[pAtual.status] || pAtual.status;
-      lpRenderPublico(pAtual);
+      await lpRenderPublico(pAtual);
     }
     showToast('Link público gerado', 'success');
   } finally {
