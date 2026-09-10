@@ -5657,25 +5657,145 @@ async function lpSalvarNovaVersao() {
   }
 }
 
+// ---- Análise Digital V1 (BLOCO 03B) ---------------------------------------
+let lpAnalisePollTimer = null;
+const LP_ANALISE_ESTAGIOS = [
+  'Identificando empresa...',
+  'Consultando presença digital...',
+  'Analisando site...',
+  'Interpretando informações...',
+  'Concluindo análise...',
+];
+
+function lpAnaliseMsg(txt, cor) {
+  return `<div style="background:var(--bg);border-radius:8px;padding:10px 12px;color:${cor || 'var(--muted)'}">${txt}</div>`;
+}
+function lpAnaliseBtnTentar() {
+  return `<div style="margin-top:8px"><button class="btn-ghost" onclick="lpExecutarAnalise()"><i class="ti ti-refresh"></i> Tentar novamente</button></div>`;
+}
+
 async function lpCarregarAnalise(proposalId) {
   const box = document.getElementById('lp-analise-box');
   const { data, error } = await sb.from('digital_analyses').select('*').eq('proposal_id', proposalId)
     .order('created_at', { ascending: false }).limit(1);
-  if (error) { console.error(error); return; }
-  if (!data || !data.length) { box.innerHTML = 'Nenhuma análise executada para esta proposta.'; return; }
-  const a = data[0];
-  box.innerHTML = `<div style="background:var(--bg);border-radius:8px;padding:10px 12px">
-    <b>Análise mais recente</b> — status: ${a.analysis_status} · ${lpDate(a.created_at)}
-    ${a.recommendations ? '<div style="margin-top:6px;white-space:pre-wrap">' + JSON.stringify(a.recommendations, null, 2) + '</div>' : ''}
-  </div>`;
+  if (error) { console.error(error); box.innerHTML = ''; return; }
+  if (!data || !data.length) { box.innerHTML = lpAnaliseMsg('Nenhuma análise executada para esta proposta.'); return; }
+  lpRenderAnalise(data[0]);
 }
 
-function lpExecutarAnalise() {
-  // BLOCO 02: sem IA, sem pesquisa, sem dados falsos. Apenas o ponto de integração.
+function lpRenderAnalise(a) {
   const box = document.getElementById('lp-analise-box');
-  box.innerHTML = '<div style="background:var(--bg);border-radius:8px;padding:10px 12px;color:var(--muted)">' +
-    'Análise automática de presença digital será executada nesta etapa. ' +
-    'A integração com o agente de análise entra em bloco posterior.</div>';
+  if (a.analysis_status === 'running' || a.analysis_status === 'pending') {
+    box.innerHTML = lpAnaliseMsg(LP_ANALISE_ESTAGIOS[0]); return;
+  }
+  if (a.analysis_status === 'under_review') {
+    box.innerHTML = lpAnaliseMsg('Precisamos revisar a identificação da empresa antes de concluir a análise.', 'var(--warning)') + lpAnaliseBtnTentar();
+    return;
+  }
+  if (a.analysis_status === 'error') {
+    const m = (a.metadata && a.metadata.error && a.metadata.error.message) || 'A análise falhou.';
+    box.innerHTML = lpAnaliseMsg(m, 'var(--danger)') + lpAnaliseBtnTentar();
+    return;
+  }
+  if (a.analysis_status !== 'completed') { box.innerHTML = lpAnaliseMsg('Status: ' + a.analysis_status); return; }
+
+  const ci = (a.company_presence && a.company_presence.company_identity) || {};
+  const wp = a.website_presence || {};
+  const gp = a.google_presence || {};
+  const rep = a.reputation || {};
+  const ops = Array.isArray(a.opportunities) ? a.opportunities : [];
+  const srcs = Array.isArray(a.sources) ? a.sources : [];
+  const sec = (titulo, s) => (s && (s.summary || s.interpretation)) ? `
+    <div style="margin-bottom:10px">
+      <div style="font-weight:700;font-size:12px">${titulo}</div>
+      ${s.summary ? `<div>${s.summary}</div>` : ''}
+      ${s.interpretation ? `<div style="color:var(--muted)">${s.interpretation}</div>` : ''}
+    </div>` : '';
+
+  box.innerHTML = `
+    <div style="background:var(--bg);border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.55">
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+        <b>Análise de presença digital</b>
+        <span style="color:var(--muted)">${lpDate(a.created_at)} · confiança ${a.confidence_score != null ? a.confidence_score : '—'}/100</span>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-weight:700;font-size:12px">Empresa identificada</div>
+        <div>${ci.razao_social || '—'}${ci.cidade ? ' · ' + ci.cidade : ''} <span style="color:var(--muted)">(identidade: ${ci.id_confidence || '—'})</span></div>
+        ${ci.site_url ? `<div>Site: <a href="${ci.site_url}" target="_blank" rel="noopener">${ci.site_url}</a></div>` : '<div style="color:var(--muted)">Site oficial não localizado</div>'}
+      </div>
+      ${sec('Site', wp)}
+      ${sec('Google / busca', gp)}
+      ${sec('Reputação', rep)}
+      ${ops.length ? `<div style="font-weight:700;font-size:12px;margin-bottom:4px">Oportunidades</div>` + ops.map(o => `
+        <div style="border-left:2px solid var(--purple);padding-left:8px;margin-bottom:8px">
+          <div><b>Achado:</b> ${o.finding || '—'}</div>
+          <div><b>Impacto:</b> ${o.impact || '—'}</div>
+          <div><b>Oportunidade:</b> ${o.opportunity || '—'}</div>
+          <div style="color:var(--muted)">confiança ${o.confidence != null ? o.confidence : '—'}/100</div>
+        </div>`).join('') : '<div style="color:var(--muted)">Nenhuma oportunidade sustentada por evidência.</div>'}
+      ${a.recommendations ? `<div style="margin-top:6px"><b>Recomendação:</b> ${a.recommendations}</div>` : ''}
+      ${srcs.length ? `<div style="margin-top:10px"><div style="font-weight:700;font-size:12px">Fontes</div>` + srcs.map(s => `
+        <div style="color:var(--muted)">• <a href="${s.url}" target="_blank" rel="noopener">${s.domain || s.url}</a> — ${s.type} (${s.confidence})</div>`).join('') + '</div>' : ''}
+      <div style="margin-top:10px"><button class="btn-ghost" onclick="lpExecutarAnalise()"><i class="ti ti-refresh"></i> Nova análise</button></div>
+    </div>`;
+}
+
+async function lpExecutarAnalise() {
+  const proposalId = document.getElementById('lp-proposal-id').value;
+  if (!proposalId) return;
+  if (!lpPodeEditar()) { showToast('Seu perfil não pode executar análise', 'error'); return; }
+  const box = document.getElementById('lp-analise-box');
+  const btn = document.getElementById('lp-analise-btn');
+  clearInterval(lpAnalisePollTimer);
+  btn.disabled = true;
+  box.innerHTML = lpAnaliseMsg(LP_ANALISE_ESTAGIOS[0]);
+  try {
+    const { data: s } = await sb.auth.getSession();
+    const resp = await fetch('/api/analise-iniciar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${s.session.access_token}` },
+      body: JSON.stringify({ proposal_id: proposalId }),
+    });
+    let out = {};
+    try { out = await resp.json(); } catch (e) {}
+    if (resp.status === 401) { box.innerHTML = lpAnaliseMsg('Sessão expirada. Recarregue a página.', 'var(--danger)'); return; }
+    if (resp.status === 403) { box.innerHTML = lpAnaliseMsg('Seu perfil não tem permissão para executar análise.', 'var(--danger)'); return; }
+    if (!out.analysis_id) { box.innerHTML = lpAnaliseMsg((out && out.error) || 'Falha ao iniciar análise.', 'var(--danger)') + lpAnaliseBtnTentar(); return; }
+    lpPollAnalise(out.analysis_id, Date.now());
+  } catch (e) {
+    box.innerHTML = lpAnaliseMsg('Erro de rede ao iniciar análise.', 'var(--danger)') + lpAnaliseBtnTentar();
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function lpPollAnalise(analysisId, startedAt) {
+  const box = document.getElementById('lp-analise-box');
+  let tick = 0;
+  clearInterval(lpAnalisePollTimer);
+  const step = async () => {
+    if (Date.now() - startedAt > 120000) {
+      clearInterval(lpAnalisePollTimer);
+      box.innerHTML = lpAnaliseMsg('A análise está demorando mais que o esperado. Tente novamente em instantes.', 'var(--warning)') + lpAnaliseBtnTentar();
+      return;
+    }
+    try {
+      const { data: s } = await sb.auth.getSession();
+      const r = await fetch('/api/analise-status?analysis_id=' + encodeURIComponent(analysisId), {
+        headers: { Authorization: `Bearer ${s.session.access_token}` },
+      });
+      if (!r.ok) { box.innerHTML = lpAnaliseMsg(LP_ANALISE_ESTAGIOS[Math.min(tick++, LP_ANALISE_ESTAGIOS.length - 1)]); return; }
+      const a = await r.json();
+      if (a.analysis_status === 'pending' || a.analysis_status === 'running') {
+        box.innerHTML = lpAnaliseMsg(LP_ANALISE_ESTAGIOS[Math.min(tick++, LP_ANALISE_ESTAGIOS.length - 1)]);
+        return;
+      }
+      clearInterval(lpAnalisePollTimer);
+      lpRenderAnalise(a);
+    } catch (e) { /* transitório — segue tentando */ }
+  };
+  step();
+  lpAnalisePollTimer = setInterval(step, 5000);
 }
 
 function lpPreview() {
