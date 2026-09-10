@@ -5668,7 +5668,7 @@ async function lpAbrirProposta(id, preloaded) {
    'lp-f-validade','lp-f-cond-obs','lp-f-escopo-desc','lp-f-escopo-entregaveis','lp-f-escopo-limites','lp-f-escopo-obs']
     .forEach(fid => { const e = document.getElementById(fid); if (e) e.disabled = !editavel; });
   // aprovada (não paga): só o link de pagamento continua editável, pra você colar/ajustar
-  const linkPgtoEditavel = lpPodeEditar() && p.status === 'approved';
+  const linkPgtoEditavel = lpPodeEditar() && p.status !== 'paid';
   const elLink = document.getElementById('lp-f-link-pgto');
   if (elLink && linkPgtoEditavel) elLink.disabled = false;
   document.getElementById('lp-salvar-btn').style.display = editavel ? 'inline-flex' : 'none';
@@ -5904,19 +5904,16 @@ async function lpRenderPagamento(p) {
     return;
   }
 
-  if (p.status !== 'approved') {
-    box.innerHTML = 'Disponível depois que o cliente aprovar a proposta.';
-    return;
-  }
-
   const linkAtual = p.payment_link || '';
+  const aprovada = p.status === 'approved';
   box.innerHTML = `
-    <div>Cole aqui o link de pagamento (Asaas / Mercado Pago / Nubank etc.). O cliente vê "Pagar agora" na página pública assim que aprovar.</div>
+    <div>Cole o link de pagamento (Nubank / Asaas / Mercado Pago etc.). Pode deixar pronto já agora — o cliente vê o botão <b>"Pagar agora"</b> na página pública assim que aprovar a proposta.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
       <input id="lp-f-pagto-link" class="form-input" style="flex:1;min-width:220px" placeholder="https://..." value="${linkAtual.replace(/"/g, '&quot;')}" ${podeAgir ? '' : 'disabled'}>
       ${podeAgir ? `<button class="btn-ghost" onclick="lpSalvarLinkPagamento()">Salvar link</button>` : ''}
     </div>
-    ${podeAgir ? `<div style="margin-top:10px"><button class="btn-primary" onclick="lpConfirmarPagamento()"><i class="ti ti-check"></i> Confirmar pagamento recebido</button>
+    ${!aprovada ? `<div style="color:var(--muted);margin-top:6px">A proposta ainda não foi aprovada pelo cliente. "Confirmar pagamento" fica disponível após a aprovação.</div>` : ''}
+    ${aprovada && podeAgir ? `<div style="margin-top:10px"><button class="btn-primary" onclick="lpConfirmarPagamento()"><i class="ti ti-check"></i> Confirmar pagamento recebido</button>
       <div style="color:var(--muted);margin-top:4px">Use quando o valor cair na sua conta. Isso marca a proposta como <b>paga</b> e trava tudo.</div></div>` : ''}`;
 }
 
@@ -5924,7 +5921,8 @@ async function lpSalvarLinkPagamento() {
   if (!lpPodeEditar()) { showToast('Sem permissão', 'error'); return; }
   const id = document.getElementById('lp-proposal-id').value;
   const p = lpProps.find(x => x.id === id);
-  if (!id || !p || p.status !== 'approved') { showToast('Só é possível com a proposta aprovada', 'error'); return; }
+  if (!id || !p) return;
+  if (p.status === 'paid') { showToast('Proposta paga — link não pode mais mudar', 'error'); return; }
   const link = (document.getElementById('lp-f-pagto-link').value || '').trim() || null;
   const { error } = await sb.from('proposals').update({ payment_link: link, updated_at: new Date().toISOString() }).eq('id', id);
   if (error) { showToast('Erro: ' + error.message, 'error'); return; }
