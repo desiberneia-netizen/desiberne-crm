@@ -25,6 +25,10 @@ const CAMPOS = [
   'ai_model',
   'ai_prompt_version',
   'metadata',
+  'reviewed_by',
+  'reviewed_at',
+  'approved_at',
+  'review_notes',
   'created_at',
   'updated_at',
 ].join(',')

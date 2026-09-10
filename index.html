@@ -5683,22 +5683,38 @@ async function lpCarregarAnalise(proposalId) {
   lpRenderAnalise(data[0]);
 }
 
+const LP_REVISAO_LABEL = {
+  pending: 'Em análise', running: 'Em análise', completed: 'Aguardando revisão',
+  under_review: 'Exige revisão humana', approved: 'Aprovada', rejected: 'Rejeitada', error: 'Erro',
+};
+let lpAnaliseAtual = null;      // guarda a última análise renderizada (pra ação de revisão)
+const lpRevisorCache = {};      // auth_id -> nome/email
+
+async function lpResolverRevisor(authId) {
+  if (!authId) return null;
+  if (lpRevisorCache[authId] !== undefined) return lpRevisorCache[authId];
+  lpRevisorCache[authId] = null; // evita disparo duplo
+  try {
+    const { data } = await sb.from('usuarios').select('nome,email').eq('auth_id', authId).maybeSingle();
+    lpRevisorCache[authId] = data ? (data.nome || data.email) : null;
+  } catch { lpRevisorCache[authId] = null; }
+  return lpRevisorCache[authId];
+}
+
 function lpRenderAnalise(a) {
   const box = document.getElementById('lp-analise-box');
+  lpAnaliseAtual = a;
+
   if (a.analysis_status === 'running' || a.analysis_status === 'pending') {
     box.innerHTML = lpAnaliseMsg(LP_ANALISE_ESTAGIOS[0]); return;
-  }
-  if (a.analysis_status === 'under_review') {
-    box.innerHTML = lpAnaliseMsg('Precisamos revisar a identificação da empresa antes de concluir a análise.', 'var(--warning)') + lpAnaliseBtnTentar();
-    return;
   }
   if (a.analysis_status === 'error') {
     const m = (a.metadata && a.metadata.error && a.metadata.error.message) || 'A análise falhou.';
     box.innerHTML = lpAnaliseMsg(m, 'var(--danger)') + lpAnaliseBtnTentar();
     return;
   }
-  if (a.analysis_status !== 'completed') { box.innerHTML = lpAnaliseMsg('Status: ' + a.analysis_status); return; }
 
+  // completed | under_review | approved | rejected -> mostra o corpo + painel de revisão
   const ci = (a.company_presence && a.company_presence.company_identity) || {};
   const wp = a.website_presence || {};
   const gp = a.google_presence || {};
@@ -5711,6 +5727,40 @@ function lpRenderAnalise(a) {
       ${s.summary ? `<div>${s.summary}</div>` : ''}
       ${s.interpretation ? `<div style="color:var(--muted)">${s.interpretation}</div>` : ''}
     </div>` : '';
+
+  // dispara resolução do nome do revisor e re-renderiza quando chegar
+  const revisorResolvido = a.reviewed_by ? lpRevisorCache[a.reviewed_by] : null;
+  if (a.reviewed_by && lpRevisorCache[a.reviewed_by] === undefined) {
+    lpResolverRevisor(a.reviewed_by).then(() => { if (lpAnaliseAtual === a) lpRenderAnalise(a); });
+  }
+
+  const podeRevisar = lpPodeEditar();
+  const emRevisao = a.analysis_status === 'completed' || a.analysis_status === 'under_review';
+
+  let painelRevisao = `
+    <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+      <div style="font-weight:700;font-size:12px;margin-bottom:6px">Revisão da análise</div>
+      <div>Status: <b>${LP_REVISAO_LABEL[a.analysis_status] || a.analysis_status}</b></div>
+      <div style="color:var(--muted)">Análise: ${lpDate(a.created_at)} · confiança ${a.confidence_score != null ? a.confidence_score : '—'}/100</div>
+      ${a.reviewed_at ? `<div style="color:var(--muted)">Revisão: ${lpDate(a.reviewed_at)}${revisorResolvido ? ' · ' + revisorResolvido : ''}</div>` : ''}
+      ${a.review_notes ? `<div style="margin-top:4px"><b>Observação:</b> ${a.review_notes}</div>` : ''}`;
+
+  if (a.analysis_status === 'under_review') {
+    painelRevisao += `<div style="margin-top:6px;color:var(--warning)"><i class="ti ti-alert-triangle"></i> Esta análise exige revisão humana antes de ser usada (identificação da empresa não confirmada ou sinalizada pelo agente).</div>`;
+  }
+  if (a.analysis_status === 'approved') {
+    painelRevisao += `<div style="margin-top:6px;color:var(--success)"><i class="ti ti-circle-check"></i> <b>ANÁLISE APROVADA</b>${revisorResolvido ? ' por ' + revisorResolvido : ''}</div>`;
+  }
+  if (a.analysis_status === 'rejected') {
+    painelRevisao += `<div style="margin-top:6px;color:var(--danger)"><i class="ti ti-circle-x"></i> <b>ANÁLISE REJEITADA</b></div>`;
+  }
+  if (emRevisao && podeRevisar) {
+    painelRevisao += `<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-primary" onclick="lpRevisarAnalise('approve')"><i class="ti ti-check"></i> Aprovar Análise</button>
+      <button class="btn-ghost" onclick="lpRevisarAnalise('reject')"><i class="ti ti-x"></i> Rejeitar</button>
+    </div>`;
+  }
+  painelRevisao += `</div>`;
 
   box.innerHTML = `
     <div style="background:var(--bg);border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.55">
@@ -5736,8 +5786,43 @@ function lpRenderAnalise(a) {
       ${a.recommendations ? `<div style="margin-top:6px"><b>Recomendação:</b> ${a.recommendations}</div>` : ''}
       ${srcs.length ? `<div style="margin-top:10px"><div style="font-weight:700;font-size:12px">Fontes</div>` + srcs.map(s => `
         <div style="color:var(--muted)">• <a href="${s.url}" target="_blank" rel="noopener">${s.domain || s.url}</a> — ${s.type} (${s.confidence})</div>`).join('') + '</div>' : ''}
+      ${painelRevisao}
       <div style="margin-top:10px"><button class="btn-ghost" onclick="lpExecutarAnalise()"><i class="ti ti-refresh"></i> Nova análise</button></div>
     </div>`;
+}
+
+async function lpRevisarAnalise(action) {
+  const a = lpAnaliseAtual;
+  if (!a || !a.id) return;
+  if (!lpPodeEditar()) { showToast('Seu perfil não pode revisar análises', 'error'); return; }
+  let notes = '';
+  if (action === 'reject') {
+    notes = (window.prompt('Motivo da rejeição:') || '').trim();
+    if (!notes) return;
+  } else {
+    if (!confirm('Aprovar esta análise para uso comercial?')) return;
+  }
+  const box = document.getElementById('lp-analise-box');
+  box.style.opacity = '0.6';
+  try {
+    const { data: s } = await sb.auth.getSession();
+    const resp = await fetch('/api/analise-revisar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${s.session.access_token}` },
+      body: JSON.stringify({ analysis_id: a.id, action, review_notes: notes }),
+    });
+    let out = {};
+    try { out = await resp.json(); } catch (e) {}
+    if (resp.status === 403) { showToast('Seu perfil não tem permissão para revisar', 'error'); return; }
+    if (!resp.ok) { showToast(out.error || 'Falha ao registrar a revisão', 'error'); return; }
+    showToast(action === 'approve' ? 'Análise aprovada' : 'Análise rejeitada', 'success');
+    const proposalId = document.getElementById('lp-proposal-id').value;
+    await lpCarregarAnalise(proposalId);
+  } catch (e) {
+    showToast('Erro de rede ao registrar a revisão', 'error');
+  } finally {
+    box.style.opacity = '';
+  }
 }
 
 async function lpExecutarAnalise() {
