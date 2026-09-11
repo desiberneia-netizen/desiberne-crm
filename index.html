@@ -1320,6 +1320,23 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
   </div>
 </div>
 
+<!-- MATERIAL DE PROSPECÇÃO — PROMPT DA ARTE (BLOCO 13, só gera o texto do prompt) -->
+<div class="modal-overlay" id="materialProspeccaoModal" onclick="closeModalOutside(event,'materialProspeccaoModal')">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <div class="modal-title">Prompt da Arte</div>
+      <button class="modal-close" onclick="closeModal('materialProspeccaoModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="mp-body">
+      <div class="loading">Gerando prompt personalizado...</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('materialProspeccaoModal')">Fechar</button>
+      <button class="btn-primary" id="mp-copiar-btn" style="display:none" onclick="copiarPromptArte()"><i class="ti ti-copy"></i> Copiar Prompt</button>
+    </div>
+  </div>
+</div>
+
 <!-- ONBOARDING MODAL (BLOCO 08) -->
 <div class="modal-overlay" id="onboardingModal" onclick="closeModalOutside(event,'onboardingModal')">
   <div class="modal" style="max-width:720px">
@@ -6617,6 +6634,12 @@ function lpRenderAnalise(a) {
   }
   if (a.analysis_status === 'approved') {
     painelRevisao += `<div style="margin-top:6px;color:var(--success)"><i class="ti ti-circle-check"></i> <b>ANÁLISE APROVADA</b>${revisorResolvido ? ' por ' + revisorResolvido : ''}</div>`;
+    if (lpPodeEditar()) {
+      painelRevisao += `<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
+        <div style="font-weight:700;font-size:12px;margin-bottom:6px">Material de Prospecção</div>
+        <button class="btn-primary" onclick="gerarPromptArte('${a.lead_id}')"><i class="ti ti-sparkles"></i> Gerar Prompt da Arte</button>
+      </div>`;
+    }
   }
   if (a.analysis_status === 'rejected') {
     painelRevisao += `<div style="margin-top:6px;color:var(--danger)"><i class="ti ti-circle-x"></i> <b>ANÁLISE REJEITADA</b></div>`;
@@ -6689,6 +6712,50 @@ async function lpRevisarAnalise(action) {
     showToast('Erro de rede ao registrar a revisão', 'error');
   } finally {
     box.style.opacity = '';
+  }
+}
+
+// ---- Material de Prospecção — só gera o PROMPT (texto), imagem é gerada fora do CRM ----
+let mpPromptAtual = '';
+
+async function gerarPromptArte(leadId) {
+  if (!leadId) { showToast('Lead não identificado', 'error'); return; }
+  if (!lpPodeEditar()) { showToast('Seu perfil não pode gerar material comercial', 'error'); return; }
+  mpPromptAtual = '';
+  document.getElementById('mp-copiar-btn').style.display = 'none';
+  document.getElementById('mp-body').innerHTML = '<div class="loading">Gerando prompt personalizado...</div>';
+  openModal('materialProspeccaoModal');
+  try {
+    const { data: s } = await sb.auth.getSession();
+    const resp = await fetch('/api/prospeccao-material', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${s.session.access_token}` },
+      body: JSON.stringify({ lead_id: leadId }),
+    });
+    const out = await resp.json().catch(() => ({}));
+    if (!resp.ok) {
+      document.getElementById('mp-body').innerHTML = `<div style="color:var(--danger);padding:12px 0">${out.error || 'Falha ao gerar o material.'}</div>`;
+      return;
+    }
+    mpPromptAtual = out.prompt || '';
+    document.getElementById('mp-body').innerHTML = `
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Copie o texto abaixo e cole no ChatGPT pra gerar a imagem.</div>
+      <textarea class="form-input" id="mp-prompt-text" readonly style="width:100%;min-height:320px;font-family:inherit;font-size:12px;line-height:1.5;resize:vertical">${mpPromptAtual.replace(/</g, '&lt;')}</textarea>`;
+    document.getElementById('mp-copiar-btn').style.display = 'inline-flex';
+  } catch (e) {
+    document.getElementById('mp-body').innerHTML = '<div style="color:var(--danger);padding:12px 0">Erro de rede ao gerar o material.</div>';
+  }
+}
+
+function copiarPromptArte() {
+  if (!mpPromptAtual) return;
+  const ta = document.getElementById('mp-prompt-text');
+  if (ta) { ta.select(); }
+  const copiar = () => showToast('Prompt copiado.', 'success');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(mpPromptAtual).then(copiar).catch(() => { try { document.execCommand('copy'); copiar(); } catch (e) { showToast('Não consegui copiar automaticamente — selecione e copie manualmente.', 'error'); } });
+  } else {
+    try { document.execCommand('copy'); copiar(); } catch (e) { showToast('Não consegui copiar automaticamente — selecione e copie manualmente.', 'error'); }
   }
 }
 
