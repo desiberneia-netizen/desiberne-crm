@@ -7016,6 +7016,31 @@ const IMP_CAMPOS = [
 
 let impWorkbook = null, impHeaders = [], impRows = [], impCandidatos = [];
 
+// Muitas planilhas de prospecção têm 1-2 linhas de título/legenda ANTES do cabeçalho de
+// verdade (ex: "Tabela-resumo das 50 empresas..."). Acha a linha real de cabeçalho em vez
+// de assumir sempre a linha 1 — senão o título vira "coluna" e os dados saem errados.
+function impDetectarHeaderRow(json) {
+  const limite = Math.min(10, json.length);
+  let melhorIdx = 0, melhorQtd = -1;
+  for (let i = 0; i < limite; i++) {
+    const qtd = (json[i] || []).filter(c => (c || '').toString().trim()).length;
+    if (qtd > melhorQtd) { melhorQtd = qtd; melhorIdx = i; }
+  }
+  return melhorQtd >= 3 ? melhorIdx : 0;
+}
+
+// Pontua uma aba pelo FORMATO real dos dados (linhas x colunas populadas), não pelo nome
+// da aba nem pela contagem bruta de linhas — uma aba narrativa (2 colunas, texto corrido)
+// não pode vencer uma aba tabular só por ter mais linhas.
+function impAnalisarAba(ws) {
+  const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+  if (!json.length) return { headerRowIdx: 0, headerCols: 0, dataRows: [], score: 0 };
+  const headerRowIdx = impDetectarHeaderRow(json);
+  const dataRows = json.slice(headerRowIdx + 1).filter(r => r.some(c => (c || '').toString().trim()));
+  const headerCols = (json[headerRowIdx] || []).filter(c => (c || '').toString().trim()).length;
+  return { headerRowIdx, headerCols, dataRows, score: headerCols * dataRows.length };
+}
+
 function impArquivoSelecionado(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -7024,21 +7049,14 @@ function impArquivoSelecionado(e) {
     try {
       const data = new Uint8Array(ev.target.result);
       impWorkbook = XLSX.read(data, { type: 'array' });
-      // Escolhe a aba padrão pela quantidade REAL de linhas com dado (não pelo range bruto,
-      // que infla com formatação/merge e pode empurrar pra aba errada tipo "Resumo").
-      // Em empate/dúvida, prioriza uma aba cujo nome sugira ser a base completa.
-      let melhor = impWorkbook.SheetNames[0], maxLinhas = -1;
+      let melhor = impWorkbook.SheetNames[0], melhorScore = -1;
       const sel = document.getElementById('imp-sheet-select');
-      const contagens = impWorkbook.SheetNames.map(n => {
-        const ws = impWorkbook.Sheets[n];
-        const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-        const linhas = json.slice(1).filter(r => r.some(c => (c || '').toString().trim())).length;
-        return { n, linhas };
+      const analise = impWorkbook.SheetNames.map(n => {
+        const info = impAnalisarAba(impWorkbook.Sheets[n]);
+        return { n, ...info };
       });
-      contagens.forEach(({ n, linhas }) => { if (linhas > maxLinhas) { maxLinhas = linhas; melhor = n; } });
-      const nomeCompleto = contagens.find(({ n }) => /complet|full|base|todos/i.test(n) && !/resumo|top\s?\d|resum/i.test(n));
-      if (nomeCompleto && nomeCompleto.linhas > 0) melhor = nomeCompleto.n;
-      sel.innerHTML = contagens.map(({ n, linhas }) => `<option value="${n}">${n} (${linhas} linhas)</option>`).join('');
+      analise.forEach(({ n, score, dataRows }) => { if (score > melhorScore) { melhorScore = score; melhor = n; } });
+      sel.innerHTML = analise.map(({ n, dataRows }) => `<option value="${n}">${n} (${dataRows.length} linhas)</option>`).join('');
       sel.value = melhor;
       document.getElementById('imp-sheet-wrap').style.display = 'block';
       impTrocarAba();
@@ -7052,9 +7070,10 @@ function impTrocarAba() {
   const ws = impWorkbook.Sheets[nome];
   const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
   if (!json.length) { showToast('Aba vazia', 'error'); return; }
-  impHeaders = json[0].map(h => (h || '').toString().trim());
-  impRows = json.slice(1).filter(r => r.some(c => (c || '').toString().trim()));
-  document.getElementById('imp-sheet-info').textContent = impRows.length + ' linhas de dados encontradas nesta aba.';
+  const headerRowIdx = impDetectarHeaderRow(json);
+  impHeaders = (json[headerRowIdx] || []).map(h => (h || '').toString().trim());
+  impRows = json.slice(headerRowIdx + 1).filter(r => r.some(c => (c || '').toString().trim()));
+  document.getElementById('imp-sheet-info').textContent = impRows.length + ' linhas de dados encontradas nesta aba' + (headerRowIdx > 0 ? ` (cabeçalho identificado na linha ${headerRowIdx + 1})` : '') + '.';
   impMontarMapeamento();
 }
 
