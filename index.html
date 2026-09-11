@@ -2676,8 +2676,10 @@ async function deleteLead() {
 }
 
 async function deleteLeadById(id) {
+  // Atividades vinculadas ao lead não têm cascade — apaga primeiro pra não travar o delete.
+  await sb.from('atividades').delete().eq('lead_id', id);
   const {error}=await sb.from('leads').delete().eq('id',id);
-  if(error){showToast('Erro ao excluir','error');return;}
+  if(error){showToast('Erro ao excluir: '+error.message,'error');return;}
   showToast('Lead excluído','success');loadLeads();
 }
 
