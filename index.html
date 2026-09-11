@@ -2266,8 +2266,9 @@ async function loadLeads() {
 }
 
 function renderAll() {
-  const emAtendimento = allLeads.filter(l => !l.em_carteira);
-  const carteira = allLeads.filter(l => l.em_carteira);
+  const ativos = allLeads.filter(l => !l.arquivado);
+  const emAtendimento = ativos.filter(l => !l.em_carteira);
+  const carteira = ativos.filter(l => l.em_carteira);
   renderKanban(emAtendimento);
   renderClientes(emAtendimento);
   renderCarteira(carteira);
@@ -2680,11 +2681,20 @@ async function saveLead() {
 
 async function deleteLead() {
   const id=document.getElementById('edit-id').value;
-  if(!id||!confirm('Excluir este lead?'))return;
+  if(!id)return;
   await deleteLeadById(id);closeModal('leadModal');
 }
 
 async function deleteLeadById(id) {
+  const { count } = await sb.from('proposals').select('id', { count: 'exact', head: true }).eq('lead_id', id);
+  if (count && count > 0) {
+    if (!confirm('Este lead tem proposta comercial gerada — o histórico de propostas não pode ser apagado (auditoria).\n\nVou ARQUIVAR o lead em vez de excluir: ele some das listas, mas fica preservado. Continuar?')) return;
+    const { error } = await sb.from('leads').update({ arquivado: true }).eq('id', id);
+    if (error) { showToast('Erro ao arquivar: ' + error.message, 'error'); return; }
+    showToast('Lead arquivado', 'success'); loadLeads();
+    return;
+  }
+  if (!confirm('Excluir este lead? Essa ação não pode ser desfeita.')) return;
   // Atividades vinculadas ao lead não têm cascade — apaga primeiro pra não travar o delete.
   await sb.from('atividades').delete().eq('lead_id', id);
   const {error}=await sb.from('leads').delete().eq('id',id);
