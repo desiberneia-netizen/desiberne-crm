@@ -631,9 +631,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
       <!-- CLIENTES -->
       <div id="view-clientes" class="view">
-        <div class="page-header"><div><div class="page-title">Clientes</div><div class="page-sub">Base completa de leads</div></div>
+        <div class="page-header"><div><div class="page-title">Clientes</div><div class="page-sub">Leads em atendimento ativo</div></div>
           <div style="display:flex;gap:8px">
-            <button class="add-btn" style="background:none;border:1px solid var(--border);color:var(--text)" onclick="abrirImportModal()"><i class="ti ti-file-spreadsheet"></i> Importar Leads</button>
             <button class="add-btn" onclick="openLeadModal()"><i class="ti ti-plus"></i> Novo Lead</button>
           </div>
         </div>
@@ -643,11 +642,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
         </div>
       </div>
 
-      <!-- CARTEIRA (BLOCO 10) -->
+      <!-- CARTEIRA (BLOCO 10/11) -->
       <div id="view-carteira" class="view">
-        <div class="page-header"><div><div class="page-title">Carteira de Clientes</div><div class="page-sub">Prospecção importada — ainda sem atendimento ativo</div></div></div>
+        <div class="page-header"><div><div class="page-title">Carteira de Clientes</div><div class="page-sub">Prospecção importada — ainda sem atendimento ativo</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="add-btn" style="background:none;border:1px solid var(--border);color:var(--text)" onclick="abrirImportModal()"><i class="ti ti-file-spreadsheet"></i> Importar Leads</button>
+          </div>
+        </div>
         <div class="table-wrap">
-          <div class="table-head" style="grid-template-columns:2fr 1.5fr 1fr 1.5fr 40px"><span>EMPRESA</span><span>CONTATO</span><span>SEGMENTO</span><span>OBSERVAÇÃO</span><span></span></div>
+          <div class="table-head" style="grid-template-columns:1.8fr 1.3fr 1fr .7fr .9fr 1.1fr .8fr 40px"><span>EMPRESA</span><span>CIDADE/BAIRRO</span><span>SEGMENTO</span><span>SITE</span><span>INSTAGRAM</span><span>DECISOR</span><span>PRIORIDADE</span><span></span></div>
           <div id="carteira-list"><div class="loading">Carregando...</div></div>
         </div>
       </div>
@@ -1062,6 +1065,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
     </div>
     <div class="modal-footer">
       <button class="btn-danger" id="delete-btn" style="display:none;margin-right:auto" onclick="deleteLead()"><i class="ti ti-trash"></i> Excluir</button>
+      <button class="btn-ghost" id="lead-proposta-btn" style="display:none" onclick="abrirPropostaDoLead()"><i class="ti ti-file-description"></i> Gerar Proposta</button>
       <button class="btn-ghost" onclick="closeModal('leadModal')">Cancelar</button>
       <button class="btn-primary" id="save-lead-btn" onclick="saveLead()">Salvar Lead</button>
     </div>
@@ -2256,7 +2260,7 @@ function renderAll() {
   const emAtendimento = allLeads.filter(l => !l.em_carteira);
   const carteira = allLeads.filter(l => l.em_carteira);
   renderKanban(emAtendimento);
-  renderClientes(allLeads);
+  renderClientes(emAtendimento);
   renderCarteira(carteira);
   renderDashboard(emAtendimento);
   renderEquipe(emAtendimento);
@@ -2440,7 +2444,7 @@ function renderClientes(leads) {
   if (!leads.length) { el.innerHTML = '<div class="loading">Nenhum lead cadastrado</div>'; return; }
   el.innerHTML = leads.map(l => `
     <div class="table-row" style="grid-template-columns:2fr 1.5fr 1fr 1fr 1fr 40px;cursor:pointer" onclick="openClienteDetalhe('${l.id}')">
-      <div style="font-weight:600">${l.razao_social||'—'}${l.em_carteira ? ' <span style="font-size:9px;font-weight:700;color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:1px 7px;margin-left:4px">CARTEIRA</span>' : ''}</div>
+      <div style="font-weight:600">${l.razao_social||'—'}</div>
       <div style="color:var(--muted);font-size:11px">${l.gestor||''} ${l.celular?'· '+l.celular:''}</div>
       <div><span class="tag-temp ${l.temperatura==='Frio'?'badge-cold':l.temperatura==='Morno'?'badge-warm':l.temperatura==='Quente'?'badge-hot':'badge-done'}">${l.temperatura||''}</span></div>
       <div style="font-size:11px;color:var(--muted)">${l.status||''}</div>
@@ -2571,6 +2575,7 @@ function openLeadModal() {
   document.getElementById('lead-modal-title').textContent='Novo Lead';
   document.getElementById('edit-id').value='';
   document.getElementById('delete-btn').style.display='none';
+  document.getElementById('lead-proposta-btn').style.display='none';
   ['razao','cnpj','gestor','celular','email','cep','cidade','logradouro','bairro','valor','obs'].forEach(f=>{const el=document.getElementById('f-'+f);if(el)el.value='';});
   document.getElementById('f-segmento').value='Clínica / Saúde';
   document.getElementById('f-temperatura').value='Frio';
@@ -2587,6 +2592,7 @@ function editLead(id) {
   document.getElementById('lead-modal-title').textContent='Editar Lead';
   document.getElementById('edit-id').value=l.id;
   document.getElementById('delete-btn').style.display='block';
+  document.getElementById('lead-proposta-btn').style.display='inline-flex';
   ['razao','cnpj','gestor','celular','email','cep','cidade','logradouro','bairro','valor'].forEach(f=>{
     const el=document.getElementById('f-'+f);
     const key={razao:'razao_social',cnpj:'cnpj',gestor:'gestor',celular:'celular',email:'email',cep:'cep',cidade:'cidade',logradouro:'logradouro',bairro:'bairro',valor:'valor'}[f];
@@ -2601,6 +2607,13 @@ function editLead(id) {
   if(document.getElementById('f-retorno-hora'))document.getElementById('f-retorno-hora').value=l.retorno_hora||'';
   if(document.getElementById('f-retorno-lembrete'))document.getElementById('f-retorno-lembrete').checked=!!l.retorno_lembrete;
   document.getElementById('leadModal').classList.add('open');
+}
+
+function abrirPropostaDoLead() {
+  const id = document.getElementById('edit-id').value;
+  if (!id) return;
+  closeModal('leadModal');
+  openClienteDetalhe(id);
 }
 
 async function saveLead() {
@@ -6725,13 +6738,17 @@ function renderCarteira(leads) {
   if (badge) badge.textContent = leads.length;
   const el = document.getElementById('carteira-list');
   if (!el) return;
-  if (!leads.length) { el.innerHTML = '<div class="loading">Nenhum lead na carteira. Importe uma planilha em Clientes → Importar Leads.</div>'; return; }
+  if (!leads.length) { el.innerHTML = '<div class="loading">Nenhum lead na carteira. Importe uma planilha em "Importar Leads".</div>'; return; }
+  const corPrioridade = { Alta: 'var(--hot)', Média: 'var(--warning)', Baixa: 'var(--muted)' };
   el.innerHTML = leads.map(l => `
-    <div class="table-row" style="grid-template-columns:2fr 1.5fr 1fr 1.5fr 40px">
-      <div style="font-weight:600;cursor:pointer" onclick="editLead('${l.id}')">${l.razao_social || '—'}</div>
-      <div style="color:var(--muted);font-size:11px">${l.gestor || ''} ${l.celular ? '· ' + l.celular : ''}</div>
+    <div class="table-row" style="grid-template-columns:1.8fr 1.3fr 1fr .7fr .9fr 1.1fr .8fr 40px">
+      <div style="font-weight:600;cursor:pointer" onclick="editLead('${l.id}')" title="${(l.observacoes || '').replace(/"/g, '&quot;')}">${l.razao_social || '—'}</div>
+      <div style="color:var(--muted);font-size:11px">${[l.cidade, l.bairro].filter(Boolean).join(' / ') || '—'}</div>
       <div style="font-size:11px"><span class="lead-tag">${l.segmento || '—'}</span></div>
-      <div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(l.observacoes || '').replace(/"/g, '&quot;')}">${(l.observacoes || '').slice(0, 90)}</div>
+      <div style="font-size:11px">${l.site_url ? `<a href="${l.site_url.startsWith('http') ? l.site_url : 'https://' + l.site_url}" target="_blank" onclick="event.stopPropagation()" style="color:var(--success)">Sim</a>` : '<span style="color:var(--muted)">Não</span>'}</div>
+      <div style="font-size:11px">${l.instagram ? `<a href="${l.instagram.startsWith('http') ? l.instagram : 'https://instagram.com/' + l.instagram.replace(/^@/, '')}" target="_blank" onclick="event.stopPropagation()" style="color:var(--purple-light)">${l.instagram}</a>` : '<span style="color:var(--muted)">—</span>'}</div>
+      <div style="color:var(--muted);font-size:11px">${l.gestor || '—'}</div>
+      <div style="font-size:11px;font-weight:700;color:${corPrioridade[l.prioridade] || 'var(--muted)'}">${l.prioridade || '—'}</div>
       <div><button class="add-btn" style="font-size:10px;padding:5px 10px" onclick="assumirLead('${l.id}')" title="Assumir atendimento — vai pro Pipeline"><i class="ti ti-arrow-right"></i></button></div>
     </div>`).join('');
 }
@@ -6810,6 +6827,9 @@ const IMP_CAMPOS = [
   { key: 'cidade', label: 'Cidade' },
   { key: 'bairro', label: 'Bairro' },
   { key: 'logradouro', label: 'Endereço' },
+  { key: 'site_url', label: 'Site' },
+  { key: 'instagram', label: 'Instagram' },
+  { key: 'prioridade', label: 'Prioridade (Alta/Média/Baixa)' },
   { key: 'observacoes', label: 'Observações (concatena várias colunas)' },
   { key: 'ignorar', label: 'Ignorar esta coluna' },
 ];
@@ -6824,14 +6844,21 @@ function impArquivoSelecionado(e) {
     try {
       const data = new Uint8Array(ev.target.result);
       impWorkbook = XLSX.read(data, { type: 'array' });
-      let melhor = impWorkbook.SheetNames[0], maxRows = -1;
+      // Escolhe a aba padrão pela quantidade REAL de linhas com dado (não pelo range bruto,
+      // que infla com formatação/merge e pode empurrar pra aba errada tipo "Resumo").
+      // Em empate/dúvida, prioriza uma aba cujo nome sugira ser a base completa.
+      let melhor = impWorkbook.SheetNames[0], maxLinhas = -1;
       const sel = document.getElementById('imp-sheet-select');
-      sel.innerHTML = impWorkbook.SheetNames.map(n => {
+      const contagens = impWorkbook.SheetNames.map(n => {
         const ws = impWorkbook.Sheets[n];
-        const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
-        if (range.e.r > maxRows) { maxRows = range.e.r; melhor = n; }
-        return `<option value="${n}">${n} (${range.e.r} linhas)</option>`;
-      }).join('');
+        const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        const linhas = json.slice(1).filter(r => r.some(c => (c || '').toString().trim())).length;
+        return { n, linhas };
+      });
+      contagens.forEach(({ n, linhas }) => { if (linhas > maxLinhas) { maxLinhas = linhas; melhor = n; } });
+      const nomeCompleto = contagens.find(({ n }) => /complet|full|base|todos/i.test(n) && !/resumo|top\s?\d|resum/i.test(n));
+      if (nomeCompleto && nomeCompleto.linhas > 0) melhor = nomeCompleto.n;
+      sel.innerHTML = contagens.map(({ n, linhas }) => `<option value="${n}">${n} (${linhas} linhas)</option>`).join('');
       sel.value = melhor;
       document.getElementById('imp-sheet-wrap').style.display = 'block';
       impTrocarAba();
@@ -6861,9 +6888,12 @@ function impAdivinharCampo(header) {
   if (tem('e-mail', 'email')) return 'email';
   if (tem('telefone', 'whatsapp', 'fone', 'celular') && !tem('site')) return 'celular';
   if (tem('decisor') && !tem('cargo', 'instagram', 'linkedin', 'fonte')) return 'gestor';
+  if (tem('instagram')) return 'instagram';
+  if (h === 'site' || h.startsWith('site') || tem('website', 'tem site', 'possui site')) return 'site_url';
+  if (tem('prioridade', 'priorização', 'priorizacao')) return 'prioridade';
   if (tem('segmento', 'categoria')) return 'segmento';
   if (tem('empresa', 'nome') && !tem('decisor', 'instagram', 'linkedin')) return 'razao_social';
-  if (tem('oportunidade', 'problema', 'avaliaç', 'avalia', 'nota', 'instagram', 'facebook', 'site', 'argumento', 'prioridade', 'score', 'presença', 'presenca', 'reputa')) return 'observacoes';
+  if (tem('oportunidade', 'problema', 'avaliaç', 'avalia', 'nota', 'facebook', 'argumento', 'score', 'presença', 'presenca', 'reputa')) return 'observacoes';
   return 'ignorar';
 }
 
@@ -6900,11 +6930,31 @@ function impLerCampoLinha(row, campo) {
   }
   const i = cols[0];
   if (i == null) return '';
-  return (row[i] || '').toString().trim();
+  const val = (row[i] || '').toString().trim();
+  if ((campo === 'site_url' || campo === 'instagram') && /^(não encontrado|nao encontrado|não verificado|nao verificado|não se aplica|nao se aplica|não tem|nao tem|sem site|sem instagram|não|nao|n\/a|—|-)$/i.test(val)) return '';
+  return val;
 }
 
 function impDigitos(s) { return (s || '').toString().replace(/\D/g, ''); }
 function impNormNome(s) { return (s || '').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim(); }
+
+// Rejeita linhas-lixo (numeração, notas de rodapé, cabeçalhos de metodologia) que não
+// são de fato um nome de empresa — evita repetir o import errado de aba de resumo.
+function impRazaoValida(s) {
+  const v = (s || '').toString().trim();
+  if (!v || v.length < 2 || v.length > 140) return false;
+  if (/^[\d#\-.\s]+$/.test(v)) return false; // só números/símbolos ("1", "#", "36")
+  if (!/[a-zA-ZÀ-ÿ]{2,}/.test(v)) return false; // precisa ter ao menos uma palavra de verdade
+  return true;
+}
+
+function impNormalizarPrioridade(s) {
+  const v = (s || '').toString().trim().toLowerCase();
+  if (/alta|urgente|prior.*1|^1$/.test(v)) return 'Alta';
+  if (/baixa|prior.*3|^3$/.test(v)) return 'Baixa';
+  if (/média|media|prior.*2|^2$/.test(v)) return 'Média';
+  return 'Média';
+}
 
 function impGerarPreview() {
   const selects = [...document.querySelectorAll('.imp-map-select')];
@@ -6933,8 +6983,11 @@ function impGerarPreview() {
       cidade: impLerCampoLinha(row, 'cidade'),
       bairro: impLerCampoLinha(row, 'bairro'),
       logradouro: impLerCampoLinha(row, 'logradouro'),
+      site_url: impLerCampoLinha(row, 'site_url'),
+      instagram: impLerCampoLinha(row, 'instagram'),
+      prioridade: impNormalizarPrioridade(impLerCampoLinha(row, 'prioridade')),
       observacoes: impLerCampoLinha(row, 'observacoes'),
-      _valido: !!razao_social,
+      _valido: impRazaoValida(razao_social),
       _duplicado: dup,
     };
   });
@@ -6960,14 +7013,14 @@ function impRenderPreview() {
   document.getElementById('imp-resumo').innerHTML = `
     <div>✅ <b>${novos.length}</b> novos</div>
     <div>⚠️ <b>${duplicados.length}</b> já parecem existir</div>
-    <div>❌ <b>${invalidos.length}</b> sem nome (ignorados)</div>
+    <div>❌ <b>${invalidos.length}</b> sem nome válido (ignorados)</div>
     <div>📥 <b>${vaiImportar.length}</b> serão importados</div>`;
 
   document.getElementById('imp-preview').innerHTML = impCandidatos.slice(0, 200).map(c => {
     const cor = !c._valido ? 'var(--muted)' : c._duplicado ? 'var(--warning)' : 'var(--success)';
     const tag = !c._valido ? 'sem nome' : c._duplicado ? 'já existe: ' + (c._duplicado.razao_social || '') : 'novo';
     return `<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
-      <div><b>${c.razao_social || '(sem nome)'}</b> <span style="color:var(--muted)">${c.celular ? '· ' + c.celular : ''}</span></div>
+      <div><b>${c.razao_social || '(sem nome válido)'}</b> <span style="color:var(--muted)">${c.celular ? '· ' + c.celular : ''}</span></div>
       <div style="color:${cor};font-size:11px;white-space:nowrap;flex-shrink:0">${tag}</div>
     </div>`;
   }).join('') + (impCandidatos.length > 200 ? `<div style="color:var(--muted);padding:8px 0">+ ${impCandidatos.length - 200} linhas…</div>` : '');
@@ -6992,6 +7045,9 @@ async function impConfirmarImportacao() {
     logradouro: c.logradouro || '',
     bairro: c.bairro || '',
     segmento: c.segmento || '',
+    site_url: c.site_url || '',
+    instagram: c.instagram || '',
+    prioridade: c.prioridade || 'Média',
     vertical: 'Site institucional',
     temperatura: 'Frio',
     status: 'Retornar',
