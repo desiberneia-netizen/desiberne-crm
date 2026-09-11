@@ -385,7 +385,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 .slide-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;transition:all .2s}
 .slide-card:hover{border-color:rgba(124,58,237,0.2)}
 
-@media(max-width:768px){.kpi-grid{grid-template-columns:1fr 1fr}.kanban-board{grid-template-columns:1fr}.sidebar{display:none}.charts-row{grid-template-columns:1fr}.topbar-nav{display:none}.link-grid{grid-template-columns:1fr}}
+/* Kanban nunca empilha — sempre lado a lado, rolando na horizontal se faltar espaço. */
+@media(max-width:640px){.kpi-grid{grid-template-columns:1fr 1fr}.sidebar{display:none}.charts-row{grid-template-columns:1fr}.topbar-nav{display:none}.link-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
