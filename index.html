@@ -74,7 +74,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 /* SIDEBAR */
 .main-body{display:flex;flex:1;overflow:hidden}
-.sidebar{width:218px;background:var(--surface);border-right:1px solid var(--border);padding:12px 8px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.sidebar{width:218px;background:var(--surface);border-right:1px solid var(--border);padding:12px 8px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:1px;transition:width .18s ease,padding .18s ease}
+.sidebar.collapsed{width:0;padding:12px 0;border-right:none;overflow:hidden}
+.sidebar-toggle{background:none;border:1px solid var(--border);border-radius:8px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;flex-shrink:0;transition:color .15s}
+.sidebar-toggle:hover{color:var(--text)}
 .sidebar-logo{display:flex;align-items:center;gap:9px;padding:10px 10px 14px;border-bottom:1px solid var(--border);margin-bottom:8px}
 .sidebar-logo img{width:26px;height:26px;border-radius:50%;object-fit:cover}
 .sidebar-logo-text{font-size:13px;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -417,9 +420,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 <div id="app-screen" style="display:none">
 <div class="crm-wrap">
   <div class="topbar">
-    <div class="logo-area" onclick="showView('home',document.querySelector('.nav-btn'))" style="cursor:pointer" title="Início">
-      <img class="logo-img" src="https://i.imgur.com/rrQxwkl.png" alt="Desiberne IA">
-      <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v17.0</span></div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <button class="sidebar-toggle" onclick="toggleSidebar()" title="Recolher/expandir menu lateral"><i class="ti ti-layout-sidebar-left-collapse" id="sidebar-toggle-icon"></i></button>
+      <div class="logo-area" onclick="showView('home',document.querySelector('.nav-btn'))" style="cursor:pointer" title="Início">
+        <img class="logo-img" src="https://i.imgur.com/rrQxwkl.png" alt="Desiberne IA">
+        <div class="logo-text">Desiberne <span>CRM</span><span class="logo-badge">v17.0</span></div>
+      </div>
     </div>
     <div class="topbar-nav">
       <button class="nav-btn active" onclick="showView('home',this)"><i class="ti ti-home"></i> Início</button>
@@ -7180,6 +7186,23 @@ function abrirImportModal() {
   impWorkbook = null; impHeaders = []; impRows = []; impCandidatos = [];
   openModal('importModal');
 }
+
+// ---- Sidebar recolhível (mais espaço pro Kanban) --------------------------
+function toggleSidebar() {
+  const sb2 = document.querySelector('.sidebar');
+  const collapsed = sb2.classList.toggle('collapsed');
+  document.getElementById('sidebar-toggle-icon').className = collapsed ? 'ti ti-layout-sidebar-left-expand' : 'ti ti-layout-sidebar-left-collapse';
+  try { localStorage.setItem('sidebar_collapsed', collapsed ? '1' : '0'); } catch (e) {}
+}
+(function initSidebarState() {
+  try {
+    if (localStorage.getItem('sidebar_collapsed') === '1') {
+      document.querySelector('.sidebar')?.classList.add('collapsed');
+      const ic = document.getElementById('sidebar-toggle-icon');
+      if (ic) ic.className = 'ti ti-layout-sidebar-left-expand';
+    }
+  } catch (e) {}
+})();
 
 checkSession();
 startLembretes();
