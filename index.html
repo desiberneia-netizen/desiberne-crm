@@ -650,7 +650,16 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
           </div>
         </div>
         <div class="table-wrap">
-          <div class="table-head" style="grid-template-columns:1.8fr 1.3fr 1fr .7fr .9fr 1.1fr .8fr 40px"><span>EMPRESA</span><span>CIDADE/BAIRRO</span><span>SEGMENTO</span><span>SITE</span><span>INSTAGRAM</span><span>DECISOR</span><span>PRIORIDADE</span><span></span></div>
+          <div class="table-head" id="carteira-head" style="grid-template-columns:1.8fr 1.3fr 1fr .7fr .9fr 1.1fr .8fr 40px">
+            <span style="cursor:pointer" onclick="ordenarCarteira('razao_social')">EMPRESA<span class="cart-sort-ico" data-col="razao_social"></span></span>
+            <span style="cursor:pointer" onclick="ordenarCarteira('cidade')">CIDADE/BAIRRO<span class="cart-sort-ico" data-col="cidade"></span></span>
+            <span style="cursor:pointer" onclick="ordenarCarteira('segmento')">SEGMENTO<span class="cart-sort-ico" data-col="segmento"></span></span>
+            <span style="cursor:pointer" onclick="ordenarCarteira('site_url')">SITE<span class="cart-sort-ico" data-col="site_url"></span></span>
+            <span style="cursor:pointer" onclick="ordenarCarteira('instagram')">INSTAGRAM<span class="cart-sort-ico" data-col="instagram"></span></span>
+            <span style="cursor:pointer" onclick="ordenarCarteira('gestor')">DECISOR<span class="cart-sort-ico" data-col="gestor"></span></span>
+            <span style="cursor:pointer" onclick="ordenarCarteira('prioridade')">PRIORIDADE<span class="cart-sort-ico" data-col="prioridade"></span></span>
+            <span></span>
+          </div>
           <div id="carteira-list"><div class="loading">Carregando...</div></div>
         </div>
       </div>
@@ -6735,14 +6744,41 @@ function lpRenderPreview(d, legenda) {
 // BLOCO 10 — Carteira de clientes, importação de planilha, CEP, segmento IA
 // ============================================================================
 
+let carteiraLeadsAtual = [];
+let carteiraOrdem = { col: null, dir: 'asc' };
+const PRIORIDADE_ORDEM = { Alta: 0, Média: 1, Baixa: 2 };
+
+function ordenarCarteira(col) {
+  carteiraOrdem = carteiraOrdem.col === col ? { col, dir: carteiraOrdem.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' };
+  renderCarteira(carteiraLeadsAtual);
+}
+
+function aplicarOrdemCarteira(leads) {
+  const { col, dir } = carteiraOrdem;
+  if (!col) return leads;
+  const mult = dir === 'asc' ? 1 : -1;
+  return [...leads].sort((a, b) => {
+    let va, vb;
+    if (col === 'cidade') { va = [a.cidade, a.bairro].filter(Boolean).join(' '); vb = [b.cidade, b.bairro].filter(Boolean).join(' '); }
+    else if (col === 'prioridade') { va = PRIORIDADE_ORDEM[a.prioridade] ?? 9; vb = PRIORIDADE_ORDEM[b.prioridade] ?? 9; return (va - vb) * mult; }
+    else if (col === 'site_url' || col === 'instagram') { va = a[col] ? 1 : 0; vb = b[col] ? 1 : 0; return (vb - va) * mult; }
+    else { va = a[col] || ''; vb = b[col] || ''; }
+    return String(va).localeCompare(String(vb), 'pt-BR', { sensitivity: 'base' }) * mult;
+  });
+}
+
 function renderCarteira(leads) {
+  carteiraLeadsAtual = leads;
   const badge = document.getElementById('badge-carteira');
   if (badge) badge.textContent = leads.length;
+  document.querySelectorAll('.cart-sort-ico').forEach(ic => {
+    ic.textContent = ic.dataset.col === carteiraOrdem.col ? (carteiraOrdem.dir === 'asc' ? ' ▲' : ' ▼') : '';
+  });
   const el = document.getElementById('carteira-list');
   if (!el) return;
   if (!leads.length) { el.innerHTML = '<div class="loading">Nenhum lead na carteira. Importe uma planilha em "Importar Leads".</div>'; return; }
   const corPrioridade = { Alta: 'var(--hot)', Média: 'var(--warning)', Baixa: 'var(--muted)' };
-  el.innerHTML = leads.map(l => `
+  el.innerHTML = aplicarOrdemCarteira(leads).map(l => `
     <div class="table-row" style="grid-template-columns:1.8fr 1.3fr 1fr .7fr .9fr 1.1fr .8fr 40px">
       <div style="font-weight:600;cursor:pointer" onclick="editLead('${l.id}')" title="${(l.observacoes || '').replace(/"/g, '&quot;')}">${l.razao_social || '—'}</div>
       <div style="color:var(--muted);font-size:11px">${[l.cidade, l.bairro].filter(Boolean).join(' / ') || '—'}</div>
