@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Desiberne CRM</title>
+<link rel="icon" type="image/png" href="https://i.imgur.com/rrQxwkl.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 /* V7 DESIGN UPGRADE */
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -455,6 +457,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
       <div class="sidebar-item" onclick="showView('kanban',null,this)"><i class="ti ti-columns"></i> Pipeline Kanban</div>
       <div class="sidebar-item" onclick="showView('agenda',null,this)"><i class="ti ti-calendar"></i> Agendamentos</div>
       <div class="sidebar-item" onclick="showView('clientes',null,this)"><i class="ti ti-users"></i> Clientes</div>
+      <div class="sidebar-item" onclick="showView('carteira',null,this)"><i class="ti ti-briefcase"></i> Carteira <span class="sidebar-badge" id="badge-carteira">0</span></div>
       <div class="sidebar-section">Gestão</div>
       <div class="sidebar-item" onclick="showView('tarefas',null,this)"><i class="ti ti-subtask"></i> Tarefas <span class="sidebar-badge" id="badge-tarefas">0</span></div>
       <div class="sidebar-item" onclick="showView('equipe',null,this)"><i class="ti ti-users-group"></i> Equipe</div>
@@ -628,10 +631,24 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
       <!-- CLIENTES -->
       <div id="view-clientes" class="view">
-        <div class="page-header"><div><div class="page-title">Clientes</div><div class="page-sub">Base completa de leads</div></div><button class="add-btn" onclick="openLeadModal()"><i class="ti ti-plus"></i> Novo Lead</button></div>
+        <div class="page-header"><div><div class="page-title">Clientes</div><div class="page-sub">Base completa de leads</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="add-btn" style="background:none;border:1px solid var(--border);color:var(--text)" onclick="abrirImportModal()"><i class="ti ti-file-spreadsheet"></i> Importar Leads</button>
+            <button class="add-btn" onclick="openLeadModal()"><i class="ti ti-plus"></i> Novo Lead</button>
+          </div>
+        </div>
         <div class="table-wrap">
           <div class="table-head" style="grid-template-columns:2fr 1.5fr 1fr 1fr 1fr 40px"><span>EMPRESA</span><span>CONTATO</span><span>TEMPERATURA</span><span>STATUS</span><span>VALOR</span><span></span></div>
           <div id="clientes-list"><div class="loading">Carregando...</div></div>
+        </div>
+      </div>
+
+      <!-- CARTEIRA (BLOCO 10) -->
+      <div id="view-carteira" class="view">
+        <div class="page-header"><div><div class="page-title">Carteira de Clientes</div><div class="page-sub">Prospecção importada — ainda sem atendimento ativo</div></div></div>
+        <div class="table-wrap">
+          <div class="table-head" style="grid-template-columns:2fr 1.5fr 1fr 1.5fr 40px"><span>EMPRESA</span><span>CONTATO</span><span>SEGMENTO</span><span>OBSERVAÇÃO</span><span></span></div>
+          <div id="carteira-list"><div class="loading">Carregando...</div></div>
         </div>
       </div>
 
@@ -1015,13 +1032,20 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
     <input type="hidden" id="edit-id">
     <div class="section-divider">Dados da Empresa</div>
     <div class="form-row"><div class="form-group"><label class="form-label">Razão Social *</label><input class="form-input" id="f-razao" placeholder="Ex: Clínica Silva Ltda"></div><div class="form-group"><label class="form-label">CNPJ</label><input class="form-input" id="f-cnpj" placeholder="00.000.000/0001-00"></div></div>
-    <div class="form-row"><div class="form-group"><label class="form-label">Gestor *</label><input class="form-input" id="f-gestor" placeholder="Nome do responsável"></div><div class="form-group"><label class="form-label">Segmento</label><select class="form-select" id="f-segmento"><option>Clínica / Saúde</option><option>Salão de Beleza</option><option>Food & Restaurante</option><option>B2B / Corporativo</option><option>Outro</option></select></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Gestor *</label><input class="form-input" id="f-gestor" placeholder="Nome do responsável"></div>
+      <div class="form-group"><label class="form-label">Segmento</label>
+        <div style="display:flex;gap:6px">
+          <input class="form-input" id="f-segmento" list="segmentos-datalist" placeholder="Ex: Clínica de estética" style="flex:1">
+          <button type="button" class="add-btn" style="padding:0 10px" title="Padronizar com IA" onclick="padronizarSegmento()"><i class="ti ti-sparkles"></i></button>
+        </div>
+        <datalist id="segmentos-datalist"></datalist>
+      </div></div>
     <div class="form-row"><div class="form-group"><label class="form-label">Celular</label><input class="form-input" id="f-celular" placeholder="(11) 99999-9999"></div><div class="form-group"><label class="form-label">E-mail</label><input class="form-input" id="f-email" placeholder="contato@empresa.com"></div></div>
     <div class="section-divider">Endereço</div>
-    <div class="form-row"><div class="form-group"><label class="form-label">CEP</label><input class="form-input" id="f-cep" placeholder="00000-000"></div><div class="form-group"><label class="form-label">Cidade</label><input class="form-input" id="f-cidade" placeholder="São Paulo"></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">CEP</label><input class="form-input" id="f-cep" placeholder="00000-000" onblur="autoPreencherCEP()"></div><div class="form-group"><label class="form-label">Cidade</label><input class="form-input" id="f-cidade" placeholder="São Paulo"></div></div>
     <div class="form-row"><div class="form-group"><label class="form-label">Logradouro</label><input class="form-input" id="f-logradouro" placeholder="Rua / Av."></div><div class="form-group"><label class="form-label">Bairro</label><input class="form-input" id="f-bairro" placeholder="Bairro"></div></div>
     <div class="section-divider">Pipeline</div>
-    <div class="form-row"><div class="form-group"><label class="form-label">Temperatura</label><select class="form-select" id="f-temperatura"><option>Frio</option><option>Morno</option><option>Quente</option><option>Fechado</option></select></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-status"><option>Retornar</option><option>Negociando</option><option>Ag. Contrato</option><option>Venda Realizada</option><option>Sem Interesse</option><option>Sem Resposta</option></select></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Temperatura</label><select class="form-select" id="f-temperatura"><option>Frio</option><option>Morno</option><option>Quente</option><option>Fechado</option></select></div><div class="form-group"><label class="form-label">Status</label><select class="form-select" id="f-status"><option>Retornar</option><option>Negociando</option><option>Ag. Contrato</option><option>Ag. Prévia de MVP (Site)</option><option>Ag. Prévia de MVP (CRM)</option><option>Aguardando Pagamento</option><option>Venda Realizada</option><option>Sem Interesse</option><option>Sem Resposta</option></select></div></div>
     <div class="form-row"><div class="form-group"><label class="form-label">Valor (R$/mês)</label><input class="form-input" id="f-valor" placeholder="0,00"></div><div class="form-group"><label class="form-label">Responsável</label><select class="form-select" id="f-responsavel"><option>João Ramos</option><option>Tiago Barbosa</option></select></div></div>
     <div class="section-divider">Observações</div>
     <textarea class="form-input" id="f-obs" rows="3" placeholder="Notas e histórico..." style="resize:vertical"></textarea>
@@ -1040,6 +1064,51 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
       <button class="btn-danger" id="delete-btn" style="display:none;margin-right:auto" onclick="deleteLead()"><i class="ti ti-trash"></i> Excluir</button>
       <button class="btn-ghost" onclick="closeModal('leadModal')">Cancelar</button>
       <button class="btn-primary" id="save-lead-btn" onclick="saveLead()">Salvar Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORTAR LEADS (BLOCO 10) -->
+<div class="modal-overlay" id="importModal" onclick="closeModalOutside(event,'importModal')">
+  <div class="modal" style="max-width:820px">
+    <div class="modal-header">
+      <div class="modal-title">Importar Leads</div>
+      <button class="modal-close" onclick="closeModal('importModal')"><i class="ti ti-x"></i></button>
+    </div>
+
+    <div id="imp-step-1">
+      <div class="form-group"><label class="form-label">Planilha (.xlsx / .csv)</label>
+        <input type="file" id="imp-file" accept=".xlsx,.xls,.csv" onchange="impArquivoSelecionado(event)">
+      </div>
+      <div class="form-group" id="imp-sheet-wrap" style="display:none">
+        <label class="form-label">Aba da planilha</label>
+        <select class="form-select" id="imp-sheet-select" onchange="impTrocarAba()"></select>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px" id="imp-sheet-info"></div>
+      </div>
+    </div>
+
+    <div id="imp-step-2" style="display:none">
+      <div class="section-divider">Mapeamento de colunas</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Confere se cada coluna da planilha caiu no campo certo do lead. "Empresa" e um jeito de identificar contato (telefone) são obrigatórios.</div>
+      <div id="imp-mapeamento" style="max-height:320px;overflow-y:auto"></div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeModal('importModal')">Cancelar</button>
+        <button class="btn-primary" onclick="impGerarPreview()">Avançar</button>
+      </div>
+    </div>
+
+    <div id="imp-step-3" style="display:none">
+      <div class="section-divider">Revisão antes de importar</div>
+      <div id="imp-resumo" style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:12px"></div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin-bottom:10px">
+        <input type="checkbox" id="imp-incluir-duplicados" onchange="impRenderPreview()">
+        Importar também os que já parecem existir no CRM
+      </label>
+      <div id="imp-preview" style="max-height:340px;overflow-y:auto;font-size:12px"></div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="importVoltarStep2()">Voltar</button>
+        <button class="btn-primary" id="imp-confirmar-btn" onclick="impConfirmarImportacao()">Confirmar importação</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2184,10 +2253,14 @@ async function loadLeads() {
 }
 
 function renderAll() {
-  renderKanban(allLeads);
+  const emAtendimento = allLeads.filter(l => !l.em_carteira);
+  const carteira = allLeads.filter(l => l.em_carteira);
+  renderKanban(emAtendimento);
   renderClientes(allLeads);
-  renderDashboard(allLeads);
-  renderEquipe(allLeads);
+  renderCarteira(carteira);
+  renderDashboard(emAtendimento);
+  renderEquipe(emAtendimento);
+  popularSegmentosDatalist();
   renderTarefas();
   if (isMaster) renderEmpresas();
   updateHomeKPIs();
@@ -2367,7 +2440,7 @@ function renderClientes(leads) {
   if (!leads.length) { el.innerHTML = '<div class="loading">Nenhum lead cadastrado</div>'; return; }
   el.innerHTML = leads.map(l => `
     <div class="table-row" style="grid-template-columns:2fr 1.5fr 1fr 1fr 1fr 40px;cursor:pointer" onclick="openClienteDetalhe('${l.id}')">
-      <div style="font-weight:600">${l.razao_social||'—'}</div>
+      <div style="font-weight:600">${l.razao_social||'—'}${l.em_carteira ? ' <span style="font-size:9px;font-weight:700;color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:1px 7px;margin-left:4px">CARTEIRA</span>' : ''}</div>
       <div style="color:var(--muted);font-size:11px">${l.gestor||''} ${l.celular?'· '+l.celular:''}</div>
       <div><span class="tag-temp ${l.temperatura==='Frio'?'badge-cold':l.temperatura==='Morno'?'badge-warm':l.temperatura==='Quente'?'badge-hot':'badge-done'}">${l.temperatura||''}</span></div>
       <div style="font-size:11px;color:var(--muted)">${l.status||''}</div>
@@ -2487,7 +2560,7 @@ function filterLeads() {
   const q = document.getElementById('search-input').value.toLowerCase();
   const resp = document.getElementById('filter-resp').value;
   const seg = document.getElementById('filter-seg').value;
-  let f = allLeads;
+  let f = allLeads.filter(l => !l.em_carteira);
   if(q) f=f.filter(l=>(l.razao_social||'').toLowerCase().includes(q)||(l.gestor||'').toLowerCase().includes(q));
   if(resp) f=f.filter(l=>l.responsavel===resp);
   if(seg) f=f.filter(l=>l.segmento===seg);
@@ -6641,6 +6714,314 @@ function lpRenderPreview(d, legenda) {
       <div>${(cc.proximos_passos || 'Revisão da proposta com o cliente. Aprovação e pagamento serão tratados nas próximas etapas.').replace(/\n/g, '<br>')}</div>
     </div>`;
   openModal('leadPropostaPreviewModal');
+}
+
+// ============================================================================
+// BLOCO 10 — Carteira de clientes, importação de planilha, CEP, segmento IA
+// ============================================================================
+
+function renderCarteira(leads) {
+  const badge = document.getElementById('badge-carteira');
+  if (badge) badge.textContent = leads.length;
+  const el = document.getElementById('carteira-list');
+  if (!el) return;
+  if (!leads.length) { el.innerHTML = '<div class="loading">Nenhum lead na carteira. Importe uma planilha em Clientes → Importar Leads.</div>'; return; }
+  el.innerHTML = leads.map(l => `
+    <div class="table-row" style="grid-template-columns:2fr 1.5fr 1fr 1.5fr 40px">
+      <div style="font-weight:600;cursor:pointer" onclick="editLead('${l.id}')">${l.razao_social || '—'}</div>
+      <div style="color:var(--muted);font-size:11px">${l.gestor || ''} ${l.celular ? '· ' + l.celular : ''}</div>
+      <div style="font-size:11px"><span class="lead-tag">${l.segmento || '—'}</span></div>
+      <div style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(l.observacoes || '').replace(/"/g, '&quot;')}">${(l.observacoes || '').slice(0, 90)}</div>
+      <div><button class="add-btn" style="font-size:10px;padding:5px 10px" onclick="assumirLead('${l.id}')" title="Assumir atendimento — vai pro Pipeline"><i class="ti ti-arrow-right"></i></button></div>
+    </div>`).join('');
+}
+
+async function assumirLead(id) {
+  const NOMES_RESP = { 'marketing@desiberneia.com.br': 'João Ramos', 'tiago.barbosa@desiberneia.com.br': 'Tiago Barbosa' };
+  const responsavel = NOMES_RESP[(currentUser?.email || '').toLowerCase()] || '';
+  const atual = allLeads.find(l => l.id === id);
+  const { error } = await sb.from('leads').update({
+    em_carteira: false,
+    status: 'Retornar',
+    temperatura: atual?.temperatura || 'Frio',
+    responsavel,
+  }).eq('id', id);
+  if (error) { showToast('Erro ao assumir lead: ' + error.message, 'error'); return; }
+  showToast('Lead assumido — foi para o Pipeline', 'success');
+  try { await logAudit('lead_assumido_carteira', 'leads', id, responsavel || null); } catch (e) {}
+  loadLeads();
+}
+
+// ---- CEP (ViaCEP, sem chave) ----------------------------------------------
+async function autoPreencherCEP() {
+  const cepEl = document.getElementById('f-cep');
+  const cep = (cepEl.value || '').replace(/\D/g, '');
+  if (cep.length !== 8) return;
+  try {
+    const r = await fetch('https://viacep.com.br/ws/' + cep + '/json/');
+    const d = await r.json();
+    if (d.erro) return;
+    if (d.logradouro) document.getElementById('f-logradouro').value = d.logradouro;
+    if (d.bairro) document.getElementById('f-bairro').value = d.bairro;
+    if (d.localidade) document.getElementById('f-cidade').value = d.localidade;
+  } catch (e) { /* silencioso — usuário preenche na mão se a API cair */ }
+}
+
+// ---- Segmento: sugestões + padronização por IA ----------------------------
+const SEGMENTOS_BASE = ['Clínica / Saúde', 'Estética / Beleza', 'Salão de Beleza', 'Barbearia', 'Odontologia',
+  'Fisioterapia', 'Psicologia', 'Advocacia', 'Contabilidade', 'Arquitetura / Engenharia', 'Imobiliária',
+  'Construção / Reforma', 'Alimentação / Restaurante', 'Bar / Boteco', 'Confeitaria / Doces',
+  'Pet Shop / Veterinária', 'Academia / Fitness', 'Moda / Vestuário', 'Educação / Cursos', 'Tecnologia / TI',
+  'Automotivo / Oficina', 'Varejo / Loja física', 'E-commerce', 'Eventos', 'Turismo / Hotelaria', 'Serviços Gerais', 'Outro'];
+
+function popularSegmentosDatalist() {
+  const existentes = [...new Set((allLeads || []).map(l => l.segmento).filter(Boolean))];
+  const todos = [...new Set([...SEGMENTOS_BASE, ...existentes])].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  const dl = document.getElementById('segmentos-datalist');
+  if (dl) dl.innerHTML = todos.map(s => `<option value="${s.replace(/"/g, '&quot;')}"></option>`).join('');
+}
+
+async function padronizarSegmento() {
+  const el = document.getElementById('f-segmento');
+  const texto = (el.value || '').trim();
+  if (!texto) { showToast('Digite o segmento primeiro', 'error'); return; }
+  try {
+    const { data: sessionData } = await sb.auth.getSession();
+    const resp = await fetch('/api/normalizar-segmento', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sessionData.session.access_token}` },
+      body: JSON.stringify({ texto }),
+    });
+    const out = await resp.json();
+    if (!resp.ok) { showToast(out.error || 'Erro ao padronizar', 'error'); return; }
+    el.value = out.segmento;
+    showToast('Segmento padronizado', 'success');
+  } catch (e) { showToast('Erro de rede ao padronizar', 'error'); }
+}
+
+// ---- Importação de planilha (Google Maps / prospecção) --------------------
+const IMP_CAMPOS = [
+  { key: 'razao_social', label: 'Empresa (razão social) *' },
+  { key: 'segmento', label: 'Segmento' },
+  { key: 'celular', label: 'Telefone / WhatsApp' },
+  { key: 'email', label: 'E-mail' },
+  { key: 'gestor', label: 'Contato / Decisor' },
+  { key: 'cep', label: 'CEP' },
+  { key: 'cidade', label: 'Cidade' },
+  { key: 'bairro', label: 'Bairro' },
+  { key: 'logradouro', label: 'Endereço' },
+  { key: 'observacoes', label: 'Observações (concatena várias colunas)' },
+  { key: 'ignorar', label: 'Ignorar esta coluna' },
+];
+
+let impWorkbook = null, impHeaders = [], impRows = [], impCandidatos = [];
+
+function impArquivoSelecionado(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (ev) {
+    try {
+      const data = new Uint8Array(ev.target.result);
+      impWorkbook = XLSX.read(data, { type: 'array' });
+      let melhor = impWorkbook.SheetNames[0], maxRows = -1;
+      const sel = document.getElementById('imp-sheet-select');
+      sel.innerHTML = impWorkbook.SheetNames.map(n => {
+        const ws = impWorkbook.Sheets[n];
+        const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
+        if (range.e.r > maxRows) { maxRows = range.e.r; melhor = n; }
+        return `<option value="${n}">${n} (${range.e.r} linhas)</option>`;
+      }).join('');
+      sel.value = melhor;
+      document.getElementById('imp-sheet-wrap').style.display = 'block';
+      impTrocarAba();
+    } catch (err) { showToast('Não consegui ler o arquivo: ' + err.message, 'error'); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function impTrocarAba() {
+  const nome = document.getElementById('imp-sheet-select').value;
+  const ws = impWorkbook.Sheets[nome];
+  const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+  if (!json.length) { showToast('Aba vazia', 'error'); return; }
+  impHeaders = json[0].map(h => (h || '').toString().trim());
+  impRows = json.slice(1).filter(r => r.some(c => (c || '').toString().trim()));
+  document.getElementById('imp-sheet-info').textContent = impRows.length + ' linhas de dados encontradas nesta aba.';
+  impMontarMapeamento();
+}
+
+function impAdivinharCampo(header) {
+  const h = (header || '').toLowerCase();
+  const tem = (...ws) => ws.some(w => h.includes(w));
+  if (tem('cep')) return 'cep';
+  if (h === 'bairro' || (h.includes('bairro') && !h.includes('cidade'))) return 'bairro';
+  if (tem('cidade')) return 'cidade';
+  if (tem('endereço', 'endereco', 'rua', 'logradouro')) return 'logradouro';
+  if (tem('e-mail', 'email')) return 'email';
+  if (tem('telefone', 'whatsapp', 'fone', 'celular') && !tem('site')) return 'celular';
+  if (tem('decisor') && !tem('cargo', 'instagram', 'linkedin', 'fonte')) return 'gestor';
+  if (tem('segmento', 'categoria')) return 'segmento';
+  if (tem('empresa', 'nome') && !tem('decisor', 'instagram', 'linkedin')) return 'razao_social';
+  if (tem('oportunidade', 'problema', 'avaliaç', 'avalia', 'nota', 'instagram', 'facebook', 'site', 'argumento', 'prioridade', 'score', 'presença', 'presenca', 'reputa')) return 'observacoes';
+  return 'ignorar';
+}
+
+function impMontarMapeamento() {
+  document.getElementById('imp-step-1').style.display = 'none';
+  document.getElementById('imp-step-2').style.display = 'block';
+  const opts = IMP_CAMPOS.map(c => `<option value="${c.key}">${c.label}</option>`).join('');
+  document.getElementById('imp-mapeamento').innerHTML = impHeaders.map((h, i) => {
+    if (!h) return '';
+    const amostra = ((impRows[0] || [])[i] || '').toString().slice(0, 60);
+    return `<div class="form-row" style="align-items:end">
+      <div class="form-group"><label class="form-label">${h}</label><input class="form-input" disabled value="${amostra.replace(/"/g, '&quot;')}"></div>
+      <div class="form-group"><label class="form-label">Campo do lead</label>
+        <select class="form-select imp-map-select" data-col="${i}">${opts}</select>
+      </div>
+    </div>`;
+  }).join('');
+  impHeaders.forEach((h, i) => {
+    if (!h) return;
+    const sel = document.querySelector(`.imp-map-select[data-col="${i}"]`);
+    if (sel) sel.value = impAdivinharCampo(h);
+  });
+}
+
+function impLerCampoLinha(row, campo) {
+  const cols = [...document.querySelectorAll('.imp-map-select')].filter(s => s.value === campo).map(s => parseInt(s.dataset.col, 10));
+  if (campo === 'observacoes') {
+    return cols.map(i => {
+      const label = impHeaders[i];
+      const val = (row[i] || '').toString().trim();
+      if (!val || /^(não encontrado|nao encontrado|não verificado|nao verificado|não se aplica|nao se aplica|não|nao|—|-)$/i.test(val)) return '';
+      return label + ': ' + val;
+    }).filter(Boolean).join('\n');
+  }
+  const i = cols[0];
+  if (i == null) return '';
+  return (row[i] || '').toString().trim();
+}
+
+function impDigitos(s) { return (s || '').toString().replace(/\D/g, ''); }
+function impNormNome(s) { return (s || '').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim(); }
+
+function impGerarPreview() {
+  const selects = [...document.querySelectorAll('.imp-map-select')];
+  if (!selects.some(s => s.value === 'razao_social')) { showToast('Marque qual coluna é a Empresa', 'error'); return; }
+
+  const existentesTel = new Map(), existentesNome = new Map();
+  allLeads.forEach(l => {
+    const t = impDigitos(l.celular); if (t.length >= 8) existentesTel.set(t.slice(-8), l);
+    const n = impNormNome(l.razao_social); if (n) existentesNome.set(n, l);
+  });
+
+  impCandidatos = impRows.map(row => {
+    const razao_social = impLerCampoLinha(row, 'razao_social');
+    const celular = impLerCampoLinha(row, 'celular');
+    const telDig = impDigitos(celular);
+    const nomeNorm = impNormNome(razao_social);
+    let dup = null;
+    if (telDig.length >= 8) dup = existentesTel.get(telDig.slice(-8)) || null;
+    if (!dup && nomeNorm) dup = existentesNome.get(nomeNorm) || null;
+    return {
+      razao_social, celular,
+      segmento: impLerCampoLinha(row, 'segmento'),
+      email: impLerCampoLinha(row, 'email'),
+      gestor: impLerCampoLinha(row, 'gestor'),
+      cep: impLerCampoLinha(row, 'cep'),
+      cidade: impLerCampoLinha(row, 'cidade'),
+      bairro: impLerCampoLinha(row, 'bairro'),
+      logradouro: impLerCampoLinha(row, 'logradouro'),
+      observacoes: impLerCampoLinha(row, 'observacoes'),
+      _valido: !!razao_social,
+      _duplicado: dup,
+    };
+  });
+
+  document.getElementById('imp-step-2').style.display = 'none';
+  document.getElementById('imp-step-3').style.display = 'block';
+  impRenderPreview();
+}
+
+function importVoltarStep2() {
+  document.getElementById('imp-step-3').style.display = 'none';
+  document.getElementById('imp-step-2').style.display = 'block';
+}
+
+function impRenderPreview() {
+  const incluirDup = document.getElementById('imp-incluir-duplicados').checked;
+  const validos = impCandidatos.filter(c => c._valido);
+  const novos = validos.filter(c => !c._duplicado);
+  const duplicados = validos.filter(c => c._duplicado);
+  const invalidos = impCandidatos.filter(c => !c._valido);
+  const vaiImportar = incluirDup ? validos : novos;
+
+  document.getElementById('imp-resumo').innerHTML = `
+    <div>✅ <b>${novos.length}</b> novos</div>
+    <div>⚠️ <b>${duplicados.length}</b> já parecem existir</div>
+    <div>❌ <b>${invalidos.length}</b> sem nome (ignorados)</div>
+    <div>📥 <b>${vaiImportar.length}</b> serão importados</div>`;
+
+  document.getElementById('imp-preview').innerHTML = impCandidatos.slice(0, 200).map(c => {
+    const cor = !c._valido ? 'var(--muted)' : c._duplicado ? 'var(--warning)' : 'var(--success)';
+    const tag = !c._valido ? 'sem nome' : c._duplicado ? 'já existe: ' + (c._duplicado.razao_social || '') : 'novo';
+    return `<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <div><b>${c.razao_social || '(sem nome)'}</b> <span style="color:var(--muted)">${c.celular ? '· ' + c.celular : ''}</span></div>
+      <div style="color:${cor};font-size:11px;white-space:nowrap;flex-shrink:0">${tag}</div>
+    </div>`;
+  }).join('') + (impCandidatos.length > 200 ? `<div style="color:var(--muted);padding:8px 0">+ ${impCandidatos.length - 200} linhas…</div>` : '');
+
+  document.getElementById('imp-confirmar-btn').textContent = `Confirmar importação (${vaiImportar.length})`;
+}
+
+async function impConfirmarImportacao() {
+  const incluirDup = document.getElementById('imp-incluir-duplicados').checked;
+  const validos = impCandidatos.filter(c => c._valido);
+  const lista = incluirDup ? validos : validos.filter(c => !c._duplicado);
+  if (!lista.length) { showToast('Nada pra importar', 'error'); return; }
+  const btn = document.getElementById('imp-confirmar-btn');
+  btn.disabled = true; btn.textContent = 'Importando...';
+  const payload = lista.map(c => ({
+    razao_social: c.razao_social,
+    gestor: c.gestor || '',
+    celular: c.celular || '',
+    email: c.email || '',
+    cep: c.cep || '',
+    cidade: c.cidade || '',
+    logradouro: c.logradouro || '',
+    bairro: c.bairro || '',
+    segmento: c.segmento || '',
+    vertical: 'Site institucional',
+    temperatura: 'Frio',
+    status: 'Retornar',
+    observacoes: c.observacoes || '',
+    em_carteira: true,
+  }));
+  let inseridos = 0, erro = null;
+  for (let i = 0; i < payload.length; i += 50) {
+    const lote = payload.slice(i, i + 50);
+    const { error } = await sb.from('leads').insert(lote);
+    if (error) { erro = error; break; }
+    inseridos += lote.length;
+  }
+  btn.disabled = false; btn.textContent = 'Confirmar importação';
+  if (erro) showToast(`Importados ${inseridos}, mas deu erro: ${erro.message}`, 'error');
+  else showToast(`${inseridos} leads importados pra carteira`, 'success');
+  try { await logAudit('leads_importados', 'leads', null, `${inseridos} leads via planilha`); } catch (e) {}
+  closeModal('importModal');
+  loadLeads();
+}
+
+function abrirImportModal() {
+  document.getElementById('imp-file').value = '';
+  document.getElementById('imp-sheet-wrap').style.display = 'none';
+  document.getElementById('imp-step-1').style.display = 'block';
+  document.getElementById('imp-step-2').style.display = 'none';
+  document.getElementById('imp-step-3').style.display = 'none';
+  document.getElementById('imp-incluir-duplicados').checked = false;
+  impWorkbook = null; impHeaders = []; impRows = []; impCandidatos = [];
+  openModal('importModal');
 }
 
 checkSession();
