@@ -2704,8 +2704,19 @@ function editLead(id) {
 }
 
 // ---- Interações (chat de negociação por lead) ------------------------------
-const NOMES_USUARIOS = { 'marketing@desiberneia.com.br': 'João Ramos', 'tiago.barbosa@desiberneia.com.br': 'Tiago Barbosa' };
+const NOMES_USUARIOS = { 'marketing@desiberneia.com.br': 'João Ramos', 'joao.ramos@desiberneia.com.br': 'João Ramos', 'tiago.barbosa@desiberneia.com.br': 'Tiago Barbosa' };
 function nomeUsuarioAtual() { return NOMES_USUARIOS[(currentUser?.email || '').toLowerCase()] || currentUser?.email || 'Usuário'; }
+
+// Cada vez que entra no Kanban, o filtro volta pra "meu Kanban" — vendedor troca pra ver
+// o do outro só se quiser, manualmente, e ao sair e voltar reseta pra si de novo.
+function resetarFiltroKanbanParaMim() {
+  const sel = document.getElementById('filter-resp');
+  if (!sel) return;
+  const meuNome = nomeUsuarioAtual();
+  const opcoes = [...sel.options].map(o => o.value);
+  sel.value = opcoes.includes(meuNome) ? meuNome : '';
+  filterLeads();
+}
 
 function fmtInteracaoData(iso) {
   const d = new Date(iso);
@@ -2900,6 +2911,7 @@ function showView(name,topBtn,sideItem){
   if(topBtn)topBtn.classList.add('active');
   if(sideItem)sideItem.classList.add('active');
   if(name==='master')renderMaster();
+  if(name==='kanban')resetarFiltroKanbanParaMim();
   fecharSidebarMobile();
 }
 
