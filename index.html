@@ -662,6 +662,17 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
             <button class="add-btn" style="background:none;border:1px solid var(--border);color:var(--text)" onclick="abrirImportModal()"><i class="ti ti-file-spreadsheet"></i> Importar Leads</button>
           </div>
         </div>
+        <div class="kanban-toolbar">
+          <input class="search-box" id="carteira-busca" placeholder="🔍  Buscar empresa, decisor, cidade..." oninput="filtrarCarteira()">
+          <select class="filter-select" id="carteira-filtro-segmento" onchange="filtrarCarteira()"><option value="">Todos os segmentos</option></select>
+          <select class="filter-select" id="carteira-filtro-prioridade" onchange="filtrarCarteira()">
+            <option value="">Todas as prioridades</option>
+            <option value="Alta">Alta</option>
+            <option value="Média">Média</option>
+            <option value="Baixa">Baixa</option>
+          </select>
+          <span id="carteira-filtro-contador" style="color:var(--muted);font-size:12px;white-space:nowrap;align-self:center">—</span>
+        </div>
         <div class="table-wrap">
           <div class="table-head" id="carteira-head" style="grid-template-columns:1.8fr 1.3fr 1fr .7fr .9fr 1.1fr .8fr 40px">
             <span style="cursor:pointer" onclick="ordenarCarteira('razao_social')">EMPRESA<span class="cart-sort-ico" data-col="razao_social"></span></span>
@@ -6888,13 +6899,15 @@ function lpRenderPreview(d, legenda) {
 // BLOCO 10 — Carteira de clientes, importação de planilha, CEP, segmento IA
 // ============================================================================
 
-let carteiraLeadsAtual = [];
+let carteiraTodosLeads = [];  // base completa (sem filtro), atualizada só pelo loadLeads()
+let carteiraLeadsAtual = [];  // resultado já filtrado+ordenado, exibido na tela
 let carteiraOrdem = { col: null, dir: 'asc' };
+let carteiraFiltro = { busca: '', segmento: '', prioridade: '' };
 const PRIORIDADE_ORDEM = { Alta: 0, Média: 1, Baixa: 2 };
 
 function ordenarCarteira(col) {
   carteiraOrdem = carteiraOrdem.col === col ? { col, dir: carteiraOrdem.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' };
-  renderCarteira(carteiraLeadsAtual);
+  pintarCarteira();
 }
 
 function aplicarOrdemCarteira(leads) {
@@ -6911,16 +6924,58 @@ function aplicarOrdemCarteira(leads) {
   });
 }
 
+function popularFiltrosCarteira() {
+  const selSeg = document.getElementById('carteira-filtro-segmento');
+  if (selSeg) {
+    const atual = selSeg.value;
+    const segmentos = [...new Set(carteiraTodosLeads.map(l => l.segmento).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    selSeg.innerHTML = '<option value="">Todos os segmentos</option>' + segmentos.map(s => `<option value="${s.replace(/"/g, '&quot;')}">${s}</option>`).join('');
+    if (segmentos.includes(atual)) selSeg.value = atual;
+  }
+}
+
+function filtrarCarteira() {
+  carteiraFiltro.busca = (document.getElementById('carteira-busca')?.value || '').toLowerCase().trim();
+  carteiraFiltro.segmento = document.getElementById('carteira-filtro-segmento')?.value || '';
+  carteiraFiltro.prioridade = document.getElementById('carteira-filtro-prioridade')?.value || '';
+  pintarCarteira();
+}
+
+function aplicarFiltroCarteira(leads) {
+  const { busca, segmento, prioridade } = carteiraFiltro;
+  return leads.filter(l => {
+    if (segmento && l.segmento !== segmento) return false;
+    if (prioridade && l.prioridade !== prioridade) return false;
+    if (busca) {
+      const alvo = [l.razao_social, l.gestor, l.cidade, l.bairro, l.instagram, l.segmento].filter(Boolean).join(' ').toLowerCase();
+      if (!alvo.includes(busca)) return false;
+    }
+    return true;
+  });
+}
+
+// Chamada pelo renderAll() com a base completa (fonte da verdade). O filtro/ordenação
+// rodam por cima disso em pintarCarteira(), sem precisar recarregar do banco.
 function renderCarteira(leads) {
+  carteiraTodosLeads = leads;
+  popularFiltrosCarteira();
+  pintarCarteira();
+}
+
+function pintarCarteira() {
+  const leads = aplicarFiltroCarteira(carteiraTodosLeads);
   carteiraLeadsAtual = leads;
   const badge = document.getElementById('badge-carteira');
-  if (badge) badge.textContent = leads.length;
+  if (badge) badge.textContent = carteiraTodosLeads.length;
+  const contador = document.getElementById('carteira-filtro-contador');
+  if (contador) contador.textContent = leads.length === carteiraTodosLeads.length ? `${leads.length} leads` : `${leads.length} de ${carteiraTodosLeads.length} leads`;
   document.querySelectorAll('.cart-sort-ico').forEach(ic => {
     ic.textContent = ic.dataset.col === carteiraOrdem.col ? (carteiraOrdem.dir === 'asc' ? ' ▲' : ' ▼') : '';
   });
   const el = document.getElementById('carteira-list');
   if (!el) return;
-  if (!leads.length) { el.innerHTML = '<div class="loading">Nenhum lead na carteira. Importe uma planilha em "Importar Leads".</div>'; return; }
+  if (!carteiraTodosLeads.length) { el.innerHTML = '<div class="loading">Nenhum lead na carteira. Importe uma planilha em "Importar Leads".</div>'; return; }
+  if (!leads.length) { el.innerHTML = '<div class="loading">Nenhum lead bate com esse filtro.</div>'; return; }
   const corPrioridade = { Alta: 'var(--hot)', Média: 'var(--warning)', Baixa: 'var(--muted)' };
   el.innerHTML = aplicarOrdemCarteira(leads).map(l => `
     <div class="table-row" style="grid-template-columns:1.8fr 1.3fr 1fr .7fr .9fr 1.1fr .8fr 40px">
@@ -7088,7 +7143,9 @@ function impAdivinharCampo(header) {
   if (tem('telefone', 'whatsapp', 'fone', 'celular') && !tem('site')) return 'celular';
   if (tem('decisor') && !tem('cargo', 'instagram', 'linkedin', 'fonte')) return 'gestor';
   if (tem('instagram')) return 'instagram';
-  if (h === 'site' || h.startsWith('site') || tem('website', 'tem site', 'possui site')) return 'site_url';
+  if (tem('url') && tem('site')) return 'site_url'; // "URL do site" — o link de verdade, prioridade sobre "Possui site?"
+  if (h === 'site' || h.startsWith('site') || tem('website')) return 'site_url';
+  if (tem('possui site', 'tem site')) return 'ignorar'; // resposta Sim/Não — já dá pra ver isso olhando se site_url está preenchido
   if (tem('prioridade', 'priorização', 'priorizacao')) return 'prioridade';
   if (tem('segmento', 'categoria')) return 'segmento';
   if (tem('empresa', 'nome') && !tem('decisor', 'instagram', 'linkedin')) return 'razao_social';
