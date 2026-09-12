@@ -81,6 +81,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 .sidebar-edge-toggle{width:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);background:var(--surface);border-right:1px solid var(--border);transition:color .15s,background .15s}
 .sidebar-edge-toggle:hover{color:var(--text);background:rgba(124,58,237,0.12)}
 .sidebar-edge-toggle i{font-size:13px}
+.sidebar-backdrop{display:none}
 .sidebar-logo{display:flex;align-items:center;gap:9px;padding:10px 10px 14px;border-bottom:1px solid var(--border);margin-bottom:8px}
 .sidebar-logo img{width:26px;height:26px;border-radius:50%;object-fit:cover}
 .sidebar-logo-text{font-size:13px;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -386,7 +387,37 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 .slide-card:hover{border-color:rgba(124,58,237,0.2)}
 
 /* Kanban nunca empilha — sempre lado a lado, rolando na horizontal se faltar espaço. */
-@media(max-width:640px){.kpi-grid{grid-template-columns:1fr 1fr}.sidebar{display:none}.charts-row{grid-template-columns:1fr}.topbar-nav{display:none}.link-grid{grid-template-columns:1fr}}
+@media(max-width:640px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .charts-row{grid-template-columns:1fr}
+  .topbar-nav{display:none}
+  .link-grid{grid-template-columns:1fr}
+
+  /* Topbar mais enxuto — tira decoração, mantém navegação */
+  .topbar{padding:0 10px;gap:6px}
+  .logo-badge{display:none}
+  #sys-status-chip{display:none !important}
+  .logo-text{font-size:13px}
+  .logo-img{width:26px;height:26px}
+
+  /* Sidebar vira gaveta (drawer) em vez de sumir sem alternativa de navegação */
+  .sidebar{position:fixed;top:56px;left:0;bottom:0;width:78vw;max-width:280px;z-index:150;
+    transform:translateX(-100%);transition:transform .22s ease;box-shadow:8px 0 32px rgba(0,0,0,0.5)}
+  .sidebar.mobile-open{transform:translateX(0)}
+  .sidebar.collapsed{width:78vw;max-width:280px;padding:12px 8px} /* collapsed (desktop) não deve valer no mobile */
+  .sidebar-edge-toggle{display:none} /* a alcinha de borda não faz sentido em drawer mobile */
+  .sidebar-backdrop.mobile-open{display:block;position:fixed;inset:0;top:56px;background:rgba(0,0,0,0.55);z-index:140}
+
+  /* Tabelas: em vez de espremer as colunas até virar ilegível, rola na horizontal */
+  .table-wrap{overflow-x:auto}
+  .table-head,.table-row{min-width:640px}
+
+  /* Modais nunca mais largos que a tela */
+  .modal{width:calc(100vw - 24px) !important;max-width:calc(100vw - 24px) !important;padding:18px}
+
+  .page-header{flex-wrap:wrap;gap:10px}
+  .search-box{width:100%}
+}
 </style>
 </head>
 <body>
@@ -488,6 +519,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
     </div>
 
     <div class="sidebar-edge-toggle" onclick="toggleSidebar()" title="Recolher/expandir menu lateral"><i class="ti ti-chevron-left" id="sidebar-edge-icon"></i></div>
+    <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="fecharSidebarMobile()"></div>
 
     <div class="content">
 
@@ -2868,6 +2900,7 @@ function showView(name,topBtn,sideItem){
   if(topBtn)topBtn.classList.add('active');
   if(sideItem)sideItem.classList.add('active');
   if(name==='master')renderMaster();
+  fecharSidebarMobile();
 }
 
 function showToast(msg,type){
@@ -7339,11 +7372,23 @@ function abrirImportModal() {
 // ---- Sidebar recolhível (mais espaço pro Kanban) --------------------------
 function toggleSidebar() {
   const sb2 = document.querySelector('.sidebar');
+  // Mobile: sidebar é gaveta (drawer) sobreposta, não faz sentido "encolher" — abre/fecha.
+  if (window.innerWidth <= 640) {
+    sb2.classList.toggle('mobile-open');
+    document.getElementById('sidebar-backdrop')?.classList.toggle('mobile-open', sb2.classList.contains('mobile-open'));
+    return;
+  }
   const collapsed = sb2.classList.toggle('collapsed');
   document.getElementById('sidebar-toggle-icon').className = collapsed ? 'ti ti-layout-sidebar-left-expand' : 'ti ti-layout-sidebar-left-collapse';
   const edgeIc = document.getElementById('sidebar-edge-icon');
   if (edgeIc) edgeIc.className = collapsed ? 'ti ti-chevron-right' : 'ti ti-chevron-left';
   try { localStorage.setItem('sidebar_collapsed', collapsed ? '1' : '0'); } catch (e) {}
+}
+
+function fecharSidebarMobile() {
+  if (window.innerWidth > 640) return;
+  document.querySelector('.sidebar')?.classList.remove('mobile-open');
+  document.getElementById('sidebar-backdrop')?.classList.remove('mobile-open');
 }
 (function initSidebarState() {
   try {
