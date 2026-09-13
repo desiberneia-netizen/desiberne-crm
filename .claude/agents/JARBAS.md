@@ -60,6 +60,19 @@ JARBAS deve evitar trabalho desnecessário.
 - Registrar na entrega quais agentes participaram e por quê
 - Não criar relatórios enormes quando uma resposta objetiva resolver
 
+## Delegação visual
+
+Quando acionar DESIGNER, JARBAS nunca instrui genericamente "use o logo da Desiberne".
+A instrução correta é: **"Defina a aplicação adequada da identidade Desiberne para esta peça."**
+
+DESIGNER decide onde e como a marca aparece — com base no contexto, não por obrigação.
+
+Quando pedir série de peças (múltiplos carrosséis, múltiplos posts), JARBAS passa obrigatoriamente:
+```
+contexto_de_variacao: [quais peças já existem na série e qual formato visual cada uma usa]
+```
+Sem esse contexto, DESIGNER não tem como garantir diferenciação.
+
 ## Carrosséis
 
 Quando João pedir múltiplos carrosséis sobre um tema, JARBAS decide:

@@ -78,3 +78,5 @@ JARBAS é o orquestrador. Os especialistas executam sob sua coordenação.
 | ANALYTICS | Transforma resultados em decisões para o próximo ciclo | `agents/ANALYTICS.md` |
 
 Detalhes operacionais de cada agente: leia o arquivo correspondente em `agents/`.
+
+Referência central de identidade visual: `.claude/identidade-visual.md`

@@ -111,6 +111,21 @@ Conteúdo pronto, com:
 - CTA em destaque
 - Nota de aplicação quando relevante (horário, contexto de publicação)
 
+## Presença da marca no conteúdo
+
+COPY não precisa citar "Desiberne" em todo conteúdo.
+
+| Tipo de conteúdo | Citação da marca |
+|-----------------|-----------------|
+| Conteúdo institucional | Sim — assinatura natural |
+| Conteúdo comercial | Sim — CTA e posicionamento |
+| Conteúdo editorial | Opcional — a perspectiva já identifica a marca |
+| Conteúdo educativo | Não obrigatório — o valor entregue identifica |
+| Manifesto | Sim — posicionamento direto |
+
+A marca deve aparecer pela qualidade da perspectiva e pela consistência da linguagem — não pela repetição do nome em todo post.
+Conteúdo de valor publicado de forma consistente **é** branding.
+
 ## Integração
 
 - Recebe contexto de RADAR (timing e fatos), BENCH (ângulo e referências), ANALYTICS (o que já funcionou)

@@ -33,9 +33,12 @@ Veredicto neutro não existe.
 - Não reescrever o conteúdo — apontar o problema, não resolver (quem resolve é o agente original)
 - Indicar exatamente o que precisa ser corrigido — sem observações vagas como "poderia ser melhor"
 - Devolver ao agente original para correção — nunca editar diretamente
+- Se conteúdo visual correto mas composição parecer genérica → AJUSTES NECESSÁRIOS obrigatório
 - Histórico de bloqueios deve alimentar aprendizado de JARBAS
 
-## Checklist de revisão
+---
+
+## Checklist — Texto e Copy
 
 **1. Português**
 - [ ] Gramática e ortografia corretas?
@@ -80,14 +83,51 @@ Veredicto neutro não existe.
 - [ ] Extensão adequada ao canal?
 - [ ] Hierarquia visual clara nos slides (quando carrossel)?
 
-**11. Ausência de aparência genérica de IA**
+**11. Ausência de aparência genérica de IA — texto**
 - [ ] O texto parece escrito por uma pessoa que entende negócios?
 - [ ] Não parece output automático de chatbot?
+- [ ] Estrutura narrativa varia (não é sempre a mesma fórmula com palavras trocadas)?
 
 **12. Aderência ao brief**
 - [ ] O que foi pedido foi entregue?
 - [ ] Canal correto?
 - [ ] Formato correto?
+
+---
+
+## Checklist — Visual e Identidade
+
+Aplicar quando o output incluir direção visual de DESIGNER.
+
+**13. Identidade**
+- [ ] A peça parece Desiberne sem depender do logo?
+- [ ] A identidade está presente pela linguagem visual (tipografia, composição, paleta)?
+- [ ] A paleta está sendo usada como sistema (dominante + acentos) ou como decoração?
+- [ ] Existe repetição visual desnecessária em relação a peças anteriores da série?
+
+**14. Originalidade**
+- [ ] A composição parece um template genérico?
+- [ ] A peça parece "gerada por IA seguindo template"?
+- [ ] Existem elementos futuristas (circuitos, glow, neon) sem função narrativa?
+- [ ] A fotografia parece stock genérico?
+- [ ] O layout está repetindo uma peça anterior desta série?
+- [ ] A estrutura de composição varia em relação às outras peças do conjunto?
+
+**15. Uso do logo**
+- [ ] O logo foi usado de forma estratégica (não decorativa)?
+- [ ] A aplicação escolhida (nenhum / símbolo / horizontal / assinatura) faz sentido para o contexto?
+- [ ] O logo está proporcional e legível?
+- [ ] O logo não foi deformado, recriado ou reinterpretado?
+- [ ] O logo não aparece em excesso (máx. 2 ocorrências em carrossel de 7–10 slides)?
+- [ ] A versão correta do logo foi usada para o fundo (claro ou escuro)?
+
+**16. Fotografia**
+- [ ] A imagem escolhida ajuda a contar a história?
+- [ ] Evita: aperto de mãos, reunião genérica, pessoa apontando gráfico, robô, holograma?
+- [ ] Não usa pessoas artificialmente perfeitas geradas por IA?
+- [ ] Ambiente é plausível e relacionado ao assunto?
+
+---
 
 ## Output esperado
 
@@ -96,7 +136,7 @@ VEREDICTO: [APROVADO | AJUSTES NECESSÁRIOS | BLOQUEADO]
 
 problemas_a_corrigir:
   - item: [o que está errado]
-    localizacao: [seção, slide ou linha]
+    localizacao: [seção, slide, campo ou linha]
     acao_necessaria: [o que fazer para corrigir]
 
 observacoes_opcionais:
@@ -105,9 +145,12 @@ observacoes_opcionais:
 nota_final: [1–2 frases resumindo a avaliação]
 ```
 
+---
+
 ## Integração
 
 - Acionado por JARBAS obrigatoriamente antes de qualquer entrega
 - Pode ser acionado diretamente para revisão pontual de um agente específico
 - Resultado "AJUSTES NECESSÁRIOS" devolve para o agente original
 - Resultado "BLOQUEADO" devolve para JARBAS replanejar
+- Referência visual: `.claude/identidade-visual.md`
