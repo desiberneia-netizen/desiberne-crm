@@ -586,6 +586,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
             </div>
             <div class="ativ-col" ondragover="allowTiDrop(event)" ondrop="dropTi(event,'entregue')" ondragenter="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
               <div class="ativ-col-header"><div class="ativ-col-title"><span class="s-dot" style="background:var(--success)"></span> Entregue</div><div class="ativ-count" id="ti-cnt-entregue">0</div></div>
+              <select class="filter-select" id="ti-periodo-entregue" style="width:100%;margin-bottom:8px;font-size:10px;padding:6px 10px" onchange="renderTarefasInternas()"></select>
               <div id="ti-entregue"><div style="text-align:center;padding:16px;color:var(--muted);font-size:11px">—</div></div>
             </div>
           </div>
@@ -5003,15 +5004,47 @@ async function loadTarefasInternas(){
   renderTarefasInternas();
 }
 
+// "Entregue" some da coluna padrão no fim do mês — mas nunca é perdido, só sai da
+// visão do mês corrente. O seletor de período deixa ver qualquer mês anterior (ou "Tudo").
+function tiMesChave(iso){ return iso ? iso.slice(0,7) : null; } // 'YYYY-MM'
+function tiMesLabel(chave){
+  const [ano,mes] = chave.split('-');
+  const nomes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  return nomes[parseInt(mes,10)-1]+'/'+ano;
+}
+function tiPopularSeletorPeriodo(entregues){
+  const sel = document.getElementById('ti-periodo-entregue');
+  if(!sel) return;
+  const mesAtual = tiMesChave(new Date().toISOString());
+  const meses = [...new Set(entregues.map(t=>tiMesChave(t.entregue_em)).filter(Boolean))];
+  if(!meses.includes(mesAtual)) meses.push(mesAtual);
+  meses.sort().reverse();
+  const atual = sel.value || mesAtual;
+  sel.innerHTML = meses.map(m=>`<option value="${m}">${m===mesAtual?'Este mês':tiMesLabel(m)}</option>`).join('') + '<option value="todos">Todos os períodos</option>';
+  sel.value = [...sel.options].some(o=>o.value===atual) ? atual : mesAtual;
+}
+
 function renderTarefasInternas(){
   const cols = {pendente:[],andamento:[],entregue:[]};
   tarefasInternas.forEach(t=>{if(cols[t.status])cols[t.status].push(t);});
-  Object.entries(cols).forEach(([status,items])=>{
+
+  tiPopularSeletorPeriodo(cols.entregue);
+  const periodoSel = document.getElementById('ti-periodo-entregue')?.value || tiMesChave(new Date().toISOString());
+  const entreguesFiltrados = periodoSel==='todos' ? cols.entregue : cols.entregue.filter(t=>tiMesChave(t.entregue_em || t.created_at)===periodoSel);
+
+  const el = document.getElementById('ti-entregue');
+  if(el) el.innerHTML = entreguesFiltrados.length ? entreguesFiltrados.map(tiCardHTML).join('') :
+    '<div style="text-align:center;padding:16px;color:var(--muted);font-size:11px;font-weight:500">Nenhuma tarefa entregue neste período</div>';
+  const cntEntregue = document.getElementById('ti-cnt-entregue');
+  if(cntEntregue) cntEntregue.textContent = entreguesFiltrados.length;
+
+  ['pendente','andamento'].forEach(status=>{
+    const items = cols[status];
     const cnt = document.getElementById('ti-cnt-'+status);
     if(cnt) cnt.textContent = items.length;
-    const el = document.getElementById('ti-'+status);
-    if(!el) return;
-    el.innerHTML = items.length ? items.map(tiCardHTML).join('') :
+    const elCol = document.getElementById('ti-'+status);
+    if(!elCol) return;
+    elCol.innerHTML = items.length ? items.map(tiCardHTML).join('') :
       '<div style="text-align:center;padding:16px;color:var(--muted);font-size:11px;font-weight:500">Nenhuma tarefa</div>';
   });
   // Checa lembretes
@@ -5025,7 +5058,8 @@ function tiCardHTML(t){
   if(prazo){
     const diff = Math.ceil((prazo-hoje)/(1000*60*60*24));
     prazoText = prazo.toLocaleDateString('pt-BR')+(t.prazo_hora?' '+t.prazo_hora:'');
-    prazoClass = diff<0?'prazo-late':diff<=2?'prazo-warn':'prazo-ok';
+    // Entregue nunca mostra prazo como vencido (vermelho) — já foi cumprido.
+    prazoClass = t.status==='entregue' ? 'prazo-ok' : (diff<0?'prazo-late':diff<=2?'prazo-warn':'prazo-ok');
   }
   const prioColor = t.prioridade==='alta'?'var(--danger)':t.prioridade==='baixa'?'var(--success)':'var(--muted)';
   const catColors = {Marketing:'var(--hot)',Comercial:'var(--warning)',Financeiro:'var(--success)',Produto:'var(--neon)',Operacional:'var(--blue-light)',Estratégia:'var(--purple-light)',Tecnologia:'var(--cold)',Geral:'var(--muted)'};
@@ -5056,7 +5090,11 @@ async function dropTi(e,status){
   e.preventDefault();
   document.querySelectorAll('.ativ-col').forEach(c=>c.classList.remove('drag-over'));
   if(!draggedTiId)return;
-  await sb.from('tarefas_internas').update({status}).eq('id',draggedTiId);
+  const atual = tarefasInternas.find(x=>x.id===draggedTiId);
+  const patch = {status};
+  if(status==='entregue' && atual?.status!=='entregue') patch.entregue_em = new Date().toISOString();
+  else if(status!=='entregue') patch.entregue_em = null;
+  await sb.from('tarefas_internas').update(patch).eq('id',draggedTiId);
   draggedTiId=null;
   loadTarefasInternas();
 }
@@ -5115,6 +5153,10 @@ async function saveTarefaInterna(){
     lembrete:document.getElementById('ti-lembrete').checked,
     checklist:tiChecklist
   };
+  const anterior = editId ? tarefasInternas.find(x=>x.id===editId) : null;
+  if(data.status==='entregue' && anterior?.status!=='entregue') data.entregue_em = new Date().toISOString();
+  else if(data.status!=='entregue') data.entregue_em = null;
+  // se já estava entregue e continua entregue, não mexe no entregue_em (mantém a data original)
   const{error}=editId?await sb.from('tarefas_internas').update(data).eq('id',editId):await sb.from('tarefas_internas').insert(data);
   if(error){showToast('Erro: '+error.message,'error');return;}
   showToast(editId?'Tarefa atualizada!':'Tarefa criada!','success');
