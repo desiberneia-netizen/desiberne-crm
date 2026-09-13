@@ -284,7 +284,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
 .modal-overlay.open{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;width:680px;max-width:calc(100vw - 32px);max-height:88vh;overflow-y:auto;padding:28px;box-shadow:0 24px 80px rgba(0,0,0,0.5)}
-.modal-sm{width:480px}
+.modal-sm{width:580px}
 .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
 .modal-title{font-size:17px;font-weight:900;letter-spacing:-.02em}
 .modal-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:5px;border-radius:8px;transition:all .15s}
@@ -1464,7 +1464,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 <!-- MODAL AGENDA -->
 <div class="modal-overlay" id="agendaModal" onclick="closeModalOutside(event,'agendaModal')">
-  <div class="modal" style="width:480px">
+  <div class="modal" style="width:580px">
     <div class="modal-header"><div class="modal-title">Novo Agendamento</div><button class="modal-close" onclick="closeModal('agendaModal')"><i class="ti ti-x"></i></button></div>
     <div class="form-group"><label class="form-label">Título *</label><input class="form-input" id="ag-titulo" placeholder="Ex: Retorno — Salão Bella Vista"></div>
     <div class="form-row"><div class="form-group"><label class="form-label">Data</label><input class="form-input" id="ag-data" type="date"></div><div class="form-group"><label class="form-label">Horário</label><input class="form-input" id="ag-hora" type="time"></div></div>
@@ -1484,7 +1484,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 <!-- MODAL EMPRESA -->
 <div class="modal-overlay" id="empresaModal" onclick="closeModalOutside(event,'empresaModal')">
-  <div class="modal" style="width:460px">
+  <div class="modal" style="width:560px">
     <div class="modal-header"><div class="modal-title">Nova Empresa Cliente</div><button class="modal-close" onclick="closeModal('empresaModal')"><i class="ti ti-x"></i></button></div>
     <div class="form-group"><label class="form-label">Nome da empresa *</label><input class="form-input" id="emp-nome" placeholder="Ex: Clínica Lumina"></div>
     <div class="form-group"><label class="form-label">E-mail do administrador *</label><input class="form-input" id="emp-email" type="email" placeholder="admin@empresa.com"></div>
@@ -1499,7 +1499,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 <!-- RECEITA MODAL -->
 <div class="modal-overlay" id="receitaModal" onclick="closeModalOutside(event,'receitaModal')">
-  <div class="modal" style="width:480px">
+  <div class="modal" style="width:580px">
     <div class="modal-header"><div class="modal-title">Nova Receita</div><button class="modal-close" onclick="closeModal('receitaModal')"><i class="ti ti-x"></i></button></div>
     <div class="form-group"><label class="form-label">Descrição *</label><input class="form-input" id="rec-desc" placeholder="Ex: Mensalidade Clínica Lumina"></div>
     <div class="form-group"><label class="form-label">Cliente</label><input class="form-input" id="rec-cliente" placeholder="Ex: Clínica Lumina"></div>
@@ -1511,7 +1511,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 <!-- DESPESA MODAL -->
 <div class="modal-overlay" id="despesaModal" onclick="closeModalOutside(event,'despesaModal')">
-  <div class="modal" style="width:480px">
+  <div class="modal" style="width:580px">
     <div class="modal-header"><div class="modal-title">Nova Despesa</div><button class="modal-close" onclick="closeModal('despesaModal')"><i class="ti ti-x"></i></button></div>
     <div class="form-group"><label class="form-label">Descrição *</label><input class="form-input" id="desp-desc" placeholder="Ex: Ferramenta de automação"></div>
     <div class="form-row"><div class="form-group"><label class="form-label">Categoria</label><select class="form-select" id="desp-cat"><option>Ferramentas / SaaS</option><option>Tráfego pago</option><option>Reembolso</option><option>Salários</option><option>Marketing</option><option>Operacional</option><option>Nota fiscal</option><option>Outro</option></select></div><div class="form-group"><label class="form-label">Tipo</label><select class="form-select" id="desp-tipo"><option>Custo fixo</option><option>Custo variável</option><option>Reembolso</option><option>Investimento</option></select></div></div>
@@ -1530,7 +1530,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 <!-- CONTRATO MODAL -->
 <div class="modal-overlay" id="contratoModal" onclick="closeModalOutside(event,'contratoModal')">
-  <div class="modal" style="width:520px">
+  <div class="modal" style="width:620px">
     <div class="modal-header"><div class="modal-title" id="contrato-modal-title">Novo Contrato / Parceiro</div><button class="modal-close" onclick="closeModal('contratoModal')"><i class="ti ti-x"></i></button></div>
     <input type="hidden" id="con-edit-id">
     <div class="form-group"><label class="form-label">Nome do cliente / empresa *</label><input class="form-input" id="con-nome" placeholder="Ex: Clínica Dra. Mariangela Santiago"></div>
@@ -1626,7 +1626,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 <!-- TAREFA INTERNA DETALHE MODAL -->
 <div class="modal-overlay" id="tiDetalheModal" onclick="closeModalOutside(event,'tiDetalheModal')">
-  <div class="modal" style="width:500px">
+  <div class="modal" style="width:600px">
     <div class="modal-header">
       <div class="modal-title" id="ti-det-titulo">Tarefa</div>
       <button class="modal-close" onclick="closeModal('tiDetalheModal')"><i class="ti ti-x"></i></button>
@@ -1641,7 +1641,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 <!-- FATURAMENTO MODAL -->
 <div class="modal-overlay" id="faturamentoModal" onclick="closeModalOutside(event,'faturamentoModal')">
-  <div class="modal" style="width:480px">
+  <div class="modal" style="width:580px">
     <div class="modal-header"><div class="modal-title">Registrar Faturamento do Mês</div><button class="modal-close" onclick="closeModal('faturamentoModal')"><i class="ti ti-x"></i></button></div>
     <div class="form-group"><label class="form-label">Cliente / Contrato *</label><select class="form-select" id="fat-contrato" onchange="calcFaturamento()"><option value="">Selecione o cliente</option></select></div>
     <div class="form-row"><div class="form-group"><label class="form-label">Mês</label><select class="form-select" id="fat-mes" onchange="calcFaturamento()"><option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option><option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option></select></div><div class="form-group"><label class="form-label">Ano</label><input class="form-input" id="fat-ano" type="number" value="2026"></div></div>
@@ -1659,7 +1659,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 <!-- ATIVIDADE MODAL -->
 <div class="modal-overlay" id="ativModal" onclick="closeModalOutside(event,'ativModal')">
-  <div class="modal" style="width:480px">
+  <div class="modal" style="width:580px">
     <div class="modal-header"><div class="modal-title">Nova Atividade</div><button class="modal-close" onclick="closeModal('ativModal')"><i class="ti ti-x"></i></button></div>
     <input type="hidden" id="ativ-edit-id">
     <div class="form-group"><label class="form-label">Título da atividade *</label><input class="form-input" id="ativ-titulo" placeholder="Ex: Enviar proposta de tráfego pago"></div>
@@ -1718,7 +1718,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 <!-- VENDA MODAL -->
 <div class="modal-overlay" id="vendaModal" onclick="closeModalOutside(event,'vendaModal')">
-  <div class="modal" style="width:520px">
+  <div class="modal" style="width:620px">
     <div class="modal-header">
       <div class="modal-title" id="venda-modal-title">Nova Venda</div>
       <button class="modal-close" onclick="closeModal('vendaModal')"><i class="ti ti-x"></i></button>
