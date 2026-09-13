@@ -1,73 +1,80 @@
-# Desiberne CRM — Contexto para Claude Code
+# Desiberne — Contexto Global para Claude Code
 
-## Projeto
+## 1. Sobre o projeto
 
-CRM interno da Desiberne + sistema de análise de presença digital com agentes de IA.
-Gerencia leads, propostas, tarefas, financeiro, contratos e calendário.
-Motor de análise de clientes via Google Places + Brave Search + OpenAI.
+Este repositório contém duas coisas distintas:
 
-## Stack
+**CRM interno** — gerencia leads, propostas, tarefas, financeiro, contratos e calendário.
+**Desiberne IA** — sistema multi-agente de inteligência de marketing e conteúdo para a própria Desiberne.
 
-- **Frontend**: SPA vanilla JS (sem framework, sem build step) — `index.html` (~7.500 linhas)
-- **Backend**: Vercel serverless functions em Node.js ESM — `api/*.js`
-- **Banco**: Supabase (Postgres + Auth) — migrations em `supabase/*.sql`
-- **IA atual**: OpenAI `gpt-4o-mini` via `api/_ai.js`
-- **Pesquisa**: Google Places API + Brave Search API via `api/_research.js`
-- **Deploy**: Vercel (funções serverless automáticas em `api/`)
+Os agentes são documentados em `.claude/agents/` e carregados nesta sessão.
+O CRM é o código em `index.html`, `api/` e `supabase/`.
 
-## Estrutura de arquivos
+## 2. Stack do CRM
+
+| Camada | Tecnologia |
+|--------|-----------|
+| Frontend | SPA vanilla JS — `index.html` (~7.500 linhas, sem build step) |
+| Backend | Vercel serverless Node.js ESM — `api/*.js` |
+| Banco | Supabase (Postgres + Auth) — migrations em `supabase/*.sql` |
+| IA (análise de leads) | OpenAI `gpt-4o-mini` via `api/_ai.js` |
+| Pesquisa | Google Places API + Brave Search API via `api/_research.js` |
+
+## 3. Estrutura de arquivos
 
 ```
-index.html              ← app completo (login + todas as telas + JS)
-proposta.html           ← página pública de proposta (sem auth)
-package.json            ← { "type": "module" } — sem dependências de build
+index.html                  ← app completo (login + todas as telas + JS)
+proposta.html               ← página pública de proposta (sem auth)
+package.json                ← { "type": "module" } — zero dependências de build
 api/
-  _ai.js                ← interpreta evidências via OpenAI (não pesquisa)
-  _auth.js              ← middleware de autenticação das funções
-  _prompts.js           ← prompts centralizados (AGENT_VERSION, PROMPT_VERSION)
-  _research.js          ← coleta evidências (Places + Brave + fetch site)
-  analise-iniciar.js    ← dispara análise de presença digital de um lead
-  analise-revisar.js    ← reabre análise existente
-  analise-status.js     ← polling do status da análise
+  _ai.js                    ← interpreta evidências via OpenAI (não pesquisa)
+  _auth.js                  ← middleware de autenticação
+  _prompts.js               ← prompts centralizados (AGENT_VERSION, PROMPT_VERSION)
+  _research.js              ← coleta evidências (Places + Brave + fetch de site)
+  analise-iniciar.js        ← dispara análise de presença digital de um lead
+  analise-revisar.js        ← reabre análise existente
+  analise-status.js         ← polling de status
   gerar-texto-proposta.js
   normalizar-segmento.js
-  proposta-aprovar.js
-  proposta-publica.js
-  proposta-responder.js
+  proposta-aprovar.js / proposta-publica.js / proposta-responder.js
   prospeccao-material.js
 supabase/
-  migration_*.sql       ← histórico de migrations (não aplicar sem revisão)
+  migration_*.sql           ← histórico sequencial (não editar aplicadas — criar nova)
 .claude/
-  CLAUDE.md             ← este arquivo (carregado automaticamente)
-  agents/               ← personas e contratos dos agentes internos Desiberne
+  CLAUDE.md                 ← este arquivo (auto-carregado a cada sessão)
+  agents/                   ← arquitetura operacional dos agentes Desiberne IA
 ```
 
-## Convenções de desenvolvimento
+## 4. Convenções de desenvolvimento do CRM
 
-- **Nunca introduzir build tooling** (webpack, vite, tsc). Projeto é zero-build por decisão.
-- **JS puro** no frontend — sem imports de módulos no browser (ESM só no `api/`).
-- **Prompts centralizados** em `api/_prompts.js`. Nunca espalhar strings de prompt pelo código.
-- **Bump de versão obrigatório**: `PROMPT_VERSION` a cada mudança de texto, `AGENT_VERSION` a cada mudança de lógica em `_prompts.js`.
-- **Migrations sequenciais**: arquivos `supabase/migration_*.sql` — não editar migrations já aplicadas, criar nova.
-- **Supabase key pública** (`sb_publishable_*`) é segura para expor no frontend — não é um vazamento.
-- **Variáveis de ambiente nas funções**: `OPENAI_API_KEY`, `BRAVE_API_KEY`, `GOOGLE_MAPS_KEY` via Vercel env.
+- **Zero build tooling** — nunca introduzir webpack, vite, tsc ou similares
+- **JS puro no frontend** — ESM apenas em `api/`
+- **Prompts centralizados** em `api/_prompts.js` — nunca espalhar strings de prompt no código
+- **Versioning obrigatório**: bump `PROMPT_VERSION` a cada mudança de texto, `AGENT_VERSION` a cada mudança de lógica
+- **Migrations sequenciais** — nunca editar migration já aplicada, criar nova
+- **Supabase key pública** (`sb_publishable_*`) é segura no frontend — não é vazamento
+- **Env vars das funções**: `OPENAI_API_KEY`, `BRAVE_API_KEY`, `GOOGLE_MAPS_KEY` via Vercel
 
-## Sistema de Agentes Desiberne IA
+## 5. Posicionamento da Desiberne
 
-Arquitetura multi-agente para produção de inteligência de marketing e conteúdo.
-JARBAS é o orquestrador central. Os demais são especialistas que ele coordena.
+> "Tire sua empresa do modo de hibernação digital. Desperte para um mundo de novas oportunidades."
 
-Agentes definidos em `.claude/agents/`:
+A Desiberne trabalha com tecnologia, presença digital, aquisição, gestão, automação e inteligência comercial.
+A comunicação não vende tecnologia pela tecnologia — vende percepção, oportunidade, transformação e resultado.
 
-| Agente | Papel |
-|--------|-------|
-| JARBAS | Orquestrador — recebe brief, delega, monta entrega final |
-| RADAR | Mercado e tendências — monitora movimentos do setor |
-| BENCH | Referências — engenharia reversa de concorrentes e cases |
-| COPY | Conteúdo — textos, roteiros, legendas, e-mails |
-| DESIGNER | Direção visual — briefings e prompts para ferramentas de imagem |
-| SENTINELA | Qualidade — revisa output dos outros agentes |
-| PLANNER | Calendário editorial — planejamento e sequenciamento |
-| ANALYTICS | Performance — leitura de métricas e recomendações |
+## 6. Sistema de Agentes Desiberne IA
 
-Para detalhes de um agente: leia `.claude/agents/NOME.md`.
+JARBAS é o orquestrador. Os especialistas executam sob sua coordenação.
+
+| Agente | Papel | Arquivo |
+|--------|-------|---------|
+| JARBAS | Orquestrador central — interpreta, decide, coordena, entrega | `agents/JARBAS.md` |
+| RADAR | Pesquisa mercado, tendências, comportamento e concorrência | `agents/RADAR.md` |
+| BENCH | Analisa referências e identifica por que algo funciona | `agents/BENCH.md` |
+| COPY | Transforma estratégia em conteúdo humano e comercial | `agents/COPY.md` |
+| DESIGNER | Direção visual — briefing, composição, prompts para IA de imagem | `agents/DESIGNER.md` |
+| SENTINELA | Controle de qualidade — veto final antes de qualquer entrega | `agents/SENTINELA.md` |
+| PLANNER | Calendário editorial — sequência, frequência, canais | `agents/PLANNER.md` |
+| ANALYTICS | Transforma resultados em decisões para o próximo ciclo | `agents/ANALYTICS.md` |
+
+Detalhes operacionais de cada agente: leia o arquivo correspondente em `agents/`.
