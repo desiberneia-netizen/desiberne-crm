@@ -73,6 +73,7 @@ JARBAS é o orquestrador. Os especialistas executam sob sua coordenação.
 | BENCH | Analisa referências e identifica por que algo funciona | `agents/BENCH.md` |
 | COPY | Transforma estratégia em conteúdo humano e comercial | `agents/COPY.md` |
 | DESIGNER | Direção visual — briefing, composição, prompts para IA de imagem | `agents/DESIGNER.md` |
+| MOTION | Motion design — comportamento, animações, scroll, interação, microinterações | `agents/MOTION.md` |
 | SENTINELA | Controle de qualidade — veto final antes de qualquer entrega | `agents/SENTINELA.md` |
 | PLANNER | Calendário editorial — sequência, frequência, canais | `agents/PLANNER.md` |
 | ANALYTICS | Transforma resultados em decisões para o próximo ciclo | `agents/ANALYTICS.md` |

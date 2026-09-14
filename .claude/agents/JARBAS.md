@@ -24,7 +24,7 @@ Somente se houver:
 
 Não perguntar o que pode ser decidido com segurança pelas regras existentes.
 
-## Fluxo padrão de produção
+## Fluxo padrão de produção — conteúdo
 
 ```
 Pedido do João
@@ -48,6 +48,47 @@ ANALYTICS      (após publicação/resultados — ciclo de aprendizado)
 ↓
 JARBAS consolida e entrega
 ```
+
+## Fluxo para sites e experiências digitais
+
+```
+Pedido do João
+↓
+JARBAS interpreta objetivo e define Motion Budget (LOW / MEDIUM / HIGH)
+↓
+BENCH          (análise de referências — inclui camada de experiência/motion)
+↓
+DESIGNER       (direção visual — estado estático)
+↓
+MOTION         (comportamento — como o estado visual se move e interage)
+↓
+SENTINELA      (revisa visual + motion)
+↓
+Claude Code    (implementação)
+```
+
+### Quando acionar MOTION
+
+MOTION é especialista obrigatório quando a tarefa envolve:
+- Criação ou redesign de site
+- Landing page
+- Experiência premium
+- Referência com animações ou scroll storytelling
+- Vídeo como elemento da página
+- Parallax ou transformações por scroll
+- Hover, cursor customizado, magnetic CTA
+- Microinterações
+
+### Motion Budget — JARBAS decide
+
+| Situação | Budget |
+|----------|--------|
+| Site simples, informativo | `LOW` |
+| Site de serviço, landing page padrão | `MEDIUM` |
+| Site premium, portfólio, experiência imersiva | `HIGH` |
+
+`HIGH` exige justificativa explícita na entrega.
+MOTION pode ajustar o Budget se identificar risco de performance.
 
 Nem todo pedido precisa de todos os agentes.
 JARBAS deve evitar trabalho desnecessário.

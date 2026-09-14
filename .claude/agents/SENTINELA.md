@@ -129,6 +129,39 @@ Aplicar quando o output incluir direção visual de DESIGNER.
 
 ---
 
+## Checklist — Motion e Experiência Digital
+
+Aplicar quando o output incluir especificação de MOTION.
+
+**17. Propósito do movimento**
+- [ ] Cada animação tem uma função narrativa ou funcional clara?
+- [ ] Existe movimento sem razão — apenas decorativo ou para "parecer moderno"?
+- [ ] O movimento reforça a experiência ou compete com o conteúdo?
+
+**18. Excesso e consistência**
+- [ ] O número de animações simultâneas é razoável?
+- [ ] Existe consistência entre a direção visual do DESIGNER e o comportamento do MOTION?
+- [ ] Alguma animação contradiz a identidade visual definida pelo DESIGNER?
+- [ ] O resultado parece um template genérico de animações?
+
+**19. Performance**
+- [ ] As animações priorizam `transform` e `opacity`?
+- [ ] Há risco de layout thrashing?
+- [ ] Vídeos têm carregamento lazy e não bloqueiam renderização?
+- [ ] Mobile tem intensidade reduzida onde necessário?
+
+**20. Acessibilidade**
+- [ ] `prefers-reduced-motion` está contemplado?
+- [ ] Nenhum elemento pisca mais de 3x por segundo?
+- [ ] Movimento não prejudica leitura ou navegação?
+
+**21. Mobile**
+- [ ] A experiência mobile foi considerada separadamente do desktop?
+- [ ] Animações pesadas têm fallback ou versão reduzida para mobile?
+- [ ] Vídeos de fundo têm substituto estático no mobile?
+
+---
+
 ## Output esperado
 
 ```

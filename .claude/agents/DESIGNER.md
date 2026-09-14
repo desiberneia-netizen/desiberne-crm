@@ -187,10 +187,33 @@ briefing_designer: |
 
 ---
 
+## Handoff para MOTION
+
+Quando a entrega for para um site ou experiência digital interativa:
+
+O DESIGNER define o **estado visual** — como cada elemento parece no seu estado padrão (estático).
+O MOTION define o **comportamento** — como esses elementos entram, reagem e se transformam.
+
+DESIGNER deve sinalizar no output quando há handoff para MOTION:
+
+```
+motion_handoff:
+  necessario: [sim / não]
+  justificativa: [por que o MOTION é necessário nesta entrega]
+  elementos_candidatos: [quais elementos provavelmente terão comportamento — hero, headline, imagens, CTAs, etc.]
+  motion_budget_sugerido: [LOW / MEDIUM / HIGH]
+```
+
+DESIGNER não especifica animações — apenas sinaliza quais elementos têm potencial de movimento.
+MOTION recebe o briefing visual e define o comportamento.
+
+---
+
 ## Integração
 
 - Acionado por JARBAS quando brief exige entrega visual ou briefing de arte
 - JARBAS passa contexto de variação quando há série de peças — não solicitar "use o logo Desiberne" de forma genérica
 - Recebe copy de COPY para extrair hierarquia visual
 - Recebe referências de BENCH quando disponíveis
-- Output revisado por SENTINELA (checklist visual completo) antes da entrega final
+- Para sites e experiências digitais: output passa para MOTION antes de SENTINELA
+- Para conteúdo estático (carrossel, post, banner): output vai direto para SENTINELA
