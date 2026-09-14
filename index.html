@@ -2114,12 +2114,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
     </div>
     <input type="hidden" id="post-edit-id">
     <div class="form-group">
-      <label class="form-label">Imagem</label>
-      <div id="post-img-preview-wrap" style="display:none;margin-bottom:8px">
-        <img id="post-img-preview" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;border:1px solid var(--border)">
-      </div>
-      <input type="file" accept="image/*" id="post-file" class="form-input" onchange="previewPostFile(event)">
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">Escolher outra imagem substitui a atual.</div>
+      <label class="form-label">Imagens (carrossel)</label>
+      <div id="post-imgs-preview" style="display:flex;gap:8px;overflow-x:auto;margin-bottom:8px"></div>
+      <input type="file" accept="image/*" id="post-file" class="form-input" multiple onchange="previewPostFile(event)">
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">Pode escolher várias de uma vez (segure Cmd/Ctrl no seletor), ou repetir pra ir adicionando mais.</div>
     </div>
     <div class="form-group">
       <label class="form-label">Legenda</label>
@@ -2433,7 +2431,16 @@ function renderAll() {
 // ---- Banco de Posts (BLOCO 16) — imagem + legenda + status, compartilhado ----
 let posts = [];
 let postsTabAtual = 'rascunho';
-let postFileSelecionado = null;
+let postImagensAtuais = [];   // já salvas (edição) — [{url, path}], removíveis antes de salvar
+let postArquivosNovos = [];   // File[] recém-escolhidos, ainda não enviados
+
+// Uma linha por post: usa "imagens" (array); se for post antigo do bloco 16 original
+// sem migração 02 aplicada ainda, cai no imagem_url isolado como fallback.
+function postImagensDe(p) {
+  if (Array.isArray(p.imagens) && p.imagens.length) return p.imagens;
+  if (p.imagem_url) return [{ url: p.imagem_url, path: p.imagem_path || null }];
+  return [];
+}
 
 async function loadPosts() {
   const { data, error } = await sb.from('posts_conteudo').select('*').order('created_at', { ascending: false });
@@ -2458,15 +2465,40 @@ function renderPosts() {
   if (!el) return;
   const filtrados = posts.filter(p => p.status === postsTabAtual);
   const corStatus = { rascunho: 'background:rgba(148,163,184,0.15);color:var(--muted)', pronto: 'background:rgba(245,158,11,0.15);color:var(--warning)', postado: 'background:rgba(16,185,129,0.15);color:var(--success)' };
-  el.innerHTML = filtrados.length ? filtrados.map(p => `
+  el.innerHTML = filtrados.length ? filtrados.map(p => {
+    const imgs = postImagensDe(p);
+    const capa = imgs[0]?.url || '';
+    return `
     <div class="post-card" onclick="editarPost('${p.id}')">
-      <img class="post-card-img" src="${p.imagem_url}" alt="" loading="lazy">
+      <div style="position:relative">
+        <img class="post-card-img" src="${capa}" alt="" loading="lazy">
+        ${imgs.length > 1 ? `<span style="position:absolute;top:5px;right:5px;background:rgba(0,0,0,0.65);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:999px"><i class="ti ti-stack-2"></i> ${imgs.length}</span>` : ''}
+      </div>
       <div class="post-card-body">
         <div class="post-card-legenda">${(p.legenda || '(sem legenda)').replace(/</g, '&lt;')}</div>
         <span class="post-card-status" style="${corStatus[p.status] || ''}">${p.status}</span>
       </div>
-    </div>`).join('') : '<div class="loading">Nenhum post aqui ainda.</div>';
+    </div>`;
+  }).join('') : '<div class="loading">Nenhum post aqui ainda.</div>';
 }
+
+function renderImagensModalPost() {
+  const el = document.getElementById('post-imgs-preview');
+  const salvas = postImagensAtuais.map((img, i) => `
+    <div style="position:relative;flex:0 0 90px">
+      <img src="${img.url}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+      <button type="button" onclick="event.stopPropagation();removerImagemAtual(${i})" style="position:absolute;top:-6px;right:-6px;background:var(--danger);border:none;color:#fff;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:12px;line-height:1">×</button>
+    </div>`).join('');
+  const novas = postArquivosNovos.map((f, i) => `
+    <div style="position:relative;flex:0 0 90px">
+      <img src="${f._preview}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid rgba(124,58,237,0.5)">
+      <button type="button" onclick="event.stopPropagation();removerArquivoNovo(${i})" style="position:absolute;top:-6px;right:-6px;background:var(--danger);border:none;color:#fff;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:12px;line-height:1">×</button>
+    </div>`).join('');
+  el.innerHTML = salvas + novas || '<div style="font-size:11px;color:var(--muted)">Nenhuma imagem ainda.</div>';
+}
+
+function removerImagemAtual(i) { postImagensAtuais.splice(i, 1); renderImagensModalPost(); }
+function removerArquivoNovo(i) { postArquivosNovos.splice(i, 1); renderImagensModalPost(); }
 
 function abrirNovoPost() {
   document.getElementById('post-modal-title').textContent = 'Novo Post';
@@ -2474,9 +2506,10 @@ function abrirNovoPost() {
   document.getElementById('post-file').value = '';
   document.getElementById('post-legenda').value = '';
   document.getElementById('post-status').value = 'rascunho';
-  document.getElementById('post-img-preview-wrap').style.display = 'none';
   document.getElementById('post-delete-btn').style.display = 'none';
-  postFileSelecionado = null;
+  postImagensAtuais = [];
+  postArquivosNovos = [];
+  renderImagensModalPost();
   openModal('postModal');
 }
 
@@ -2488,45 +2521,47 @@ function editarPost(id) {
   document.getElementById('post-file').value = '';
   document.getElementById('post-legenda').value = p.legenda || '';
   document.getElementById('post-status').value = p.status || 'rascunho';
-  document.getElementById('post-img-preview').src = p.imagem_url;
-  document.getElementById('post-img-preview-wrap').style.display = 'block';
   document.getElementById('post-delete-btn').style.display = 'block';
-  postFileSelecionado = null;
+  postImagensAtuais = postImagensDe(p).map(img => ({ ...img }));
+  postArquivosNovos = [];
+  renderImagensModalPost();
   openModal('postModal');
 }
 
 function previewPostFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  postFileSelecionado = file;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    document.getElementById('post-img-preview').src = ev.target.result;
-    document.getElementById('post-img-preview-wrap').style.display = 'block';
-  };
-  reader.readAsDataURL(file);
+  const files = [...e.target.files];
+  if (!files.length) return;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => { file._preview = ev.target.result; renderImagensModalPost(); };
+    reader.readAsDataURL(file);
+    postArquivosNovos.push(file);
+  });
+  e.target.value = ''; // permite escolher o mesmo arquivo de novo / repetir o browse pra ir somando
 }
 
 async function salvarPost() {
   const editId = document.getElementById('post-edit-id').value;
-  if (!editId && !postFileSelecionado) { showToast('Escolha uma imagem', 'error'); return; }
+  if (!postImagensAtuais.length && !postArquivosNovos.length) { showToast('Escolha ao menos uma imagem', 'error'); return; }
   const btn = document.getElementById('post-save-btn');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try {
-    let imagem_url = null, imagem_path = null;
-    if (postFileSelecionado) {
-      const ext = (postFileSelecionado.name.split('.').pop() || 'jpg').toLowerCase();
+    const imagensFinal = postImagensAtuais.map(img => ({ url: img.url, path: img.path || null }));
+    for (const file of postArquivosNovos) {
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
       const path = `posts/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error: upErr } = await sb.storage.from('posts-conteudo').upload(path, postFileSelecionado);
-      if (upErr) { showToast('Erro ao subir imagem: ' + upErr.message, 'error'); btn.disabled = false; btn.textContent = 'Salvar Post'; return; }
-      imagem_path = path;
-      imagem_url = sb.storage.from('posts-conteudo').getPublicUrl(path).data.publicUrl;
+      const { error: upErr } = await sb.storage.from('posts-conteudo').upload(path, file);
+      if (upErr) { showToast('Erro ao subir imagem: ' + upErr.message, 'error'); return; }
+      const url = sb.storage.from('posts-conteudo').getPublicUrl(path).data.publicUrl;
+      imagensFinal.push({ url, path });
     }
     const data = {
       legenda: document.getElementById('post-legenda').value.trim(),
       status: document.getElementById('post-status').value,
+      imagens: imagensFinal,
+      imagem_url: imagensFinal[0]?.url || null,       // mantido só pra compatibilidade com posts antigos
+      imagem_path: imagensFinal[0]?.path || null,
     };
-    if (imagem_url) { data.imagem_url = imagem_url; data.imagem_path = imagem_path; }
     if (!editId) data.criado_por = nomeUsuarioAtual();
     const { error } = editId
       ? await sb.from('posts_conteudo').update(data).eq('id', editId)
