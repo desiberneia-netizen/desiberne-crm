@@ -2118,9 +2118,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
     </div>
     <div style="padding:18px">
       <div id="post-preview-legenda" style="font-size:13px;line-height:1.5;white-space:pre-wrap;margin-bottom:10px"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
         <span class="post-card-status" id="post-preview-status"></span>
-        <button class="btn-ghost" onclick="editarPostAPartirDoPreview()"><i class="ti ti-pencil"></i> Editar</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn-ghost" id="post-preview-download-btn" onclick="baixarImagemPreviewAtual()"><i class="ti ti-download"></i> Baixar</button>
+          <button class="btn-ghost" onclick="editarPostAPartirDoPreview()"><i class="ti ti-pencil"></i> Editar</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2451,8 +2454,10 @@ function renderAll() {
 // ---- Banco de Posts (BLOCO 16) — imagem + legenda + status, compartilhado ----
 let posts = [];
 let postsTabAtual = 'pronto';
-let postImagensAtuais = [];   // já salvas (edição) — [{url, path}], removíveis antes de salvar
-let postArquivosNovos = [];   // File[] recém-escolhidos, ainda não enviados
+// Lista única e ORDENADA do que está no formulário — mistura imagens já salvas
+// e arquivos novos, na ordem em que aparecem no carrossel final.
+// Item existente: {kind:'existing', url, path}. Item novo: {kind:'new', file, preview}.
+let postEditImagens = [];
 
 // Uma linha por post: usa "imagens" (array); se for post antigo do bloco 16 original
 // sem migração 02 aplicada ainda, cai no imagem_url isolado como fallback.
@@ -2539,29 +2544,65 @@ function postPreviewNav(delta) {
 
 function postPreviewIrPara(i) { postPreviewIndex = i; renderPostPreviewImg(); }
 
+async function baixarImagemPreviewAtual() {
+  const item = postPreviewLista[postPreviewIndex];
+  if (!item?.url) return;
+  const btn = document.getElementById('post-preview-download-btn');
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader-2"></i> Baixando...';
+  try {
+    const resp = await fetch(item.url);
+    const blob = await resp.blob();
+    const ext = (item.url.split('?')[0].split('.').pop() || 'jpg').toLowerCase();
+    const nomeBase = (document.getElementById('post-preview-legenda').textContent || 'post').trim().slice(0, 30).replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') || 'post';
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = `${nomeBase}-${postPreviewIndex + 1}.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(objectUrl);
+  } catch (e) {
+    showToast('Erro ao baixar imagem: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+}
+
 function editarPostAPartirDoPreview() {
   const id = postPreviewId;
   closeModal('postPreviewModal');
   if (id) editarPost(id);
 }
 
-function renderImagensModalPost() {
-  const el = document.getElementById('post-imgs-preview');
-  const salvas = postImagensAtuais.map((img, i) => `
-    <div style="position:relative;flex:0 0 90px">
-      <img src="${img.url}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
-      <button type="button" onclick="event.stopPropagation();removerImagemAtual(${i})" style="position:absolute;top:-6px;right:-6px;background:var(--danger);border:none;color:#fff;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:12px;line-height:1">×</button>
-    </div>`).join('');
-  const novas = postArquivosNovos.map((f, i) => `
-    <div style="position:relative;flex:0 0 90px">
-      <img src="${f._preview}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid rgba(124,58,237,0.5)">
-      <button type="button" onclick="event.stopPropagation();removerArquivoNovo(${i})" style="position:absolute;top:-6px;right:-6px;background:var(--danger);border:none;color:#fff;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:12px;line-height:1">×</button>
-    </div>`).join('');
-  el.innerHTML = salvas + novas || '<div style="font-size:11px;color:var(--muted)">Nenhuma imagem ainda.</div>';
+function postEditImagemThumb(item) {
+  return item.kind === 'existing' ? item.url : (item.preview || '');
 }
 
-function removerImagemAtual(i) { postImagensAtuais.splice(i, 1); renderImagensModalPost(); }
-function removerArquivoNovo(i) { postArquivosNovos.splice(i, 1); renderImagensModalPost(); }
+function renderImagensModalPost() {
+  const el = document.getElementById('post-imgs-preview');
+  el.innerHTML = postEditImagens.length ? postEditImagens.map((item, i) => `
+    <div style="position:relative;flex:0 0 90px">
+      <img src="${postEditImagemThumb(item)}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid ${item.kind === 'new' ? 'rgba(124,58,237,0.5)' : 'var(--border)'}">
+      <button type="button" onclick="event.stopPropagation();removerImagemEdit(${i})" title="Remover" style="position:absolute;top:-6px;right:-6px;background:var(--danger);border:none;color:#fff;width:20px;height:20px;border-radius:50%;cursor:pointer;font-size:12px;line-height:1">×</button>
+      <div style="position:absolute;bottom:-4px;left:0;right:0;display:flex;justify-content:center;gap:2px">
+        <button type="button" onclick="event.stopPropagation();moverImagemEdit(${i},-1)" ${i === 0 ? 'disabled' : ''} title="Mover pra esquerda" style="background:rgba(0,0,0,0.7);border:none;color:#fff;width:22px;height:22px;border-radius:50%;cursor:${i === 0 ? 'default' : 'pointer'};opacity:${i === 0 ? '0.3' : '1'};font-size:11px"><i class="ti ti-chevron-left"></i></button>
+        <button type="button" onclick="event.stopPropagation();moverImagemEdit(${i},1)" ${i === postEditImagens.length - 1 ? 'disabled' : ''} title="Mover pra direita" style="background:rgba(0,0,0,0.7);border:none;color:#fff;width:22px;height:22px;border-radius:50%;cursor:${i === postEditImagens.length - 1 ? 'default' : 'pointer'};opacity:${i === postEditImagens.length - 1 ? '0.3' : '1'};font-size:11px"><i class="ti ti-chevron-right"></i></button>
+      </div>
+    </div>`).join('') : '<div style="font-size:11px;color:var(--muted)">Nenhuma imagem ainda.</div>';
+}
+
+function removerImagemEdit(i) { postEditImagens.splice(i, 1); renderImagensModalPost(); }
+
+function moverImagemEdit(i, delta) {
+  const j = i + delta;
+  if (j < 0 || j >= postEditImagens.length) return;
+  [postEditImagens[i], postEditImagens[j]] = [postEditImagens[j], postEditImagens[i]];
+  renderImagensModalPost();
+}
 
 function abrirNovoPost() {
   document.getElementById('post-modal-title').textContent = 'Novo Post';
@@ -2570,8 +2611,7 @@ function abrirNovoPost() {
   document.getElementById('post-legenda').value = '';
   document.getElementById('post-status').value = 'rascunho';
   document.getElementById('post-delete-btn').style.display = 'none';
-  postImagensAtuais = [];
-  postArquivosNovos = [];
+  postEditImagens = [];
   renderImagensModalPost();
   openModal('postModal');
 }
@@ -2585,8 +2625,7 @@ function editarPost(id) {
   document.getElementById('post-legenda').value = p.legenda || '';
   document.getElementById('post-status').value = p.status || 'rascunho';
   document.getElementById('post-delete-btn').style.display = 'block';
-  postImagensAtuais = postImagensDe(p).map(img => ({ ...img }));
-  postArquivosNovos = [];
+  postEditImagens = postImagensDe(p).map(img => ({ kind: 'existing', url: img.url, path: img.path || null }));
   renderImagensModalPost();
   openModal('postModal');
 }
@@ -2595,28 +2634,36 @@ function previewPostFile(e) {
   const files = [...e.target.files];
   if (!files.length) return;
   files.forEach(file => {
+    const item = { kind: 'new', file, preview: null };
+    postEditImagens.push(item);
     const reader = new FileReader();
-    reader.onload = ev => { file._preview = ev.target.result; renderImagensModalPost(); };
+    reader.onload = ev => { item.preview = ev.target.result; renderImagensModalPost(); };
     reader.readAsDataURL(file);
-    postArquivosNovos.push(file);
   });
+  renderImagensModalPost();
   e.target.value = ''; // permite escolher o mesmo arquivo de novo / repetir o browse pra ir somando
 }
 
 async function salvarPost() {
   const editId = document.getElementById('post-edit-id').value;
-  if (!postImagensAtuais.length && !postArquivosNovos.length) { showToast('Escolha ao menos uma imagem', 'error'); return; }
+  if (!postEditImagens.length) { showToast('Escolha ao menos uma imagem', 'error'); return; }
   const btn = document.getElementById('post-save-btn');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try {
-    const imagensFinal = postImagensAtuais.map(img => ({ url: img.url, path: img.path || null }));
-    for (const file of postArquivosNovos) {
-      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-      const path = `posts/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error: upErr } = await sb.storage.from('posts-conteudo').upload(path, file);
-      if (upErr) { showToast('Erro ao subir imagem: ' + upErr.message, 'error'); return; }
-      const url = sb.storage.from('posts-conteudo').getPublicUrl(path).data.publicUrl;
-      imagensFinal.push({ url, path });
+    // Faz upload de cada item novo NA ORDEM em que está na tela — é essa ordem
+    // (existentes + novos misturados, do jeito que o usuário organizou) que vira o carrossel final.
+    const imagensFinal = [];
+    for (const item of postEditImagens) {
+      if (item.kind === 'existing') {
+        imagensFinal.push({ url: item.url, path: item.path || null });
+      } else {
+        const ext = (item.file.name.split('.').pop() || 'jpg').toLowerCase();
+        const path = `posts/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error: upErr } = await sb.storage.from('posts-conteudo').upload(path, item.file);
+        if (upErr) { showToast('Erro ao subir imagem: ' + upErr.message, 'error'); return; }
+        const url = sb.storage.from('posts-conteudo').getPublicUrl(path).data.publicUrl;
+        imagensFinal.push({ url, path });
+      }
     }
     const data = {
       legenda: document.getElementById('post-legenda').value.trim(),
