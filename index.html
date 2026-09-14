@@ -2167,6 +2167,14 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
         <option value="postado">Postado</option>
       </select>
     </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Postar em (data)</label><input class="form-input" id="post-agendar-data" type="date"></div>
+      <div class="form-group"><label class="form-label">Postar em (hora)</label><input class="form-input" id="post-agendar-hora" type="time"></div>
+    </div>
+    <div class="form-group" style="display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="post-lembrete" style="width:16px;height:16px">
+      <label for="post-lembrete" style="font-size:12px;cursor:pointer">Ativar lembrete pop-up no horário</label>
+    </div>
     <div class="modal-footer">
       <button class="btn-danger" id="post-delete-btn" style="display:none;margin-right:auto" onclick="excluirPost()"><i class="ti ti-trash"></i></button>
       <button class="btn-ghost" onclick="closeModal('postModal')">Cancelar</button>
@@ -2515,7 +2523,10 @@ function renderPosts() {
       </div>
       <div class="post-card-body">
         <div class="post-card-legenda">${(p.legenda || '(sem legenda)').replace(/</g, '&lt;')}</div>
-        <span class="post-card-status" style="${corStatus[p.status] || ''}">${p.status}</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:4px">
+          <span class="post-card-status" style="${corStatus[p.status] || ''}">${p.status}</span>
+          ${p.agendar_data ? `<span style="font-size:10px;color:var(--purple-light);font-weight:600;white-space:nowrap"><i class="ti ti-clock"></i> ${new Date(p.agendar_data + 'T00:00:00').toLocaleDateString('pt-BR')}${p.agendar_hora ? ' ' + p.agendar_hora.slice(0, 5) : ''}</span>` : ''}
+        </div>
       </div>
     </div>`;
   }).join('') : '<div class="loading">Nenhum post aqui ainda.</div>';
@@ -2624,6 +2635,9 @@ function abrirNovoPost() {
   document.getElementById('post-file').value = '';
   document.getElementById('post-legenda').value = '';
   document.getElementById('post-status').value = 'rascunho';
+  document.getElementById('post-agendar-data').value = '';
+  document.getElementById('post-agendar-hora').value = '';
+  document.getElementById('post-lembrete').checked = false;
   document.getElementById('post-delete-btn').style.display = 'none';
   postEditImagens = [];
   renderImagensModalPost();
@@ -2638,6 +2652,9 @@ function editarPost(id) {
   document.getElementById('post-file').value = '';
   document.getElementById('post-legenda').value = p.legenda || '';
   document.getElementById('post-status').value = p.status || 'rascunho';
+  document.getElementById('post-agendar-data').value = p.agendar_data || '';
+  document.getElementById('post-agendar-hora').value = p.agendar_hora || '';
+  document.getElementById('post-lembrete').checked = !!p.lembrete;
   document.getElementById('post-delete-btn').style.display = 'block';
   postEditImagens = postImagensDe(p).map(img => ({ kind: 'existing', url: img.url, path: img.path || null }));
   renderImagensModalPost();
@@ -2685,6 +2702,9 @@ async function salvarPost() {
       imagens: imagensFinal,
       imagem_url: imagensFinal[0]?.url || null,       // mantido só pra compatibilidade com posts antigos
       imagem_path: imagensFinal[0]?.path || null,
+      agendar_data: document.getElementById('post-agendar-data').value || null,
+      agendar_hora: document.getElementById('post-agendar-hora').value || null,
+      lembrete: document.getElementById('post-lembrete').checked,
     };
     if (!editId) data.criado_por = nomeUsuarioAtual();
     const { error } = editId
@@ -4050,6 +4070,26 @@ async function checkAllLembretes() {
   verificarGatilhos();
   // Verifica agendamentos
   checkAgendaLembretes();
+  // Verifica posts agendados pra publicar
+  checkPostsLembretes();
+}
+
+function checkPostsLembretes() {
+  if (!posts || !posts.length) return;
+  const agora = new Date();
+  posts.filter(p => p.lembrete && p.status !== 'postado' && p.agendar_data).forEach(p => {
+    const prazo = parsePrazoBR(p.agendar_data, p.agendar_hora || '09:00');
+    const diffMin = (prazo - agora) / 60000;
+    const key = 'post_notif_' + p.id;
+    if (diffMin <= 15 && diffMin > -120 && !sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, '1');
+      const titulo = (p.legenda || 'Post').slice(0, 60);
+      showPopup('📅 Hora de postar: ' + titulo, 'Horário: ' + prazo.toLocaleString('pt-BR'));
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('📅 Hora de postar', { body: titulo + '\nHorário: ' + prazo.toLocaleString('pt-BR'), icon: 'https://i.imgur.com/rrQxwkl.png' });
+      }
+    }
+  });
 }
 
 function checkLembretes() {
