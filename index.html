@@ -689,6 +689,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
           <select class="filter-select" id="filter-seg" onchange="filterLeads()"><option value="">Todos segmentos</option><option>Clínica / Saúde</option><option>Salão de Beleza</option><option>Food & Restaurante</option><option>B2B / Corporativo</option><option>Outro</option></select>
           <button class="add-btn" onclick="openLeadModal()"><i class="ti ti-plus"></i> Novo Lead</button>
         </div>
+        <div id="devolucao-bar" style="display:none;align-items:center;gap:10px;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);border-radius:8px;padding:8px 12px;margin-bottom:12px">
+          <span style="font-size:12px;font-weight:600" id="devolucao-count">0 selecionado(s)</span>
+          <button class="add-btn" style="font-size:11px;padding:5px 10px" onclick="devolverParaCarteira()"><i class="ti ti-corner-up-left"></i> Devolver para Carteira</button>
+          <button class="btn-ghost" style="font-size:11px;padding:5px 10px" onclick="limparSelecaoDevolucao()">Cancelar</button>
+        </div>
         <div class="kanban-board">
           <div class="kanban-col" ondragover="allowDrop(event)" ondrop="dropCard(event,'Aguardando Atendimento')"><div class="col-header"><div class="col-title"><span class="s-dot s-wait"></span>Aguardando Atendimento</div><div class="col-count" id="cnt-aguardando">0</div></div><div id="cards-aguardando"><div class="loading">Carregando...</div></div></div>
           <div class="kanban-col" ondragover="allowDrop(event)" ondrop="dropCard(event,'Frio')"><div class="col-header"><div class="col-title"><span class="s-dot s-cold"></span>Frio</div><div class="col-count" id="cnt-frio">0</div></div><div id="cards-frio"><div class="loading">Carregando...</div></div></div>
@@ -2802,7 +2807,9 @@ function cardHTML(l) {
   const dotColor = {'Aguardando Atendimento':'var(--purple-light)',Frio:'var(--cold)',Morno:'var(--warning)',Quente:'var(--hot)',Fechado:'var(--success)'}[l.temperatura]||'var(--muted)';
   const ownerInitial = l.responsavel==='Tiago Barbosa'?'TG':'JV';
   const ownerColor = l.responsavel==='Tiago Barbosa'?'var(--purple)':'var(--neon)';
+  const podeDevolver = l.temperatura === 'Aguardando Atendimento';
   return `<div class="lead-card" draggable="true" ondragstart="dragStart(event,'${l.id}')" onclick="editLead('${l.id}')">
+    ${podeDevolver ? `<input type="checkbox" onclick="event.stopPropagation()" onchange="toggleSelecaoDevolucao('${l.id}',this.checked)" ${leadsParaDevolver.has(l.id)?'checked':''} style="position:absolute;top:10px;right:10px;width:16px;height:16px;cursor:pointer" title="Selecionar para devolver à Carteira">` : ''}
     <div class="lead-status-dot" style="background:${dotColor}"></div>
     <div class="lead-company">${l.razao_social||'—'}</div>
     <div class="lead-contact">${l.gestor||''} ${l.celular?'· '+l.celular:''}</div>
@@ -2983,6 +2990,35 @@ function formatDate(d) {
   const [y,m,day] = d.split('-');
   const months=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   return `${day} ${months[parseInt(m)-1]} ${y}`;
+}
+
+let leadsParaDevolver = new Set();
+function toggleSelecaoDevolucao(id, checked) {
+  if (checked) leadsParaDevolver.add(id); else leadsParaDevolver.delete(id);
+  atualizarBarraDevolucao();
+}
+function atualizarBarraDevolucao() {
+  const bar = document.getElementById('devolucao-bar');
+  if (!bar) return;
+  const n = leadsParaDevolver.size;
+  bar.style.display = n ? 'flex' : 'none';
+  document.getElementById('devolucao-count').textContent = n + ' selecionado(s)';
+}
+function limparSelecaoDevolucao() {
+  leadsParaDevolver.clear();
+  atualizarBarraDevolucao();
+  filterLeads();
+}
+async function devolverParaCarteira() {
+  const ids = [...leadsParaDevolver];
+  if (!ids.length) return;
+  if (!confirm(`Devolver ${ids.length} lead(s) para a Carteira?`)) return;
+  const { error } = await sb.from('leads').update({ em_carteira: true }).in('id', ids);
+  if (error) { showToast('Erro ao devolver: ' + error.message, 'error'); return; }
+  showToast(`${ids.length} lead(s) devolvido(s) para a Carteira`, 'success');
+  leadsParaDevolver.clear();
+  atualizarBarraDevolucao();
+  loadLeads();
 }
 
 function filterLeads() {
@@ -3246,7 +3282,7 @@ function showView(name,topBtn,sideItem){
   if(topBtn)topBtn.classList.add('active');
   if(sideItem)sideItem.classList.add('active');
   if(name==='master')renderMaster();
-  if(name==='kanban')resetarFiltroKanbanParaMim();
+  if(name==='kanban'){resetarFiltroKanbanParaMim();leadsParaDevolver.clear();atualizarBarraDevolucao();}
   if(name==='links')loadLinks();
   fecharSidebarMobile();
 }
