@@ -2106,6 +2106,26 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 
 
 <!-- POST MODAL (BLOCO 16 — Banco de Posts) -->
+<!-- PREVIEW DO CARROSSEL (BLOCO 16c) -->
+<div class="modal-overlay" id="postPreviewModal" onclick="closeModalOutside(event,'postPreviewModal')">
+  <div class="modal" style="width:440px;padding:0;overflow:hidden">
+    <div style="position:relative;background:#000;height:440px;display:flex;align-items:center;justify-content:center">
+      <img id="post-preview-img" style="max-width:100%;max-height:100%;object-fit:contain">
+      <button onclick="postPreviewNav(-1)" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.55);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px"><i class="ti ti-chevron-left"></i></button>
+      <button onclick="postPreviewNav(1)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.55);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px"><i class="ti ti-chevron-right"></i></button>
+      <button onclick="closeModal('postPreviewModal')" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.55);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer"><i class="ti ti-x"></i></button>
+      <div id="post-preview-dots" style="position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:center;gap:5px"></div>
+    </div>
+    <div style="padding:18px">
+      <div id="post-preview-legenda" style="font-size:13px;line-height:1.5;white-space:pre-wrap;margin-bottom:10px"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span class="post-card-status" id="post-preview-status"></span>
+        <button class="btn-ghost" onclick="editarPostAPartirDoPreview()"><i class="ti ti-pencil"></i> Editar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="postModal" onclick="closeModalOutside(event,'postModal')">
   <div class="modal modal-sm">
     <div class="modal-header">
@@ -2469,7 +2489,7 @@ function renderPosts() {
     const imgs = postImagensDe(p);
     const capa = imgs[0]?.url || '';
     return `
-    <div class="post-card" onclick="editarPost('${p.id}')">
+    <div class="post-card" onclick="abrirPreviewPost('${p.id}')">
       <div style="position:relative">
         <img class="post-card-img" src="${capa}" alt="" loading="lazy">
         ${imgs.length > 1 ? `<span style="position:absolute;top:5px;right:5px;background:rgba(0,0,0,0.65);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:999px"><i class="ti ti-stack-2"></i> ${imgs.length}</span>` : ''}
@@ -2480,6 +2500,49 @@ function renderPosts() {
       </div>
     </div>`;
   }).join('') : '<div class="loading">Nenhum post aqui ainda.</div>';
+}
+
+// ---- Prévia navegável do carrossel (clicar no card) -------------------------
+let postPreviewId = null, postPreviewLista = [], postPreviewIndex = 0;
+const POST_STATUS_LABEL = { rascunho: 'Rascunho', pronto: 'Pronto', postado: 'Postado' };
+const POST_STATUS_COR = { rascunho: 'background:rgba(148,163,184,0.15);color:var(--muted)', pronto: 'background:rgba(245,158,11,0.15);color:var(--warning)', postado: 'background:rgba(16,185,129,0.15);color:var(--success)' };
+
+function abrirPreviewPost(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p) return;
+  postPreviewId = id;
+  postPreviewLista = postImagensDe(p);
+  postPreviewIndex = 0;
+  document.getElementById('post-preview-legenda').textContent = p.legenda || '(sem legenda)';
+  const statusEl = document.getElementById('post-preview-status');
+  statusEl.textContent = POST_STATUS_LABEL[p.status] || p.status;
+  statusEl.setAttribute('style', POST_STATUS_COR[p.status] || '');
+  renderPostPreviewImg();
+  openModal('postPreviewModal');
+}
+
+function renderPostPreviewImg() {
+  const total = postPreviewLista.length;
+  document.getElementById('post-preview-img').src = postPreviewLista[postPreviewIndex]?.url || '';
+  const dots = document.getElementById('post-preview-dots');
+  dots.innerHTML = total > 1 ? postPreviewLista.map((_, i) =>
+    `<span onclick="event.stopPropagation();postPreviewIrPara(${i})" style="width:6px;height:6px;border-radius:50%;cursor:pointer;background:${i === postPreviewIndex ? '#fff' : 'rgba(255,255,255,0.4)'}"></span>`
+  ).join('') : '';
+}
+
+function postPreviewNav(delta) {
+  const total = postPreviewLista.length;
+  if (!total) return;
+  postPreviewIndex = (postPreviewIndex + delta + total) % total;
+  renderPostPreviewImg();
+}
+
+function postPreviewIrPara(i) { postPreviewIndex = i; renderPostPreviewImg(); }
+
+function editarPostAPartirDoPreview() {
+  const id = postPreviewId;
+  closeModal('postPreviewModal');
+  if (id) editarPost(id);
 }
 
 function renderImagensModalPost() {
