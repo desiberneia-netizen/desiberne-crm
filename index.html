@@ -2108,22 +2108,20 @@ body{font-family:'Inter',system-ui,sans-serif;background:#06060e;color:#ddd8f0;f
 <!-- POST MODAL (BLOCO 16 — Banco de Posts) -->
 <!-- PREVIEW DO CARROSSEL (BLOCO 16c) -->
 <div class="modal-overlay" id="postPreviewModal" onclick="closeModalOutside(event,'postPreviewModal')">
-  <div class="modal" style="width:440px;padding:0;overflow:hidden">
-    <div style="position:relative;background:#000;height:440px;display:flex;align-items:center;justify-content:center">
+  <div class="modal" style="width:440px;padding:0;overflow:hidden;max-height:calc(100vh - 48px);display:flex;flex-direction:column">
+    <div style="position:relative;background:#000;height:340px;flex:0 0 auto;display:flex;align-items:center;justify-content:center">
       <img id="post-preview-img" style="max-width:100%;max-height:100%;object-fit:contain">
       <button onclick="postPreviewNav(-1)" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.55);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px"><i class="ti ti-chevron-left"></i></button>
       <button onclick="postPreviewNav(1)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.55);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px"><i class="ti ti-chevron-right"></i></button>
       <button onclick="closeModal('postPreviewModal')" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.55);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer"><i class="ti ti-x"></i></button>
       <div id="post-preview-dots" style="position:absolute;bottom:10px;left:0;right:0;display:flex;justify-content:center;gap:5px"></div>
     </div>
-    <div style="padding:18px">
-      <div id="post-preview-legenda" style="font-size:13px;line-height:1.5;white-space:pre-wrap;margin-bottom:10px"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-        <span class="post-card-status" id="post-preview-status"></span>
-        <div style="display:flex;gap:8px">
-          <button class="btn-ghost" id="post-preview-download-btn" onclick="baixarImagemPreviewAtual()"><i class="ti ti-download"></i> Baixar</button>
-          <button class="btn-ghost" onclick="editarPostAPartirDoPreview()"><i class="ti ti-pencil"></i> Editar</button>
-        </div>
+    <div id="post-preview-legenda" style="font-size:13px;line-height:1.5;white-space:pre-wrap;padding:14px 18px 0;overflow-y:auto;flex:1 1 auto"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 18px;flex:0 0 auto">
+      <span class="post-card-status" id="post-preview-status"></span>
+      <div style="display:flex;gap:8px">
+        <button class="btn-ghost" id="post-preview-download-btn" onclick="baixarImagemPreviewAtual()"><i class="ti ti-download"></i> Baixar</button>
+        <button class="btn-ghost" onclick="editarPostAPartirDoPreview()"><i class="ti ti-pencil"></i> Editar</button>
       </div>
     </div>
   </div>
